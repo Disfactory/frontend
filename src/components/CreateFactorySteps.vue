@@ -35,17 +35,35 @@
     </v-app-bar>
 
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">
-      <v-btn rounded color="white" class="mr-2">
-        顯示經緯度
-      </v-btn>
+      <v-container class="select-location-container" v-if="showLongLat">
+        <p>以下經緯度版本為WGS84</p>
+        <div class='d-flex d-flex align-end justify-space-between'>
+          <p class='font-weight-medium h5 mb-0'>
+            經度：{{ appState.mapLngLat[0].toFixed(7) }}
+            <br>
+            緯度：{{ appState.mapLngLat[1].toFixed(7) }}
+          </p>
 
-      <switch-map-mode-button />
-
-      <v-container fluid class="choose-location-btn-container d-flex justify-center" bottom="50">
-        <v-btn x-large rounded @click="chooseLocation">
-          選擇此地點
-        </v-btn>
+          <v-btn rounded color="white" class="mr-2">
+            搜尋經緯度
+          </v-btn>
+        </div>
       </v-container>
+
+      <div class="px-5 py-4">
+        <v-btn rounded color="white" class="mr-2" @click="toggleShowLongLat">
+          {{ showLongLat ? '隱藏經緯度' : '顯示經緯度' }}
+        </v-btn>
+
+        <switch-map-mode-button />
+
+        <v-container fluid class="choose-location-btn-container d-flex justify-center" bottom="50">
+          <v-btn x-large rounded @click="chooseLocation">
+            選擇此地點
+          </v-btn>
+        </v-container>
+      </div>
+
     </div>
 
     <image-upload-form
@@ -201,6 +219,11 @@ export default createComponent({
       pageTransition.closeFactoryPage()
     }
 
+    const showLongLat = ref(false)
+    const toggleShowLongLat = () => {
+      showLongLat.value = !showLongLat.value
+    }
+
     return {
       appState,
       pageTransition,
@@ -228,26 +251,41 @@ export default createComponent({
       onClickRemoveImage,
       imageUploadFormValid,
       discardDialog,
-      submitFactory
+      submitFactory,
+      showLongLat,
+      toggleShowLongLat
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+@import "@/styles/variables";
+
 .btn-container.hide {
   visibility: hidden;
   pointer-events: none;
 }
 
 .create-factory-steps {
+  width: 100%;
+  height: 100%;
+
   .create-factory-step-1 {
-    padding: 20px 15px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
 
     .choose-location-btn-container {
       position: fixed;
       bottom: 50px;
     }
+  }
+
+  .select-location-container {
+    background-color: $light-green-color;
+    color: white;
   }
 }
 </style>

@@ -19,9 +19,12 @@
         </app-button>
       </div>
 
+      <!--
       <div class="region-alert" v-if="appState.selectFactoryMode">
         白色區域：農地範圍，為可回報範圍。<br>灰色區域：非農地範圍，不在回報範圍內。
       </div>
+
+      -->
 
       <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!appState.selectFactoryMode">
         <button>
@@ -36,6 +39,9 @@
       </div>
 
       <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
+
+      <!--
+
       <div class="location-tooltip-backdrop" v-if="appState.selectFactoryMode && showLocationInput" @click="dismissLocationInput" />
       <div class="location-tooltip" v-if="appState.selectFactoryMode && locationTooltipVisibility">
         <div class="circle" />
@@ -69,6 +75,8 @@
           </div>
         </div>
       </div>
+
+      -->
 
       <div class="factory-button-group">
         <div class="factory-secondary-actions-group">
