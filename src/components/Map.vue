@@ -144,7 +144,7 @@ export default createComponent({
       required: true
     }
   },
-  setup (props) {
+  setup () {
     const { event } = useGA()
     const root = ref<HTMLElement>(null)
     const popup = ref<HTMLDivElement>(null)

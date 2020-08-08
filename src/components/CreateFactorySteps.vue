@@ -34,34 +34,12 @@
 
     </v-app-bar>
 
-
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">
       <v-btn rounded color="white" class="mr-2">
         顯示經緯度
       </v-btn>
 
-      <v-bottom-sheet v-model="mapModeBottomSheet">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn
-            rounded
-            color="white"
-            v-bind="attrs"
-            v-on="on"
-          >
-            切換地圖模式•簡易地圖
-          </v-btn>
-        </template>
-        <v-list>
-          <v-subheader>切換地圖模式</v-subheader>
-          <v-list-item
-            v-for="mode in mapModes"
-            :key="mode.type"
-            @click="clickChangeBaseLayer(mode)"
-          >
-            <v-list-item-title>{{ mode.name }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-bottom-sheet>
+      <switch-map-mode-button />
 
       <v-container fluid class="choose-location-btn-container d-flex justify-center" bottom="50">
         <v-btn x-large rounded @click="chooseLocation">
@@ -99,11 +77,12 @@ import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 
 import { MainMapControllerSymbol } from '../symbols'
-import { MapFactoryController, BASE_MAP_NAME, BASE_MAP } from '../lib/map'
+import { MapFactoryController } from '../lib/map'
 import { uploadImages, UploadedImage, createFactory } from '../api'
 
 import ImageUploadForm from './ImageUploadForm.vue'
 import ConfirmFactory from './ConfirmFactory.vue'
+import SwitchMapModeButton from './SwitchMapModeButton.vue'
 import { FactoryPostData, FactoryType } from '../types'
 import { useGA } from '../lib/useGA'
 import { useBackPressed } from '../lib/useBackPressed'
@@ -112,9 +91,10 @@ export default createComponent({
   name: 'CreateFactorySteps',
   components: {
     ImageUploadForm,
-    ConfirmFactory
+    ConfirmFactory,
+    SwitchMapModeButton
   },
-  setup (props) {
+  setup () {
     const [appState, { pageTransition, setFactoryLocation }] = useAppState()
     const [, alertActions] = useAlertState()
     const { event } = useGA()
@@ -146,19 +126,6 @@ export default createComponent({
     }
     useBackPressed(onBack)
 
-    const mapModes = [BASE_MAP.SATELITE, BASE_MAP.OSM, BASE_MAP.TAIWAN].map(type => ({
-      type,
-      name: BASE_MAP_NAME[type]
-    }))
-    const clickChangeBaseLayer = (mode: { type: BASE_MAP, name: string }) => {
-      if (mapController.value) {
-        mapController.value?.mapInstance.changeBaseMap(mode.type)
-
-        mapModeBottomSheet.value = false
-      }
-    }
-    const mapModeBottomSheet = ref(false)
-
     const createFactoryFormState = reactive({
       nickname: '',
       contact: '',
@@ -175,7 +142,7 @@ export default createComponent({
     })
 
     const selectedImages = ref<FileList>(null)
-    watch(selectedImages, async () => {
+    watch(selectedImages, () => {
       imageUploadState.error = null
 
       if (!selectedImages.value) {
@@ -184,22 +151,20 @@ export default createComponent({
 
       imageUploadState.uploading = true
 
-      try {
-        const images = await uploadImages(selectedImages.value)
-
+      uploadImages(selectedImages.value).then(images => {
         uploadedImages.value = [
           ...uploadedImages.value,
           ...images
         ]
-      } catch (err) {
+      }).catch(err => {
         console.error(err)
         imageUploadState.error = true
-      }
-
-      imageUploadState.uploading = false
+      }).finally(() => {
+        imageUploadState.uploading = false
+      })
     })
 
-    const onClickRemoveImage = ({ src } : UploadedImage) => {
+    const onClickRemoveImage = ({ src }: UploadedImage) => {
       uploadedImages.value = uploadedImages.value.filter(image => image.src !== src)
     }
 
@@ -209,7 +174,7 @@ export default createComponent({
       createFactoryFormState.submitting = true
 
       try {
-        const [lng, lat] = appState.factoryLocation as number[]
+        const [lng, lat]: number[] = appState.factoryLocation
         const factory: FactoryPostData = {
           name: createFactoryFormState.name,
           others: createFactoryFormState.others,
@@ -263,10 +228,7 @@ export default createComponent({
       onClickRemoveImage,
       imageUploadFormValid,
       discardDialog,
-      submitFactory,
-      mapModes,
-      clickChangeBaseLayer,
-      mapModeBottomSheet
+      submitFactory
     }
   }
 })

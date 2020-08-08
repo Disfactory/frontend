@@ -302,7 +302,6 @@ export default createComponent({
 
     const minimap = ref<HTMLElement>(null)
 
-
     // !FIXME create factory minimap is set after pageState changed to CREATE_FACTORY_2
     watch(() => appState.pageState, () => {
       if (!appState.selectFactoryMode) {
@@ -320,7 +319,6 @@ export default createComponent({
         }
       }
     })
-
 
     // !FIXME update factory minmimap is set after page mounted
     onMounted(() => {

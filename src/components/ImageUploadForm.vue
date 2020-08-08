@@ -59,7 +59,6 @@
 </template>
 
 <script lang="ts">
-import { PropType } from 'vue'
 import { createComponent } from '@vue/composition-api'
 import { UploadedImage } from '../api'
 export default createComponent({
@@ -78,7 +77,7 @@ export default createComponent({
       type: Function
     },
     submit: {
-      type: Function,
+      type: Function
     },
     valid: {
       type: Boolean,
@@ -101,6 +100,7 @@ export default createComponent({
         }
       },
       removeImage: (image: UploadedImage) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         props.onClickRemoveImage!(image)
       }
     }
@@ -131,6 +131,5 @@ export default createComponent({
   left: 0;
   padding: 10px 15px;
 }
-
 
 </style>

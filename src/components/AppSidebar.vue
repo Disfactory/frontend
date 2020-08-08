@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { createComponent, ref } from '@vue/composition-api'
+import { createComponent } from '@vue/composition-api'
 import { useModalState } from '../lib/hooks'
 
 export default createComponent({

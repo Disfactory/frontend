@@ -61,10 +61,10 @@
 </template>
 
 <script lang="ts">
-import { createComponent, inject, ref, onMounted } from '@vue/composition-api'
+import { createComponent, inject, ref } from '@vue/composition-api'
 
 import { MainMapControllerSymbol } from '../symbols'
-import { MapFactoryController, initializeMinimap } from '../lib/map'
+import { MapFactoryController } from '../lib/map'
 import { useAppState } from '../lib/appState'
 import { FACTORY_TYPE } from '../types'
 

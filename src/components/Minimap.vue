@@ -3,9 +3,8 @@
 </template>
 
 <script lang="ts">
-import { createComponent, onMounted, inject, ref } from '@vue/composition-api'
-import { MainMapControllerSymbol } from '../symbols'
-import { MapFactoryController, initializeMinimap, initializeMap } from '../lib/map'
+import { createComponent, onMounted, ref } from '@vue/composition-api'
+import { initializeMinimap } from '../lib/map'
 import { FactoryData } from '../types'
 
 export default createComponent({
@@ -25,7 +24,6 @@ export default createComponent({
   },
   name: 'Minimap',
   setup (props) {
-    const mapController = inject(MainMapControllerSymbol, ref<MapFactoryController>())
     const minimap = ref<HTMLElement>(null)
 
     onMounted(() => {

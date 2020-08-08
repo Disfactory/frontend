@@ -1,4 +1,4 @@
-import { inject, provide, reactive, computed, toRefs } from '@vue/composition-api'
+import { inject, provide, reactive, computed } from '@vue/composition-api'
 import { useGA } from './useGA'
 import { FactoryData } from '../types'
 
@@ -28,8 +28,8 @@ export const provideAppState = () => {
     isCreateMode: boolean,
     createStepIndex: number,
     isEditMode: boolean,
-    selectFactoryMode: boolean
-    formPageOpen: boolean
+    selectFactoryMode: boolean,
+    formPageOpen: boolean,
     mapLngLat: number[],
     canPlaceFactory: boolean
   } = reactive({
@@ -45,7 +45,6 @@ export const provideAppState = () => {
     isEditMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY),
     selectFactoryMode: computed(() => appState.pageState === PageState.CREATE_FACTORY_1),
     formPageOpen: computed(() => CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY),
-
 
     // map states
     mapLngLat: [] as number[],
