@@ -35,7 +35,7 @@
     </v-app-bar>
 
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">
-      <v-container class="select-location-container" v-if="showLongLat">
+      <div class="select-location-container container-fluid pa-3" v-if="showLongLat">
         <p>以下經緯度版本為WGS84</p>
         <div class='d-flex d-flex align-end justify-space-between'>
           <p class='font-weight-medium h5 mb-0'>
@@ -44,11 +44,35 @@
             緯度：{{ appState.mapLngLat[1].toFixed(7) }}
           </p>
 
-          <v-btn rounded color="white" class="mr-2">
-            搜尋經緯度
-          </v-btn>
+          <v-dialog v-model="chooseLocationDialog" max-width="290">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn rounded color="white" class="mr-2" v-on="on" v-bind="attrs" >
+                搜尋經緯度
+              </v-btn>
+            </template>
+            <v-card outlined>
+              <v-card-text class="pt-4">
+                <p>
+                  以下經緯度版本為WGS84
+                </p>
+
+                <h3 class="mb-2">精度</h3>
+
+                <v-text-field outilned solo v-model="locationInputState.longitude" placeholder="例：121.5231872" />
+
+                <h3 class="mb-2">緯度</h3>
+
+                <v-text-field outilned solo v-model="locationInputState.latitude" placeholder="例：25.0458344" />
+                <div class="d-flex justify-space-between mt-3 align-end">
+                  <a class="text-decoration-underline" style="height: 36px; line-height: 36px;" @click="clearLocationInput">清空</a>
+                  <v-btn rounded color="white" @click="setLocation">定位</v-btn>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+
         </div>
-      </v-container>
+      </div>
 
       <div class="px-5 py-4">
         <v-btn rounded color="white" class="mr-2" @click="toggleShowLongLat">
@@ -224,6 +248,37 @@ export default createComponent({
       showLongLat.value = !showLongLat.value
     }
 
+    const chooseLocationDialog = ref(false)
+    const locationInputState = reactive({
+      longitude: '',
+      latitude: ''
+    })
+    const clearLocationInput = () => {
+      locationInputState.longitude = ''
+      locationInputState.latitude = ''
+    }
+    const setLocation = () => {
+      if (!mapController.value) return
+
+      const lng = parseFloat(locationInputState.longitude)
+      const lat = parseFloat(locationInputState.latitude)
+      if (!locationInputState.longitude ||
+          !locationInputState.latitude ||
+          isNaN(lng) ||
+          isNaN(lat)
+      ) {
+        // TODO: show invalid input error
+        chooseLocationDialog.value = false
+      } else {
+        let zoom = mapController.value.mapInstance.map.getView().getZoom()
+        if (!zoom || zoom <= 17) {
+          zoom = 17
+        }
+        mapController.value.mapInstance.setCoordinate(lng, lat, zoom)
+        chooseLocationDialog.value = false
+      }
+    }
+
     return {
       appState,
       pageTransition,
@@ -253,7 +308,11 @@ export default createComponent({
       discardDialog,
       submitFactory,
       showLongLat,
-      toggleShowLongLat
+      toggleShowLongLat,
+      chooseLocationDialog,
+      locationInputState,
+      clearLocationInput,
+      setLocation
     }
   }
 })
