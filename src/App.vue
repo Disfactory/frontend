@@ -64,10 +64,20 @@
       <!-- alert or modal -->
       <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
       <filter-modal :open="modalState.filterModalOpen" :dismiss="modalActions.closeFilterModal" />
-      <create-factory-success-modal
-        :open="modalState.createFactorySuccessModal"
-        :dismiss="modalActions.closeCreateFactorySuccessModal"
-      />
+
+      <v-dialog v-model="modalState.createFactorySuccessModal">
+        <v-card>
+          <v-card-title class="headline">
+            新增可疑工廠成功
+          </v-card-title>
+          <v-card-text>
+            <small>
+              3 秒後自動關閉提示訊息
+            </small>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
       <update-factory-success-modal
         :open="modalState.updateFactorySuccessModal"
         :dismiss="modalActions.closeUpdateFactorySuccessModal"

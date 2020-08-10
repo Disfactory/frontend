@@ -87,7 +87,12 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
   const openUpdateFactorySuccessModal = () => { modalState.updateFactorySuccessModal = true }
   const closeUpdateFactorySuccessModal = () => { modalState.updateFactorySuccessModal = false }
 
-  const openCreateFactorySuccessModal = () => { modalState.createFactorySuccessModal = true }
+  const openCreateFactorySuccessModal = () => {
+    modalState.createFactorySuccessModal = true
+    window.setTimeout(() => {
+      modalState.createFactorySuccessModal = false
+    }, 3000)
+  }
   const closeCreateFactorySuccessModal = () => { modalState.createFactorySuccessModal = false }
 
   const openAboutModal = () => { modalState.aboutModalOpen = true }

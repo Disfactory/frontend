@@ -128,6 +128,7 @@ import SwitchMapModeButton from './SwitchMapModeButton.vue'
 import { FactoryPostData, FactoryType } from '../types'
 import { useGA } from '../lib/useGA'
 import { useBackPressed } from '../lib/useBackPressed'
+import { useModalState } from '../lib/hooks'
 
 export default createComponent({
   name: 'CreateFactorySteps',
@@ -138,6 +139,7 @@ export default createComponent({
   },
   setup () {
     const [appState, { pageTransition, setFactoryLocation }] = useAppState()
+    const [, { openCreateFactorySuccessModal }] = useModalState()
     const [, alertActions] = useAlertState()
     const { event } = useGA()
 
@@ -241,6 +243,8 @@ export default createComponent({
 
       // TODO: if error, don't close factory page
       pageTransition.closeFactoryPage()
+
+      openCreateFactorySuccessModal()
     }
 
     const showLongLat = ref(false)
