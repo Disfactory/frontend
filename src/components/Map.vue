@@ -1,11 +1,5 @@
 <template>
   <div>
-    <div class="navbar-container" v-if="selectFactoryMode">
-      <app-navbar :dark="false" :fixed="true" @back="onNavBack" @menu="modalActions.toggleSidebar">
-        新增資訊
-      </app-navbar>
-    </div>
-
     <div class="map-container">
       <div ref="root" class="map"></div>
 
@@ -19,11 +13,7 @@
         </app-button>
       </div>
 
-      <div class="region-alert" v-if="selectFactoryMode">
-        白色區域：農地範圍，為可回報範圍。<br>灰色區域：非農地範圍，不在回報範圍內。
-      </div>
-
-      <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!selectFactoryMode">
+      <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!appState.selectFactoryMode">
         <button>
           <img src="/images/filter.svg" alt="search">
         </button>
@@ -35,74 +25,11 @@
         </button>
       </div>
 
-      <div class="center-point" v-if="selectFactoryMode && !locationTooltipVisibility" />
-      <div class="location-tooltip-backdrop" v-if="selectFactoryMode && showLocationInput" @click="dismissLocationInput" />
-      <div class="location-tooltip" v-if="selectFactoryMode && locationTooltipVisibility">
-        <div class="circle" />
-        <div class="line" />
-        <div class="box flex justify-between" v-if="!showLocationInput">
-          <p>
-            經度：{{ factoryLngLat[0].toFixed(7) }}
-            <br>
-            緯度：{{ factoryLngLat[1].toFixed(7) }}
-            <br>
-            <small>以上經緯度版本為WGS84</small>
-          </p>
-
-          <div class="flex align-items-end">
-            <app-button color="white" small @click="onClickLocationSearch">搜尋經緯度</app-button>
-          </div>
-        </div>
-        <div class="box box-input flex flex-column" v-if="showLocationInput">
-          <div>
-            <label>經度：</label>
-            <app-text-field type="number" placeholder="請輸入經度。例：121.5253618" small v-model="inputLongitude" />
-          </div>
-
-          <div>
-            <label>緯度：</label>
-            <app-text-field type="number" placeholder="請輸入緯度。例：25.0459660" small v-model="inputLatitude" />
-          </div>
-
-          <div style="text-align: center;">
-            <app-button color="white" small auto @click="onClickSubmitLocation">定位</app-button>
-          </div>
-        </div>
-      </div>
+      <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
 
       <div class="factory-button-group">
-        <div class="factory-secondary-actions-group">
-          <div class="ol-switch-luilayer-visibility ol-unselectable ol-control" data-label="map-set-luilayer-visibility" @click="toggleLUILayerVisibility" v-if="!selectFactoryMode">
-            <button>
-              {{ setLUILayerVisibilityText }}
-            </button>
-          </div>
-
-          <div class="ol-switch-base ol-unselectable ol-control" @click="switchBaseMap" data-label="map-switch-base">
-            <button>
-              {{ baseMapName }}
-            </button>
-          </div>
-
-          <div class="ol-switch-base ol-unselectable ol-control" @click="toggleLocationTooltipVisibility" data-label="map-location-tooltip" v-if="selectFactoryMode">
-            <button>
-              {{ locationTooltipControlText }}
-            </button>
-          </div>
-        </div>
-
-        <div class="create-factory-button" v-if="!selectFactoryMode">
+        <div class="create-factory-button" v-if="!appState.selectFactoryMode">
           <app-button @click="onClickCreateFactoryButton" data-label="map-create-factory" color="dark-green">我想新增可疑工廠</app-button>
-        </div>
-
-        <div class="choose-location-button" v-if="selectFactoryMode">
-          <app-button
-            @click="onClickFinishSelectFactoryPositionButton"
-            data-label="map-select-position"
-            color="dark-green"
-          >
-            選擇此地點
-          </app-button>
         </div>
       </div>
     </div>
@@ -120,7 +47,6 @@ import { MainMapControllerSymbol } from '../symbols'
 import { Overlay } from 'ol'
 import OverlayPositioning from 'ol/OverlayPositioning'
 import { FactoryStatus } from '../types'
-import { useBackPressed } from '../lib/useBackPressed'
 import { useGA } from '@/lib/useGA'
 import { useModalState } from '../lib/hooks'
 import { useFactoryPopup, getPopupData } from '../lib/factoryPopup'
@@ -135,26 +61,6 @@ export default createComponent({
     AppTextField
   },
   props: {
-    openCreateFactoryForm: {
-      type: Function,
-      required: true
-    },
-    openEditFactoryForm: {
-      type: Function,
-      required: true
-    },
-    selectFactoryMode: {
-      type: Boolean,
-      required: true
-    },
-    enterSelectFactoryMode: {
-      type: Function,
-      required: true
-    },
-    exitSelectFactoryMode: {
-      type: Function,
-      required: true
-    },
     setFactoryLocation: {
       type: Function,
       required: true
@@ -164,36 +70,18 @@ export default createComponent({
       required: true
     }
   },
-  setup (props) {
+  setup () {
     const { event } = useGA()
     const root = ref<HTMLElement>(null)
     const popup = ref<HTMLDivElement>(null)
-    const factoryValid = ref(false)
-    const factoryLngLat = ref<number[]>([])
     const mapControllerRef = inject(MainMapControllerSymbol, ref<MapFactoryController>())
 
     const [, modalActions] = useModalState()
-    const [appState] = useAppState()
+    const [appState, { openEditFactoryForm, pageTransition }] = useAppState()
     const [, alertActions] = useAlertState()
 
     const [popupState] = useFactoryPopup()
     const popupData = computed(() => appState.factoryData ? getPopupData(appState.factoryData) : {})
-    const baseMap = ref(0)
-    const baseMapName = computed(() => '切換不同地圖')
-
-    const luiVisibibility = ref(mapControllerRef?.value?.mapInstance.getLUILayerVisible() || false)
-    const setLUILayerVisibilityText = computed(() => {
-      if (luiVisibibility.value) {
-        return '隱藏農地範圍'
-      } else {
-        return '顯示農地範圍'
-      }
-    })
-    const toggleLUILayerVisibility = () => {
-      const bool = !luiVisibibility.value
-
-      mapControllerRef?.value?.mapInstance.setLUILayerVisible(bool)
-    }
 
     const setPopup = (id: string) => {
       if (!mapControllerRef.value) return
@@ -210,49 +98,7 @@ export default createComponent({
         return
       }
 
-      props.openEditFactoryForm(appState.factoryData)
-    }
-
-    const locationTooltipVisibility = ref(false)
-    const showLocationInput = ref(false)
-    const toggleLocationTooltipVisibility = () => {
-      locationTooltipVisibility.value = !locationTooltipVisibility.value
-    }
-    const locationTooltipControlText = computed(() => {
-      if (locationTooltipVisibility.value) {
-        return '隱藏經緯度'
-      } else {
-        return '顯示經緯度'
-      }
-    })
-    const inputLongitude = ref('')
-    const inputLatitude = ref('')
-    const onClickLocationSearch = () => {
-      showLocationInput.value = true
-    }
-    const dismissLocationInput = () => {
-      showLocationInput.value = false
-    }
-    const onClickSubmitLocation = () => {
-      if (!mapControllerRef.value) return
-
-      const lng = parseFloat(inputLongitude.value)
-      const lat = parseFloat(inputLatitude.value)
-      if (!inputLongitude.value ||
-          !inputLatitude.value ||
-          isNaN(lng) ||
-          isNaN(lat)
-      ) {
-        // TODO: show invalid input error
-        dismissLocationInput()
-      } else {
-        let zoom = mapControllerRef.value.mapInstance.map.getView().getZoom()
-        if (!zoom || zoom <= 17) {
-          zoom = 17
-        }
-        mapControllerRef.value.mapInstance.setCoordinate(lng, lat, zoom)
-        dismissLocationInput()
-      }
+      openEditFactoryForm(appState.factoryData)
     }
 
     onMounted(() => {
@@ -270,8 +116,9 @@ export default createComponent({
           permalink.zoom(zoom)
           window.location.hash = permalink.dumps()
 
-          factoryValid.value = canPlaceFactory
-          factoryLngLat.value = [longitude, latitude]
+          appState.canPlaceFactory = canPlaceFactory
+          appState.mapLngLat = [longitude, latitude]
+
           event('moveMap')
           try {
             const factories = await getFactories(range, longitude, latitude)
@@ -291,9 +138,6 @@ export default createComponent({
           } else {
             popupState.show = false
           }
-        },
-        onLUILayerVisibilityChange: function (visible) {
-          luiVisibibility.value = visible
         },
         onZoomed: function (zoom) {
           permalink.zoom(zoom)
@@ -316,54 +160,20 @@ export default createComponent({
       mapController.mapInstance.setLUILayerVisible(false)
     })
 
-    const switchBaseMap = () => {
-      baseMap.value = (baseMap.value + 1 < 3) ? baseMap.value + 1 : 0
-      mapControllerRef.value?.mapInstance.changeBaseMap(baseMap.value)
-    }
-
-    const onBack = () => {
-      if (mapControllerRef.value) {
-        mapControllerRef.value.mapInstance.setLUILayerVisible(false)
-      }
-      props.exitSelectFactoryMode()
-    }
-
     function onClickCreateFactoryButton () {
       if (!mapControllerRef.value) return
 
       mapControllerRef.value.mapInstance.setLUILayerVisible(true)
-      props.enterSelectFactoryMode()
+
+      pageTransition.startCreateFactory()
+
       popupState.show = false
-      locationTooltipVisibility.value = false
-      showLocationInput.value = false
-
-      useBackPressed(onBack)
-    }
-
-    function onClickFinishSelectFactoryPositionButton () {
-      if (!mapControllerRef.value) return
-
-      if (!factoryValid.value) {
-        alertActions.showAlert('此地點不在農地範圍內，\n請回報在農地範圍內的工廠。')
-        return
-      }
-
-      mapControllerRef.value.mapInstance.setLUILayerVisible(false)
-
-      props.setFactoryLocation(factoryLngLat.value)
-      props.exitSelectFactoryMode()
-      props.openCreateFactoryForm()
     }
 
     return {
       root,
       modalActions,
       popup,
-      factoryValid,
-      baseMapName,
-      switchBaseMap,
-      toggleLUILayerVisibility,
-      setLUILayerVisibilityText,
       zoomToGeolocation: function () {
         if (mapControllerRef.value) {
           event('zoomToGeolocation')
@@ -374,14 +184,10 @@ export default createComponent({
           }
         }
       },
-      onNavBack () {
-        onBack()
-      },
+      appState,
       popupState,
       popupData,
       onClickEditFactoryData,
-      onClickCreateFactoryButton,
-      onClickFinishSelectFactoryPositionButton,
       getButtonColorFromStatus: function () {
         if (!appState.factoryData) {
           return 'default'
@@ -395,16 +201,7 @@ export default createComponent({
           [FactoryStatus.REPORTED]: 'default'
         }[status]
       },
-      locationTooltipVisibility,
-      toggleLocationTooltipVisibility,
-      locationTooltipControlText,
-      factoryLngLat,
-      showLocationInput,
-      onClickLocationSearch,
-      onClickSubmitLocation,
-      dismissLocationInput,
-      inputLongitude,
-      inputLatitude
+      onClickCreateFactoryButton
     }
   }
 })
@@ -415,10 +212,10 @@ export default createComponent({
 @import '~@/styles/utils';
 
 .map-container {
-  top: 47px;
+  top: 0;
   bottom: 0;
-  width: 100%;
-  height: calc(100% - 47px);
+  width: 100vw;
+  height: 100%;
   position: absolute;
 
   .ol-switch-base, .ol-switch-luilayer-visibility {
@@ -492,9 +289,6 @@ export default createComponent({
 }
 
 .location-tooltip {
-  width: 0.1px;
-  height: 0.1px;
-
   position: fixed;
   top: 50%;
   left: 50vw;
@@ -632,7 +426,7 @@ export default createComponent({
   position: absolute;
   top: -47px;
   left: 0;
-  z-index: 2;
+  z-index: 5;
 }
 
 .region-alert {
