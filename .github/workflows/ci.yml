@@ -47,7 +47,7 @@ jobs:
           node-version: 10.x
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.5.9
-        env:
+        with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BASE_BRANCH: master
           BRANCH: gh-pages
@@ -67,7 +67,7 @@ jobs:
           node-version: 10.x
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.5.9
-        env:
+        with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           REPOSITORY_NAME: Disfactory/disfactory.tw
           BASE_BRANCH: production
