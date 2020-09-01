@@ -1,9 +1,6 @@
 <template>
   <div class="create-factory-steps">
-    <v-app-bar
-      fixed
-      color="white"
-    >
+    <v-app-bar fixed color="white" class="d-block d-md-none">
       <div class="btn-container" :class="{ hide: appState.createStepIndex === 1 }">
         <v-btn icon @click="onBack">
           <v-icon>mdi-keyboard-backspace</v-icon>
@@ -30,6 +27,24 @@
             </v-container>
           </v-card>
         </v-dialog>
+      </div>
+    </v-app-bar>
+
+    <v-app-bar fixed color="white" class="d-none d-md-block">
+      <v-toolbar-title>新增可疑工廠</v-toolbar-title>
+
+      <div class="ml-15 desktop-step-item" @click="switchStep(1)">
+        <span>選擇工廠位置</span>
+        <v-icon class='mr-1'>mdi-chevron-right</v-icon>
+      </div>
+
+      <div class="desktop-step-item" :class="{ inactive: appState.createStepIndex < 2 }"  @click="switchStep(2)">
+        <span>上傳工廠照片</span>
+        <v-icon class='mr-1'>mdi-chevron-right</v-icon>
+      </div>
+
+      <div class="desktop-step-item" :class="{ inactive: appState.createStepIndex < 3 }"  @click="switchStep(3)">
+        <span>確認及補充工廠資訊</span>
       </div>
 
     </v-app-bar>
@@ -82,7 +97,7 @@
         <switch-map-mode-button />
 
         <v-container fluid class="choose-location-btn-container d-flex justify-center" bottom="50">
-          <v-btn x-large rounded @click="chooseLocation">
+          <v-btn x-large rounded @click="chooseLocation" class="px-md-15">
             選擇此地點
           </v-btn>
         </v-container>
@@ -283,6 +298,14 @@ export default createComponent({
       }
     }
 
+    const switchStep = (num: number) => {
+      const backSteps = appState.createStepIndex - num
+
+      for (let i = 0; i < backSteps; i++) {
+        onBack()
+      }
+    }
+
     return {
       appState,
       pageTransition,
@@ -316,7 +339,8 @@ export default createComponent({
       chooseLocationDialog,
       locationInputState,
       clearLocationInput,
-      setLocation
+      setLocation,
+      switchStep
     }
   }
 })
@@ -349,6 +373,19 @@ export default createComponent({
   .select-location-container {
     background-color: $light-green-color;
     color: white;
+  }
+}
+
+.desktop-step-item {
+  &:not(.inactive) {
+    cursor: pointer;
+  }
+
+  user-select: none;
+  color: $dark-green-color;
+
+  &.inactive {
+    opacity: 0.5;
   }
 }
 </style>
