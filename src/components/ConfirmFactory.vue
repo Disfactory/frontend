@@ -53,7 +53,7 @@
 
       <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined />
 
-      <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3">
+      <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
         <v-btn x-large rounded @click="submit" style="width: 100%; max-width: 345px;" v-bind="attrs" v-on="on">
           確認送出
         </v-btn>

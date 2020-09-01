@@ -51,7 +51,7 @@
         v-model="formState.contact"
       ></v-text-field>
 
-      <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3">
+      <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
         <v-btn x-large rounded @click="onSubmit" :disabled="!valid" style="width: 100%; max-width: 345px;">
           下一步
         </v-btn>
