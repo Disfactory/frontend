@@ -405,5 +405,9 @@ export default createComponent({
   &.inactive {
     opacity: 0.5;
   }
+
+  .v-icon {
+    margin-top: -3px;
+  }
 }
 </style>
