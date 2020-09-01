@@ -1,61 +1,63 @@
 <template>
   <div class="confirm-factory-page">
-    <h2 class="mt-2 mb-2">確認及補充工廠資訊</h2>
+    <v-container style="max-width: 620px; position: relative;" class="pt-3 pt-md-12">
+      <h2 class="mt-2 mb-2">確認及補充工廠資訊</h2>
 
-    <p>請確認工廠地點及照片，並補充工廠資訊。</p>
+      <p>請確認工廠地點及照片，並補充工廠資訊。</p>
 
-    <h3 class="mt-2 mb-2 required">工廠地點</h3>
+      <h3 class="mt-2 mb-2 required">工廠地點</h3>
 
-    <minimap
-      :initialFactories="initialFactories"
-      :initialLocation="initialLocation"
-      :pinLocation="appState.factoryLocation"
-    />
+      <minimap
+        :initialFactories="initialFactories"
+        :initialLocation="initialLocation"
+        :pinLocation="appState.factoryLocation"
+      />
 
-    <p>
-      返回<a @click="gotoStepOne">步驟(1/3)</a>編輯
-    </p>
+      <p>
+        返回<a @click="gotoStepOne">步驟(1/3)</a>編輯
+      </p>
 
-    <h3 class="mt-2 mb-2 required">工廠照片</h3>
+      <h3 class="mt-2 mb-2 required">工廠照片</h3>
 
-    <p>
-      返回<a @click="gotoStepTwo">步驟(2/3)</a>編輯
-    </p>
+      <p>
+        返回<a @click="gotoStepTwo">步驟(2/3)</a>編輯
+      </p>
 
-    <div class="preview-images-container mb-2">
-      <div v-for="image of previewImages" :key="image.token" class="uploaded-image">
-        <img :src="image.src" />
+      <div class="preview-images-container mb-2">
+        <div v-for="image of previewImages" :key="image.token" class="uploaded-image">
+          <img :src="image.src" />
+        </div>
       </div>
-    </div>
 
-    <h3 class="mt-2 mb-2 required">聯絡人暱稱</h3>
+      <h3 class="mt-2 mb-2 required">聯絡人暱稱</h3>
 
-    <p>{{ formState.nickname }}</p>
+      <p>{{ formState.nickname }}</p>
 
-    <h3 class="mt-2 mb-2 required">聯絡方式 (email或電話)</h3>
+      <h3 class="mt-2 mb-2 required">聯絡方式 (email或電話)</h3>
 
-    <p>{{ formState.contact }}</p>
+      <p>{{ formState.contact }}</p>
 
-    <h2>其他工廠資訊（非必填）</h2>
+      <h2>其他工廠資訊（非必填）</h2>
 
-    <p>提供明確的工廠資訊能夠幫助我們更快速的填寫公文。</p>
+      <p>提供明確的工廠資訊能夠幫助我們更快速的填寫公文。</p>
 
-    <h3 class="mt-2 mb-2">工廠描述</h3>
+      <h3 class="mt-2 mb-2">工廠描述</h3>
 
-    <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" />
+      <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" />
 
-    <h3 class="mt-2 mb-2">工廠外部文字</h3>
+      <h3 class="mt-2 mb-2">工廠外部文字</h3>
 
-    <v-text-field outilned solo v-model="formState.name" placeholder="例：小明化工廠" />
+      <v-text-field outilned solo v-model="formState.name" placeholder="例：小明化工廠" />
 
-    <h3 class="mt-2 mb-2">工廠類型</h3>
+      <h3 class="mt-2 mb-2">工廠類型</h3>
 
-    <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined />
+      <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined />
 
-    <v-container class="bottom-button-container d-flex justify-center">
-      <v-btn x-large rounded @click="submit" style="width: 100%" v-bind="attrs" v-on="on">
-        確認送出
-      </v-btn>
+      <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3">
+        <v-btn x-large rounded @click="submit" style="width: 100%; max-width: 345px;" v-bind="attrs" v-on="on">
+          確認送出
+        </v-btn>
+      </div>
     </v-container>
   </div>
 </template>
@@ -134,8 +136,6 @@ export default createComponent({
   padding-bottom: 50px;
   overflow-y: auto;
   overflow-x: hidden;
-
-  padding: 20px 15px;
 
   padding-bottom: 72px;
 }
