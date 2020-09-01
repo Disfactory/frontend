@@ -68,18 +68,57 @@
     </v-app-bar>
 
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">
-      <div class="select-location-container container-fluid pa-3" v-if="showLongLat">
-        <p>以下經緯度版本為WGS84</p>
-        <div class='d-flex d-flex align-end justify-space-between'>
-          <p class='font-weight-medium h5 mb-0'>
-            經度：{{ appState.mapLngLat[0].toFixed(7) }}
-            <br>
-            緯度：{{ appState.mapLngLat[1].toFixed(7) }}
-          </p>
+      <div class="select-location-container container-fluid pa-3 py-md-5 px-md-10" v-if="showLongLat">
+        <div class="d-flex flex-md-row justify-space-between align-end align-md-center">
+          <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between justify-md-start flex-grow-1">
+            <p class="mb-4 mb-md-0 mr-md-10">以下經緯度版本為WGS84</p>
+
+            <p class='font-weight-medium h5 mb-0 mr-md-10' v-if="!inlineLocationForm">
+              經度：{{ appState.mapLngLat[0].toFixed(7) }}
+            </p>
+
+            <p class='font-weight-medium h5 mb-0 mr-md-8' v-if="!inlineLocationForm">
+              緯度：{{ appState.mapLngLat[1].toFixed(7) }}
+            </p>
+
+            <v-btn rounded color="white" class="mr-2 d-none d-md-block"  v-if="!inlineLocationForm" @click="toggleInlineLocationForm">
+              搜尋經緯度
+            </v-btn>
+
+            <div class="d-none d-md-flex justify-space-between align-center flex-grow-1" v-if="inlineLocationForm">
+              <div class="d-flex align-center">
+                <p class='font-weight-medium h5 mb-0  mr-7'>
+                  搜尋經緯度
+                </p>
+
+                <div class="d-block  mr-7" style="height: 36px; width: 1px; background-color: #EAF3BF;" />
+
+                <h5 class=" mr-2">精度</h5>
+
+                <v-text-field hide-details class=" mr-7" outilned solo v-model="locationInputState.longitude" placeholder="例：121.5231872" dense />
+
+                <h5 class=" mr-2">緯度</h5>
+
+                <v-text-field hide-details class=" mr-7" outilned solo v-model="locationInputState.latitude" placeholder="例：25.0458344" dense />
+
+                <h5 class="text-decoration-underline mr-5" style="cursor: pointer;" @click="clearLocationInput">清空</h5>
+
+                <v-btn rounded color="white" @click="setLocation">定位</v-btn>
+              </div>
+
+              <div class="d-flex align-center" v-if="inlineLocationForm" >
+                <div class="d-block d-none d-md-block mx-7" style="height: 36px; width: 1px; background-color: #EAF3BF;" />
+
+                <v-btn icon @click="toggleInlineLocationForm" color="white">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </div>
+            </div>
+          </div>
 
           <v-dialog v-model="chooseLocationDialog" max-width="290">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn rounded color="white" class="mr-2" v-on="on" v-bind="attrs" >
+              <v-btn rounded color="white" class="mr-2 d-md-none" v-on="on" v-bind="attrs" >
                 搜尋經緯度
               </v-btn>
             </template>
@@ -96,6 +135,7 @@
                 <h3 class="mb-2">緯度</h3>
 
                 <v-text-field outilned solo v-model="locationInputState.latitude" placeholder="例：25.0458344" />
+
                 <div class="d-flex justify-space-between mt-3 align-end">
                   <a class="text-decoration-underline" style="height: 36px; line-height: 36px;" @click="clearLocationInput">清空</a>
                   <v-btn rounded color="white" @click="setLocation">定位</v-btn>
@@ -103,7 +143,6 @@
               </v-card-text>
             </v-card>
           </v-dialog>
-
         </div>
       </div>
 
@@ -286,6 +325,10 @@ export default createComponent({
     }
 
     const chooseLocationDialog = ref(false)
+    const inlineLocationForm = ref(false)
+    const toggleInlineLocationForm = () => {
+      inlineLocationForm.value = !inlineLocationForm.value
+    }
     const locationInputState = reactive({
       longitude: '',
       latitude: ''
@@ -355,8 +398,10 @@ export default createComponent({
       showLongLat,
       toggleShowLongLat,
       chooseLocationDialog,
+      inlineLocationForm,
       locationInputState,
       clearLocationInput,
+      toggleInlineLocationForm,
       setLocation,
       switchStep
     }
