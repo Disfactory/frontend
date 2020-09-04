@@ -118,8 +118,7 @@ const registerMutator = (appState: AppState) => {
      * Noted: **zero-based**, can be either 0, 1, 2
      */
     gotoCreateStep (step: number) {
-      const index = CreateFactoryPageState.indexOf(appState.pageState)
-      if (index !== -1 && step < index) {
+      if (CreateFactoryPageState[step]) {
         appState.pageState = CreateFactoryPageState[step]
       } else {
         invalidPageTransition()
