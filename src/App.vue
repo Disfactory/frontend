@@ -95,9 +95,9 @@
       />
 
       <create-factory-steps v-if="appState.isCreateMode" />
-
-      <factory-detail />
     </v-main>
+
+    <factory-detail />
   </v-app>
 </template>
 

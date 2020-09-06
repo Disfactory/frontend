@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="3" class="factory-container" :class="{ full: appState.factoryDetailsExpanded }" v-if="!!appState.factoryData">
+  <v-card elevation="3" class="factory-container d-md-none" :class="{ full: appState.factoryDetailsExpanded }" v-if="!!appState.factoryData">
     <v-card-text>
       <div>
         <span class="float-left body-2">工廠狀態</span>
@@ -77,6 +77,7 @@ export default createComponent({
   position: absolute;
   bottom: 0;
   width: 100%;
+  z-index: 5;
 }
 
 .factory-container.full {
