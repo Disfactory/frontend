@@ -31,7 +31,8 @@ export const provideAppState = () => {
     selectFactoryMode: boolean,
     formPageOpen: boolean,
     mapLngLat: number[],
-    canPlaceFactory: boolean
+    canPlaceFactory: boolean,
+    factoryDetailsExpanded: boolean
   } = reactive({
     // Page state
     pageState: PageState.INITIAL,
@@ -48,7 +49,8 @@ export const provideAppState = () => {
 
     // map states
     mapLngLat: [] as number[],
-    canPlaceFactory: false
+    canPlaceFactory: false,
+    factoryDetailsExpanded: false
   })
 
   provide(AppStateSymbol, appState)
@@ -149,6 +151,15 @@ const registerMutator = (appState: AppState) => {
     appState.factoryData = factory
   }
 
+  function expandFactoryDetail () {
+    appState.factoryDetailsExpanded = true
+  }
+
+  function collapseFactoryDetail () {
+    appState.factoryDetailsExpanded = false
+    appState.factoryData = null
+  }
+
   return {
     pageTransition,
 
@@ -164,7 +175,10 @@ const registerMutator = (appState: AppState) => {
     setFactoryLocation (value: [number, number]) {
       appState.factoryLocation = value
       event('setFactoryLocation')
-    }
+    },
+
+    expandFactoryDetail,
+    collapseFactoryDetail
   }
 }
 
