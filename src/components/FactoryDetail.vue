@@ -6,30 +6,23 @@
         <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
         <v-icon class="float-right">mdi-share-variant</v-icon>
       </div>
-      <p class="headline text--primary" style="clear: both">
-        <v-icon>mdi-map-marker</v-icon>等待被舉報
+      <p class="headline text--primary mb-2" style="clear: both">
+        <v-icon style="margin-bottom: 5px;">mdi-map-marker</v-icon>等待被舉報
       </p>
-      <p class="caption">
+      <p class="caption mb-0">
         工廠編號 HK4FD2 <br>
         最後更新 2020/4/12
       </p>
     </v-card-text>
+
     <v-slide-group>
-      <v-slide-item class="mr-4">
-        <img src="https://picsum.photos/120/68" alt="">
-      </v-slide-item>
-      <v-slide-item class="mr-4">
-        <img src="https://picsum.photos/120/68" alt="">
-      </v-slide-item>
-      <v-slide-item class="mr-4">
-        <img src="https://picsum.photos/120/68" alt="">
-      </v-slide-item>
-      <v-slide-item class="mr-4">
-        <img src="https://picsum.photos/120/68" alt="">
+      <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
+        <img :src="image.url" class="factory-slide-image" />
       </v-slide-item>
     </v-slide-group>
-    <div class="mt-4 ml-3">
-      <h3 class="text-h5">地段 / 地址</h3>
+
+    <div class="mt-4 mx-3 mb-2">
+      <h6 class="text-h6">地段 / 地址</h6>
       <p>台中市大雅區自強段（701）7 地號</p>
 
       <div v-if="full">
@@ -38,10 +31,10 @@
         <p class="text-caption">以上經緯度版本為 WGS84</p>
       </div>
 
-      <hr v-if="full">
-      <p class="text-body-1 ml-3" @click="expandFactoryDetail" v-if="!full">顯示更多資訊</p>
+      <hr v-if="appState.factoryDetailsExpanded">
+      <p class="text-body-1 m-0 mb-0" @click="expandFactoryDetail" v-if="!appState.factoryDetailsExpanded">顯示更多資訊</p>
 
-      <div v-if="full" class="mt-4">
+      <div v-if="appState.factoryDetailsExpanded" class="mt-4">
         <h2 class="text-h4 mb-5">其他工廠資訊</h2>
         <h3 class="text-h5">工廠外部文字</h3>
         <p class="mb-2">XXX 公司</p>
@@ -54,7 +47,7 @@
 </template>
 
 <script lang="ts">
-import { createComponent } from '@vue/composition-api'
+import { createComponent, computed } from '@vue/composition-api'
 import { useAppState } from '../lib/appState'
 
 export default createComponent({
@@ -62,8 +55,17 @@ export default createComponent({
   setup () {
     const [appState, { expandFactoryDetail, collapseFactoryDetail }] = useAppState()
 
+    const images = computed(() => {
+      if (appState.factoryData) {
+        return appState.factoryData.images
+      } else {
+        return []
+      }
+    })
+
     return {
       appState,
+      images,
       expandFactoryDetail,
       collapseFactoryDetail
     }
@@ -71,9 +73,8 @@ export default createComponent({
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .factory-container {
-  height: 50%;
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -82,5 +83,12 @@ export default createComponent({
 
 .factory-container.full {
   height: 100%;
+}
+
+.factory-slide-image {
+  width: 120px;
+  height: 68px;
+  overflow: hidden;
+  object-fit: cover;
 }
 </style>
