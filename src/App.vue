@@ -60,7 +60,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main>
+    <v-main style="max-height: 100%; height: 100%;">
       <!-- alert or modal -->
       <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
       <filter-modal :open="modalState.filterModalOpen" :dismiss="modalActions.closeFilterModal" />
@@ -183,4 +183,17 @@ export default createComponent({
 
 <style lang="scss">
 @import '~@/styles/index';
+
+@supports (-webkit-touch-callout: none) {
+  .v-application {
+    height: -webkit-fill-available;
+    overflow: hidden;
+  }
+
+  .v-application--wrap {
+    min-height: unset !important;
+    max-height: 100%;
+  }
+}
+
 </style>

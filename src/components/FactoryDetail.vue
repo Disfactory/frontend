@@ -176,7 +176,9 @@ export default createComponent({
 }
 
 .factory-container.full {
-  height: 100%;
+  min-height: 100%;
+  overflow: auto;
+  top: 0;
 }
 
 .factory-slide-image {
