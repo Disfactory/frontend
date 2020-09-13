@@ -1,46 +1,46 @@
 <template>
-  <div>
-    <div class="map-container">
-      <div ref="root" class="map"></div>
+  <div class="map-container">
+    <div ref="root" class="map"></div>
 
-      <div ref="popup" :class="['popup', { show: popupState.show }]" :style="{ borderColor: popupData.color }">
-        <div class="close" @click="popupState.show = false" data-label="map-popup-close" />
-        <small :style="{ color: popupData.color }">{{ popupData.status }}</small>
-        <h3>{{ popupData.name }}</h3>
-        <p class="summary">{{ popupData.summary }}</p>
-        <app-button outline @click="onClickEditFactoryData" :color="getButtonColorFromStatus()" data-label="map-popup-modify">
-          補充資料
-        </app-button>
-      </div>
+    <div ref="popup" :class="['popup', { show: popupState.show }]" :style="{ borderColor: popupData.color }">
+      <div class="close" @click="popupState.show = false" data-label="map-popup-close" />
+      <small :style="{ color: popupData.color }">{{ popupData.status }}</small>
+      <h3>{{ popupData.name }}</h3>
+      <p class="summary">{{ popupData.summary }}</p>
+      <app-button outline @click="onClickEditFactoryData" :color="getButtonColorFromStatus()" data-label="map-popup-modify">
+        補充資料
+      </app-button>
+    </div>
 
-      <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!appState.selectFactoryMode">
-        <button>
-          <img src="/images/filter.svg" alt="search">
-        </button>
-      </div>
+    <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!appState.selectFactoryMode">
+      <button>
+        <img src="/images/filter.svg" alt="search">
+      </button>
+    </div>
 
-      <div class="ol-fit-location ol-unselectable ol-control" @click="zoomToGeolocation" data-label="map-locate">
-        <button>
-          <img src="/images/locate.svg" alt="locate">
-        </button>
-      </div>
+    <div class="ol-fit-location ol-unselectable ol-control" @click="zoomToGeolocation" data-label="map-locate">
+      <button>
+        <img src="/images/locate.svg" alt="locate">
+      </button>
+    </div>
 
-      <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
+    <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
 
-      <div class="factory-button-group">
-        <div class="create-factory-button" v-if="!appState.selectFactoryMode">
-          <app-button @click="onClickCreateFactoryButton" data-label="map-create-factory" color="dark-green">我想新增可疑工廠</app-button>
-        </div>
+    <div class="factory-button-group">
+      <div class="create-factory-button" v-if="!appState.selectFactoryMode">
+        <app-button @click="onClickCreateFactoryButton" data-label="map-create-factory" color="dark-green">我想新增可疑工廠</app-button>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
+import { createComponent, onMounted, onUnmounted, ref, inject, computed } from '@vue/composition-api'
+
 import AppButton from '@/components/AppButton.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import AppTextField from '@/components/AppTextField.vue'
-import { createComponent, onMounted, ref, inject, computed } from '@vue/composition-api'
+
 import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
@@ -70,7 +70,7 @@ export default createComponent({
       required: true
     }
   },
-  setup () {
+  setup (props, context) {
     const { event } = useGA()
     const root = ref<HTMLElement>(null)
     const popup = ref<HTMLDivElement>(null)
@@ -83,13 +83,20 @@ export default createComponent({
     const [popupState] = useFactoryPopup()
     const popupData = computed(() => appState.factoryData ? getPopupData(appState.factoryData) : {})
 
-    const setPopup = (id: string) => {
+    const openFactoryDetail = (id: string) => {
       if (!mapControllerRef.value) return
       const factory = mapControllerRef.value.getFactory(id)
 
       if (factory) {
         appState.factoryData = factory
-        popupState.show = true
+      }
+    }
+
+    const waitNextTick = () => new Promise(resolve => context.root.$nextTick(resolve))
+
+    const resizeMap = function () {
+      if (mapControllerRef.value) {
+        mapControllerRef.value.mapInstance.map.updateSize()
       }
     }
 
@@ -131,13 +138,13 @@ export default createComponent({
         }, // TODO: do on start move to lock selection
         onClicked: async function (_, feature) {
           if (feature) {
-            event('clickPopup')
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            popupOverlay.setPosition((feature.getGeometry() as any).getCoordinates())
-            setPopup(feature.getId() as string)
+            event('clickFactoryPin')
+            openFactoryDetail(feature.getId() as string)
           } else {
-            popupState.show = false
+            appState.factoryData = null
           }
+          await waitNextTick()
+          resizeMap()
         },
         onZoomed: function (zoom) {
           permalink.zoom(zoom)
@@ -158,6 +165,14 @@ export default createComponent({
       mapControllerRef.value = mapController
 
       mapController.mapInstance.setLUILayerVisible(false)
+    })
+
+    onMounted(() => {
+      window.addEventListener('resize', resizeMap)
+    })
+
+    onUnmounted(() => {
+      window.removeEventListener('resize', resizeMap)
     })
 
     function onClickCreateFactoryButton () {
@@ -232,6 +247,7 @@ export default createComponent({
       font-size: 14px;
     }
   }
+
 }
 
 .map {
@@ -442,5 +458,4 @@ export default createComponent({
   font-size: 14px;
   line-height: 19px;
 }
-
 </style>

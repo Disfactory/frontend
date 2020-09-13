@@ -60,7 +60,7 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main>
+    <v-main style="max-height: 100%; height: 100%;">
       <!-- alert or modal -->
       <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
       <filter-modal :open="modalState.filterModalOpen" :dismiss="modalActions.closeFilterModal" />
@@ -96,6 +96,8 @@
 
       <create-factory-steps v-if="appState.isCreateMode" />
     </v-main>
+
+    <factory-detail />
   </v-app>
 </template>
 
@@ -109,6 +111,7 @@ import AppSidebar from './components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import FormPage from '@/components/FormPage.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
+import FactoryDetail from '@/components/FactoryDetail.vue'
 
 import FilterModal from '@/components/FilterModal.vue'
 import AboutModal from '@/components/AboutModal.vue'
@@ -146,7 +149,8 @@ export default createComponent({
     TutorialModal,
     FormPage,
     IosVersionModal,
-    CreateFactorySteps
+    CreateFactorySteps,
+    FactoryDetail
   },
   setup (_, context) {
     provideGA(context)
@@ -179,4 +183,17 @@ export default createComponent({
 
 <style lang="scss">
 @import '~@/styles/index';
+
+@supports (-webkit-touch-callout: none) {
+  .v-application {
+    height: -webkit-fill-available;
+    overflow: hidden;
+  }
+
+  .v-application--wrap {
+    min-height: unset !important;
+    max-height: 100%;
+  }
+}
+
 </style>
