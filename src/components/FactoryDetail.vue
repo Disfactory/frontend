@@ -1,9 +1,9 @@
 <template>
-  <v-card elevation="3" class="factory-container d-md-none" :class="{ full }" v-if="!!appState.factoryData">
+  <v-card elevation="3" class="factory-container d-md-none" :class="{ full }" v-if="!!appState.factoryData" ref="factoryDetailRef">
     <v-card-text>
       <div>
         <span class="float-left body-2">工廠狀態</span>
-        <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
+        <v-icon class="float-right" @click="collapseFactoryDetail" ref="closeButtonRef">mdi-close</v-icon>
         <v-icon class="float-right mr-4">mdi-share-variant</v-icon>
       </div>
       <p class="factory-status text--primary mb-2" style="clear: both">
@@ -51,9 +51,10 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed } from '@vue/composition-api'
+import { createComponent, computed, ref } from '@vue/composition-api'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
+import useInsideViewport from '@/lib/hooks/useInsideViewport'
 
 import { useAppState } from '../lib/appState'
 import { FactoryStatusText } from '../types'
@@ -114,6 +115,22 @@ export default createComponent({
     const longitude = computed(() => appState.factoryData?.lng.toFixed(7))
     const latitude = computed(() => appState.factoryData?.lat.toFixed(7))
 
+    const closeButtonRef = ref(null)
+    const closeButtonDomRef = computed(() => {
+      if (closeButtonRef.value) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (closeButtonRef.value as any).$el
+      }
+    })
+    const factoryDetailRef = ref(null)
+    const factoryDetailDomRef = computed(() => {
+      if (factoryDetailRef.value) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (factoryDetailRef.value as any).$el
+      }
+    })
+    const inside = useInsideViewport(factoryDetailDomRef, closeButtonDomRef)
+
     return {
       full,
       appState,
@@ -125,7 +142,10 @@ export default createComponent({
       factoryId,
       factoryType,
       longitude,
-      latitude
+      latitude,
+      closeButtonRef,
+      factoryDetailRef,
+      inside
     }
   }
 })
