@@ -53,6 +53,7 @@ import { useFactoryPopup, getPopupData } from '../lib/factoryPopup'
 import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 import { permalink } from '../lib/permalink'
+import { waitNextTick } from '../lib/utils'
 
 export default createComponent({
   components: {
@@ -91,8 +92,6 @@ export default createComponent({
         appState.factoryData = factory
       }
     }
-
-    const waitNextTick = () => new Promise(resolve => context.root.$nextTick(resolve))
 
     const resizeMap = function () {
       if (mapControllerRef.value) {
@@ -143,7 +142,7 @@ export default createComponent({
           } else {
             appState.factoryData = null
           }
-          await waitNextTick()
+          await waitNextTick(context)
           resizeMap()
         },
         onZoomed: function (zoom) {
