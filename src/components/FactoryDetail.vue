@@ -238,6 +238,7 @@ export default createComponent({
 .copied-message {
   background-color: $light-green-color;
   color: white;
+  font-size: 14px;
 }
 
 .v-app-bar .copied-message {
