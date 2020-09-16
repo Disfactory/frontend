@@ -30,6 +30,10 @@
         工廠編號 {{ factoryId }} <br>
         最後更新 2020/4/12
       </p>
+      <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
+        <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
+        已複製連結
+      </div>
     </v-card-text>
 
     <v-slide-group>
@@ -239,13 +243,17 @@ export default createComponent({
   background-color: $light-green-color;
   color: white;
   font-size: 14px;
-}
-
-.v-app-bar .copied-message {
+  height: 41px;
   position: absolute;
   width: 100%;
   left: 0;
-  height: 41px;
+}
+
+.v-app-bar .copied-message {
   top: 56px;
+}
+
+.v-card__text .copied-message {
+  top: 80px;
 }
 </style>
