@@ -49,6 +49,7 @@ export type FactoryImage = {
 
 export type FactoryData = {
   id: string,
+  display_number: string,
   lat: number,
   lng: number,
   name: string,

@@ -126,7 +126,7 @@ export default createComponent({
 
     const factoryId = computed(() => {
       if (appState.factoryData) {
-        return appState.factoryData.id
+        return appState.factoryData.display_number
       } else {
         return ''
       }
