@@ -85,7 +85,7 @@ import { useAppState } from '../lib/appState'
 import { FactoryStatusText } from '../types'
 
 export default createComponent({
-  name: 'FactoryDetail',
+  name: 'FactoryDetailPage',
   setup () {
     const [appState, { expandFactoryDetail, collapseFactoryDetail }] = useAppState()
 
