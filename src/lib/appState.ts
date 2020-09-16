@@ -160,6 +160,10 @@ const registerMutator = (appState: AppState) => {
     appState.factoryData = null
   }
 
+  function toggleFactoryDetail () {
+    appState.factoryDetailsExpanded = !appState.factoryDetailsExpanded
+  }
+
   return {
     pageTransition,
 
@@ -178,7 +182,8 @@ const registerMutator = (appState: AppState) => {
     },
 
     expandFactoryDetail,
-    collapseFactoryDetail
+    collapseFactoryDetail,
+    toggleFactoryDetail
   }
 }
 
