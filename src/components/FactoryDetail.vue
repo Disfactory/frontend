@@ -1,9 +1,22 @@
 <template>
   <v-card elevation="3" class="factory-container d-md-none" :class="{ full }" v-if="!!appState.factoryData" ref="factoryDetailRef">
+
+    <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
+      <v-spacer></v-spacer>
+      <v-toolbar-title>
+        <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <div class="btn-container">
+        <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
+        <v-icon class="float-right mr-4">mdi-share-variant</v-icon>
+      </div>
+    </v-app-bar>
+
     <v-card-text>
       <div>
         <span class="float-left body-2">工廠狀態</span>
-        <v-icon class="float-right" @click="collapseFactoryDetail" ref="closeButtonRef">mdi-close</v-icon>
+        <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
         <v-icon class="float-right mr-4">mdi-share-variant</v-icon>
       </div>
       <p class="factory-status text--primary mb-2" style="clear: both">
@@ -51,10 +64,10 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref } from '@vue/composition-api'
+import { createComponent, computed, ref, watch } from '@vue/composition-api'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
-import useInsideViewport from '@/lib/hooks/useInsideViewport'
+import useScroll from '@/lib/hooks/useScroll'
 
 import { useAppState } from '../lib/appState'
 import { FactoryStatusText } from '../types'
@@ -115,13 +128,6 @@ export default createComponent({
     const longitude = computed(() => appState.factoryData?.lng.toFixed(7))
     const latitude = computed(() => appState.factoryData?.lat.toFixed(7))
 
-    const closeButtonRef = ref(null)
-    const closeButtonDomRef = computed(() => {
-      if (closeButtonRef.value) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (closeButtonRef.value as any).$el
-      }
-    })
     const factoryDetailRef = ref(null)
     const factoryDetailDomRef = computed(() => {
       if (factoryDetailRef.value) {
@@ -129,7 +135,8 @@ export default createComponent({
         return (factoryDetailRef.value as any).$el
       }
     })
-    const inside = useInsideViewport(factoryDetailDomRef, closeButtonDomRef)
+    const { scrollTop } = useScroll(factoryDetailDomRef)
+    const scrollOff = computed(() => scrollTop.value > 29 && full.value)
 
     return {
       full,
@@ -143,9 +150,8 @@ export default createComponent({
       factoryType,
       longitude,
       latitude,
-      closeButtonRef,
       factoryDetailRef,
-      inside
+      scrollOff
     }
   }
 })
@@ -192,6 +198,11 @@ export default createComponent({
     background-color: #EAF3BF;
     height: 1px;
     border-width: inherit;
+  }
+
+  .btn-container {
+    position: absolute;
+    right: 10px;
   }
 }
 
