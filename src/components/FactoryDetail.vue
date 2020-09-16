@@ -1,10 +1,27 @@
 <template>
-  <v-card elevation="3" class="factory-container d-md-none" :class="{ full }" v-if="!!appState.factoryData">
+  <v-card elevation="3" class="factory-container d-md-none" :class="{ full }" v-if="!!appState.factoryData" ref="factoryDetailRef">
+
+    <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
+      <v-spacer></v-spacer>
+      <v-toolbar-title>
+        <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
+      </v-toolbar-title>
+      <v-spacer></v-spacer>
+      <div class="btn-container">
+        <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
+        <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
+      </div>
+      <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage">
+        <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
+        已複製連結
+      </div>
+    </v-app-bar>
+
     <v-card-text>
       <div>
         <span class="float-left body-2">工廠狀態</span>
         <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
-        <v-icon class="float-right mr-4">mdi-share-variant</v-icon>
+        <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
       </div>
       <p class="factory-status text--primary mb-2" style="clear: both">
         <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
@@ -13,6 +30,10 @@
         工廠編號 {{ factoryId }} <br>
         最後更新 2020/4/12
       </p>
+      <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
+        <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
+        已複製連結
+      </div>
     </v-card-text>
 
     <v-slide-group>
@@ -51,9 +72,11 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed } from '@vue/composition-api'
+import { createComponent, computed, ref } from '@vue/composition-api'
+import copy from 'copy-to-clipboard'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
+import useScroll from '@/lib/hooks/useScroll'
 
 import { useAppState } from '../lib/appState'
 import { FactoryStatusText } from '../types'
@@ -114,6 +137,25 @@ export default createComponent({
     const longitude = computed(() => appState.factoryData?.lng.toFixed(7))
     const latitude = computed(() => appState.factoryData?.lat.toFixed(7))
 
+    const factoryDetailRef = ref(null)
+    const factoryDetailDomRef = computed(() => {
+      if (factoryDetailRef.value) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (factoryDetailRef.value as any).$el
+      }
+    })
+    const { scrollTop } = useScroll(factoryDetailDomRef)
+    const scrollOff = computed(() => scrollTop.value > 29 && full.value)
+
+    const showCopiedMessage = ref(false)
+    const copyToClipboard = () => {
+      copy(window.location.href)
+      showCopiedMessage.value = true
+      window.setTimeout(() => {
+        showCopiedMessage.value = false
+      }, 1000)
+    }
+
     return {
       full,
       appState,
@@ -125,7 +167,11 @@ export default createComponent({
       factoryId,
       factoryType,
       longitude,
-      latitude
+      latitude,
+      factoryDetailRef,
+      scrollOff,
+      showCopiedMessage,
+      copyToClipboard
     }
   }
 })
@@ -173,6 +219,11 @@ export default createComponent({
     height: 1px;
     border-width: inherit;
   }
+
+  .btn-container {
+    position: absolute;
+    right: 10px;
+  }
 }
 
 .factory-container.full {
@@ -186,5 +237,23 @@ export default createComponent({
   height: 68px;
   overflow: hidden;
   object-fit: cover;
+}
+
+.copied-message {
+  background-color: $light-green-color;
+  color: white;
+  font-size: 14px;
+  height: 41px;
+  position: absolute;
+  width: 100%;
+  left: 0;
+}
+
+.v-app-bar .copied-message {
+  top: 56px;
+}
+
+.v-card__text .copied-message {
+  top: 80px;
 }
 </style>
