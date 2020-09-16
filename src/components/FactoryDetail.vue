@@ -9,7 +9,11 @@
       <v-spacer></v-spacer>
       <div class="btn-container">
         <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
-        <v-icon class="float-right mr-4">mdi-share-variant</v-icon>
+        <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
+      </div>
+      <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage">
+        <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
+        已複製連結
       </div>
     </v-app-bar>
 
@@ -17,7 +21,7 @@
       <div>
         <span class="float-left body-2">工廠狀態</span>
         <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
-        <v-icon class="float-right mr-4">mdi-share-variant</v-icon>
+        <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
       </div>
       <p class="factory-status text--primary mb-2" style="clear: both">
         <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
@@ -64,7 +68,8 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref, watch } from '@vue/composition-api'
+import { createComponent, computed, ref } from '@vue/composition-api'
+import copy from 'copy-to-clipboard'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
 import useScroll from '@/lib/hooks/useScroll'
@@ -138,6 +143,15 @@ export default createComponent({
     const { scrollTop } = useScroll(factoryDetailDomRef)
     const scrollOff = computed(() => scrollTop.value > 29 && full.value)
 
+    const showCopiedMessage = ref(false)
+    const copyToClipboard = () => {
+      copy(window.location.href)
+      showCopiedMessage.value = true
+      window.setTimeout(() => {
+        showCopiedMessage.value = false
+      }, 1000)
+    }
+
     return {
       full,
       appState,
@@ -151,7 +165,9 @@ export default createComponent({
       longitude,
       latitude,
       factoryDetailRef,
-      scrollOff
+      scrollOff,
+      showCopiedMessage,
+      copyToClipboard
     }
   }
 })
@@ -217,5 +233,18 @@ export default createComponent({
   height: 68px;
   overflow: hidden;
   object-fit: cover;
+}
+
+.copied-message {
+  background-color: $light-green-color;
+  color: white;
+}
+
+.v-app-bar .copied-message {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  height: 41px;
+  top: 56px;
 }
 </style>
