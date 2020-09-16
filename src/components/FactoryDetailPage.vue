@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="3" class="factory-container d-md-none" :class="{ full }" v-if="!!appState.factoryData" ref="factoryDetailRef">
+  <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp }" v-show="!!appState.factoryData" ref="factoryDetailRef">
 
     <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
       <v-spacer></v-spacer>
@@ -26,13 +26,16 @@
           <v-icon @click="collapseFactoryDetail">mdi-close</v-icon>
         </span>
       </div>
+
       <p class="factory-status text--primary mb-2" style="clear: both">
         <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
       </p>
+
       <p class="caption mb-0">
         工廠編號 {{ factoryId }} <br>
         最後更新 2020/4/12
       </p>
+
       <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
         <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
         已複製連結
@@ -49,16 +52,16 @@
       <h3 class="mb-1">地段 / 地址</h3>
       <p class="mb-5">台中市大雅區自強段（701）7 地號</p>
 
-      <div v-if="full" class="mb-5">
+      <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
         <h3 class="mb-1">經緯度</h3>
         <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
         <p class="text-caption">以上經緯度版本為 WGS84</p>
       </div>
 
-      <hr v-if="full">
-      <p class="text-body-1 m-0 mb-0" @click="expandFactoryDetail" v-if="!full">顯示更多資訊</p>
+      <hr v-if="full || $vuetify.breakpoint.mdAndUp">
+      <p class="text-body-1 m-0 mb-0" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">顯示更多資訊</p>
 
-      <div v-if="full" class="mt-4">
+      <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
         <h2 class="mb-5">其他工廠資訊</h2>
 
         <h3 class="mb-1">工廠外部文字</h3>
@@ -227,12 +230,23 @@ export default createComponent({
     position: absolute;
     right: 10px;
   }
-}
 
-.factory-container.full {
-  min-height: 100%;
-  overflow: auto;
-  top: 0;
+  &:not(.desktop).full {
+    min-height: 100%;
+    overflow: auto;
+    top: 0;
+  }
+
+  // sidebar style
+  &.desktop {
+    width: 395px;
+    right: 0;
+    top: 64px;
+    max-height: calc(100% - 64px);
+    border-radius: 0;
+    z-index: 4;
+    overflow: auto;
+  }
 }
 
 .factory-status-title {
