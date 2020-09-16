@@ -18,10 +18,13 @@
     </v-app-bar>
 
     <v-card-text>
-      <div>
-        <span class="float-left body-2">工廠狀態</span>
-        <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
-        <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
+      <div class="d-flex justify-between align-items-center mb-3">
+        <span class="factory-status-title">工廠狀態</span>
+
+        <span>
+          <v-icon class="mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
+          <v-icon @click="collapseFactoryDetail">mdi-close</v-icon>
+        </span>
       </div>
       <p class="factory-status text--primary mb-2" style="clear: both">
         <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
@@ -232,6 +235,11 @@ export default createComponent({
   top: 0;
 }
 
+.factory-status-title {
+  color: $dark-green-color;
+  font-size: 16px;
+}
+
 .factory-slide-image {
   width: 120px;
   height: 68px;
@@ -254,6 +262,6 @@ export default createComponent({
 }
 
 .v-card__text .copied-message {
-  top: 80px;
+  top: 48px;
 }
 </style>
