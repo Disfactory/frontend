@@ -15,6 +15,10 @@ body {
   touch-action: manipulation;
 }
 
+html {
+  overflow-y: auto;
+}
+
 * {
   line-height: 1;
   box-sizing: border-box;
