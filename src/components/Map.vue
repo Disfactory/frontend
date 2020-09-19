@@ -78,7 +78,7 @@ export default createComponent({
     const mapControllerRef = inject(MainMapControllerSymbol, ref<MapFactoryController>())
 
     const [, modalActions] = useModalState()
-    const [appState, { openEditFactoryForm, pageTransition }] = useAppState()
+    const [appState, { openEditFactoryForm, pageTransition, expandFactoryDetail }] = useAppState()
     const [, alertActions] = useAlertState()
 
     const [popupState] = useFactoryPopup()
@@ -139,6 +139,10 @@ export default createComponent({
           if (feature) {
             event('clickFactoryPin')
             openFactoryDetail(feature.getId() as string)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
+              expandFactoryDetail()
+            }
           } else {
             appState.factoryData = null
           }

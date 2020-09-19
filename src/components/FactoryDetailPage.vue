@@ -1,6 +1,6 @@
 <template>
-  <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, collapsed: !appState.factoryData }">
-    <div class="factory-detail-scroller" ref="factoryDetailScrollerRef">
+  <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }">
+    <div class="factory-detail-scroller" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
       <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
         <v-spacer></v-spacer>
         <v-toolbar-title>
@@ -21,7 +21,12 @@
         <div class="d-flex justify-between align-items-center mb-3">
           <span class="factory-status-title">工廠狀態</span>
 
-          <span>
+          <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp">
+            <v-icon class="mr-1">mdi-share-variant</v-icon>
+            {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
+          </v-btn>
+
+          <span v-else>
             <v-icon class="mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
             <v-icon @click="collapseFactoryDetail">mdi-close</v-icon>
           </span>
@@ -76,8 +81,13 @@
       </div>
     </div>
 
+    <div class="factory-detail-scroller px-4 py-5" v-show="!appState.factoryData">
+      <h1 class="text--primary mb-5">請選擇一個地標</h1>
+      <p>請選擇一間工廠查看工廠詳細資訊。</p>
+    </div>
+
     <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
-      <v-icon color="#697F01">mdi-chevron-right</v-icon>
+      <v-icon color="#697F01">mdi-chevron-left</v-icon>
     </div>
   </v-card>
 </template>
@@ -237,20 +247,23 @@ export default createComponent({
     right: 10px;
   }
 
-  &:not(.desktop).full {
-    min-height: 100%;
-    overflow: auto;
-    top: 0;
-  }
+  // mobile expand
+  &:not(.desktop) {
+    &.full {
+      min-height: 100%;
+      overflow: auto;
+      top: 0;
+    }
 
-  &:not(.desktop).collapsed {
-    display: none;
+    &.empty {
+      display: none;
+    }
   }
 
   // sidebar style
   &.desktop {
     width: 395px;
-    right: 0;
+    right: -395px;
     top: 64px;
     max-height: calc(100% - 64px);
     border-radius: 0;
@@ -258,13 +271,17 @@ export default createComponent({
     overflow: visible;
     transition: transform ease-in-out 200ms;
 
-    // collpased sidebar
-    &:not(.full) {
-      transform: translateX(395px);
+    // expanded sidebar
+    &.full {
+      transform: translateX(-395px);
 
       .sidebar-collapse-button .v-icon {
         transform: rotate(180deg);
       }
+    }
+
+    .copied-message {
+      display: none;
     }
   }
 
