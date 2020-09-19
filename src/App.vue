@@ -97,7 +97,7 @@
       <create-factory-steps v-if="appState.isCreateMode" />
     </v-main>
 
-    <factory-detail />
+    <factory-detail-page />
   </v-app>
 </template>
 
@@ -111,7 +111,7 @@ import AppSidebar from './components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import FormPage from '@/components/FormPage.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
-import FactoryDetail from '@/components/FactoryDetail.vue'
+import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
 
 import FilterModal from '@/components/FilterModal.vue'
 import AboutModal from '@/components/AboutModal.vue'
@@ -150,7 +150,7 @@ export default createComponent({
     FormPage,
     IosVersionModal,
     CreateFactorySteps,
-    FactoryDetail
+    FactoryDetailPage
   },
   setup (_, context) {
     provideGA(context)
