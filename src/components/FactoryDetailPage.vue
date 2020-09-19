@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }">
+  <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }" v-show="!appState.formPageOpen">
     <div class="factory-detail-scroller" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
       <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
         <v-spacer></v-spacer>
@@ -51,6 +51,12 @@
         <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
           <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
+        <v-slide-item>
+          <div class='update-image-button d-flex flex-column justify-center align-items-center'>
+            <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
+            補充照片
+          </div>
+        </v-slide-item>
       </v-slide-group>
 
       <div class="mt-4 mx-3 mb-2">
@@ -87,7 +93,7 @@
     </div>
 
     <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
-      <v-icon color="#697F01">mdi-chevron-left</v-icon>
+      <v-icon color="#697F01">mdi-menu-left</v-icon>
     </div>
   </v-card>
 </template>
@@ -328,5 +334,19 @@ export default createComponent({
 
 .v-card__text .copied-message {
   top: 48px;
+}
+
+.update-image-button {
+  background-color: $dark-green-color;
+  width: 100px;
+  height: 68px;
+  color: white;
+  font-size: 12px;
+  user-select: none;
+  cursor: pointer;
+
+  &:first-child {
+    margin-left: 15px;
+  }
 }
 </style>
