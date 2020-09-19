@@ -21,7 +21,7 @@
         <div class="d-flex justify-between align-items-center mb-3">
           <span class="factory-status-title">工廠狀態</span>
 
-          <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp">
+          <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp" :outlined="showCopiedMessage">
             <v-icon class="mr-1">mdi-share-variant</v-icon>
             {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
           </v-btn>
