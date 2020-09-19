@@ -185,14 +185,15 @@
 </template>
 
 <script lang="ts">
-import { createComponent, inject, ref, watch, reactive, computed } from '@vue/composition-api'
+import { createComponent, inject, ref, reactive } from '@vue/composition-api'
 
 import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 
 import { MainMapControllerSymbol } from '../symbols'
 import { MapFactoryController } from '../lib/map'
-import { uploadImages, UploadedImage, createFactory } from '../api'
+import { createFactory } from '../api'
+import { useImageUpload } from '../lib/imageUpload'
 
 import ImageUploadForm from './ImageUploadForm.vue'
 import ConfirmFactory from './ConfirmFactory.vue'
@@ -251,40 +252,13 @@ export default createComponent({
       submitting: false
     })
 
-    const uploadedImages = ref<UploadedImage[]>([])
-    const imageUploadState = reactive({
-      error: null as boolean | null,
-      uploading: false
-    })
-
-    const selectedImages = ref<FileList>(null)
-    watch(selectedImages, () => {
-      imageUploadState.error = null
-
-      if (!selectedImages.value) {
-        return
-      }
-
-      imageUploadState.uploading = true
-
-      uploadImages(selectedImages.value).then(images => {
-        uploadedImages.value = [
-          ...uploadedImages.value,
-          ...images
-        ]
-      }).catch(err => {
-        console.error(err)
-        imageUploadState.error = true
-      }).finally(() => {
-        imageUploadState.uploading = false
-      })
-    })
-
-    const onClickRemoveImage = ({ src }: UploadedImage) => {
-      uploadedImages.value = uploadedImages.value.filter(image => image.src !== src)
-    }
-
-    const imageUploadFormValid = computed(() => uploadedImages.value.length > 0 && !imageUploadState.uploading)
+    const {
+      selectedImages,
+      imageUploadState,
+      uploadedImages,
+      onClickRemoveImage,
+      imageUploadFormValid
+    } = useImageUpload()
 
     const submitFactory = async () => {
       createFactoryFormState.submitting = true

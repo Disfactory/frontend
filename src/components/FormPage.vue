@@ -82,7 +82,7 @@
             />
           </div>
 
-          <div style="width: 100px; height: 47px; margin-left: -3px;" v-if="isEditMode">
+          <div style="width: 100px; height: 47px; margin-left: -3px;" v-if="isEditImagesMode">
             <app-button @click="updateFactoryFieldsFor('others', factoryFormState.others)" rect :disabled="fieldSubmittingState.others_submitting" data-label="form-update-others">
               {{ fieldSubmittingState.others_submitting ? '更新中' : '更新' }}
             </app-button>
@@ -98,7 +98,7 @@
             />
           </div>
 
-          <div style="width: 100px; height: 47px; margin-left: -3px;" v-if="isEditMode">
+          <div style="width: 100px; height: 47px; margin-left: -3px;" v-if="isEditImagesMode">
             <app-button @click="updateFactoryFieldsFor('name', factoryFormState.name)" rect :disabled="fieldSubmittingState.name_submitting" data-label="form-update-name">
               {{ fieldSubmittingState.name_submitting ? '更新中' : '更新' }}
             </app-button>
@@ -114,7 +114,7 @@
             />
           </div>
 
-          <div style="width: 100px; height: 47px; margin-left: -3px;" v-if="isEditMode">
+          <div style="width: 100px; height: 47px; margin-left: -3px;" v-if="isEditImagesMode">
             <app-button @click="updateFactoryFieldsFor('factory_type', factoryFormState.type)" rect :disabled="fieldSubmittingState.factory_type_submitting" data-label="form-update-factoryType">
               {{ fieldSubmittingState.factory_type_submitting ? '更新中' : '更新' }}
             </app-button>
@@ -217,7 +217,7 @@ export default createComponent({
     }
 
     // merge state
-    if (appState.isEditMode) {
+    if (appState.isEditImagesMode) {
       const { factoryData } = props
 
       initialFactoryState.name = factoryData.name
@@ -274,7 +274,7 @@ export default createComponent({
 
     const updateFactoryFieldsFor = async (field: string, value: string) => {
       const { factoryData } = props
-      if (!appState.isEditMode || !factoryData) {
+      if (!appState.isEditImagesMode || !factoryData) {
         return
       }
 
@@ -329,7 +329,7 @@ export default createComponent({
         minimapController = initializeMinimap(minimap.value!, center)
         minimapController.addFactories(controller.factories)
 
-        if (appState.isEditMode) {
+        if (appState.isEditImagesMode) {
           const { factoryData } = props
           minimapController.mapInstance.setMinimapPin(factoryData.lng, factoryData.lat)
         }
@@ -377,7 +377,7 @@ export default createComponent({
         if (appState.isCreateMode) {
           factoryFormState.imageUrls = imageUrls
           factoryFormState.images = (_images as UploadedImages).map(image => image.token)
-        } else if (appState.isEditMode) {
+        } else if (appState.isEditImagesMode) {
           // TODO: refactor into sepearte method...
           try {
             const factory = { ...props.factoryData } as FactoryData
