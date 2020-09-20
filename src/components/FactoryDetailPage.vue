@@ -75,8 +75,8 @@
         <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
           <h2 class="mb-5">其他工廠資訊</h2>
 
-          <h3 class="mb-1">工廠外部文字</h3>
-          <p class="mb-5">XXX 公司</p>
+          <h3 class="mb-1" v-if="factoryName">工廠外部文字</h3>
+          <p class="mb-5" v-if="factoryName">{{ factoryName }}</p>
 
           <h3 v-if="factoryType" class="mb-1">工廠類型</h3>
           <p class="mb-5" v-if="factoryType">{{ factoryType }}</p>
@@ -159,6 +159,10 @@ export default createComponent({
       }
     })
 
+    const factoryName = computed(() => {
+      return appState.factoryData?.name
+    })
+
     const full = computed(() => appState.factoryDetailsExpanded)
 
     const longitude = computed(() => appState.factoryData?.lng.toFixed(7))
@@ -189,6 +193,7 @@ export default createComponent({
       statusColor,
       factoryId,
       factoryType,
+      factoryName,
       longitude,
       latitude,
       factoryDetailScrollerRef,
