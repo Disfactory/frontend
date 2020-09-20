@@ -1,6 +1,6 @@
 <template>
   <div class='update-factory-steps'>
-    <v-app-bar fixed color="white" class="d-block d-md-none">
+    <v-app-bar fixed color="white" class="d-block d-md-none" v-if="appState.isEditImagesMode">
       <v-spacer></v-spacer>
       <v-toolbar-title>補充工廠描述</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -35,15 +35,20 @@
       :submit="submitImageUpload"
       :formState="imageUploadFormState"
       submitText="確認新增照片"
+      disableProgressiveUpload
     />
   </div>
 </template>
 
 <script lang="ts">
-import { useImageUpload } from '@/lib/imageUpload'
-import { createComponent, reactive, ref } from '@vue/composition-api'
+import { useUpdateFactoryImage } from '@/lib/imageUpload'
+import { updateFactoryImages } from '@/api'
+import { createComponent, inject, reactive, ref } from '@vue/composition-api'
 import { useAppState } from '../lib/appState'
+import { useModalState } from '../lib/hooks'
 import ImageUploadForm from './ImageUploadForm.vue'
+import { MainMapControllerSymbol } from '@/symbols'
+import { MapFactoryController } from '@/lib/map'
 
 export default createComponent({
   name: 'UpdateFactorySteps',
@@ -52,6 +57,8 @@ export default createComponent({
   },
   setup () {
     const [appState, { pageTransition }] = useAppState()
+    const [, modalActions] = useModalState()
+    const mapController = inject(MainMapControllerSymbol, ref<MapFactoryController>())
 
     const {
       selectedImages,
@@ -59,15 +66,37 @@ export default createComponent({
       uploadedImages,
       onClickRemoveImage,
       imageUploadFormValid
-    } = useImageUpload()
+    } = useUpdateFactoryImage()
 
     const imageUploadFormState = reactive({
       nickname: '',
       contact: ''
     })
 
-    const submitImageUpload = () => {
-      // TODO:
+    const submitImageUpload = async () => {
+      if (!appState.factoryData?.id || !selectedImages.value) {
+        return
+      }
+
+      try {
+        const newImages = await updateFactoryImages(appState.factoryData?.id, selectedImages.value, {
+          nickname: imageUploadFormState.nickname,
+          contact: imageUploadFormState.contact
+        })
+
+        if (mapController.value) {
+          const factory = appState.factoryData
+          factory.images = factory.images.concat(newImages)
+
+          mapController.value.updateFactory(factory.id, factory)
+          appState.factoryData = factory
+        }
+
+        pageTransition.cancelUpdateFactoryImages()
+        modalActions.openUpdateFactoryImagesSuccessModal()
+      } catch (err) {
+        console.error(err)
+      }
     }
 
     const discardDialog = ref(false)

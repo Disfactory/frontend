@@ -14,9 +14,9 @@
         </label>
       </v-btn>
 
-      <span v-if="uploading">上傳中</span>
-      <span v-if="valid && !uploading && !error">上傳成功</span>
-      <span v-if="error">上傳錯誤</span>
+      <span v-if="uploading && !disableProgressiveUpload">上傳中</span>
+      <span v-if="valid && !uploading && !error && !disableProgressiveUpload">上傳成功</span>
+      <span v-if="error && !disableProgressiveUpload">上傳錯誤</span>
 
       <div class="preview-images-container mb-2">
         <div v-for="image of previewImages" :key="image.token" class="uploaded-image">
@@ -90,6 +90,10 @@ export default createComponent({
     },
     submitText: {
       type: String
+    },
+    disableProgressiveUpload: {
+      type: Boolean,
+      default: false
     }
   },
   name: 'ImageUploadForm',

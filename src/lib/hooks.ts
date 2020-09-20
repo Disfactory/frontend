@@ -27,6 +27,7 @@ const ModalStateSymbol: InjectionKey<ModalState> = Symbol('ModalStateSymbol')
 export const provideModalState = () => {
   const modalState = reactive({
     updateFactorySuccessModal: false,
+    updateFactoryImageSuccessModal: false,
     createFactorySuccessModal: false,
     aboutModalOpen: false,
     contactModalOpen: false,
@@ -49,6 +50,8 @@ type ModalState = ReturnType<typeof provideModalState>
 type ModalActions = {
   openUpdateFactorySuccessModal: Function,
   closeUpdateFactorySuccessModal: Function,
+
+  openUpdateFactoryImagesSuccessModal: Function,
 
   openCreateFactorySuccessModal: Function,
   closeCreateFactorySuccessModal: Function,
@@ -86,6 +89,14 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
 
   const openUpdateFactorySuccessModal = () => { modalState.updateFactorySuccessModal = true }
   const closeUpdateFactorySuccessModal = () => { modalState.updateFactorySuccessModal = false }
+
+  const openUpdateFactoryImagesSuccessModal = () => {
+    modalState.updateFactoryImageSuccessModal = true
+
+    window.setTimeout(() => {
+      modalState.updateFactoryImageSuccessModal = false
+    }, 3000)
+  }
 
   const openCreateFactorySuccessModal = () => {
     modalState.createFactorySuccessModal = true
@@ -130,6 +141,8 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
   const modalActions = {
     openUpdateFactorySuccessModal,
     closeUpdateFactorySuccessModal,
+
+    openUpdateFactoryImagesSuccessModal,
 
     openCreateFactorySuccessModal,
     closeCreateFactorySuccessModal,

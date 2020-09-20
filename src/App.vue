@@ -78,6 +78,19 @@
         </v-card>
       </v-dialog>
 
+      <v-dialog v-model="modalState.updateFactoryImageSuccessModal">
+        <v-card>
+          <v-card-title class="headline">
+            補充工廠照片成功
+          </v-card-title>
+          <v-card-text>
+            <small>
+              3 秒後自動關閉提示訊息
+            </small>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
       <update-factory-success-modal
         :open="modalState.updateFactorySuccessModal"
         :dismiss="modalActions.closeUpdateFactorySuccessModal"
