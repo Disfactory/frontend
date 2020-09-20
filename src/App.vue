@@ -95,6 +95,7 @@
       />
 
       <create-factory-steps v-if="appState.isCreateMode" />
+      <update-factory-steps v-if="appState.isEditMode" />
     </v-main>
 
     <factory-detail-page />
@@ -111,6 +112,7 @@ import AppSidebar from './components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import FormPage from '@/components/FormPage.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
+import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
 import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
 
 import FilterModal from '@/components/FilterModal.vue'
@@ -150,6 +152,7 @@ export default createComponent({
     FormPage,
     IosVersionModal,
     CreateFactorySteps,
+    UpdateFactorySteps,
     FactoryDetailPage
   },
   setup (_, context) {

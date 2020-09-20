@@ -52,7 +52,7 @@
           <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
         <v-slide-item>
-          <div class='update-image-button d-flex flex-column justify-center align-items-center'>
+          <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
             <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
             補充照片
           </div>
@@ -111,7 +111,7 @@ import { FactoryStatusText } from '../types'
 export default createComponent({
   name: 'FactoryDetailPage',
   setup () {
-    const [appState, { expandFactoryDetail, collapseFactoryDetail, toggleFactoryDetail }] = useAppState()
+    const [appState, { pageTransition, expandFactoryDetail, collapseFactoryDetail, toggleFactoryDetail }] = useAppState()
 
     const images = computed(() => {
       if (appState.factoryData) {
@@ -180,6 +180,7 @@ export default createComponent({
     return {
       full,
       appState,
+      pageTransition,
       images,
       expandFactoryDetail,
       collapseFactoryDetail,

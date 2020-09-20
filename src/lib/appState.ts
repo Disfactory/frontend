@@ -136,7 +136,7 @@ const registerMutator = (appState: AppState) => {
       }
     },
 
-    startUpdateFacoryImages () {
+    startUpdateFactoryImages () {
       if (appState.pageState === PageState.INITIAL) {
         appState.pageState = PageState.UPDATE_FACTORY_IMAGES
       } else {
@@ -144,6 +144,16 @@ const registerMutator = (appState: AppState) => {
       }
 
       pageview('/edit')
+    },
+
+    cancelUpdateFactoryImages () {
+      if (appState.pageState === PageState.UPDATE_FACTORY_IMAGES) {
+        appState.pageState = PageState.INITIAL
+      } else {
+        invalidPageTransition()
+      }
+
+      event('exitUpdateFactoryImagesMode')
     },
 
     startUpdateFactoryComment () {
