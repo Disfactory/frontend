@@ -82,7 +82,7 @@
           <p class="mb-5" v-if="factoryType">{{ factoryType }}</p>
 
           <h3 class="mb-1">工廠描述</h3>
-          <v-btn outlined>補充工廠描述</v-btn>
+          <v-btn outlined @click="pageTransition.startUpdateFactoryComment">補充工廠描述</v-btn>
         </div>
       </div>
     </div>

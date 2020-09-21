@@ -166,6 +166,16 @@ const registerMutator = (appState: AppState) => {
       pageview('/editComment')
     },
 
+    cancelUpdateFactoryComment () {
+      if (appState.pageState === PageState.UPDATE_FACTORY_COMMENT) {
+        appState.pageState = PageState.INITIAL
+      } else {
+        invalidPageTransition()
+      }
+
+      event('exitUpdateFactoryCommentsMode')
+    },
+
     closeFactoryPage () {
       if (CreateFactoryPageState.includes(appState.pageState) || UpdateFactoryPageState.includes(appState.pageState)) {
         appState.pageState = PageState.INITIAL

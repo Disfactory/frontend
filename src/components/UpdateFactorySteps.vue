@@ -1,8 +1,9 @@
 <template>
   <div class='update-factory-steps'>
-    <v-app-bar fixed color="white" class="d-block d-md-none" v-if="appState.isEditImagesMode">
+    <v-app-bar fixed color="white" class="d-block d-md-none">
       <v-spacer></v-spacer>
-      <v-toolbar-title>補充工廠描述</v-toolbar-title>
+      <v-toolbar-title v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
+      <v-toolbar-title v-else>補充工廠描述</v-toolbar-title>
       <v-spacer></v-spacer>
 
       <div class="btn-container">
@@ -12,12 +13,20 @@
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </template>
-          <v-card>
+          <v-card v-if="appState.isEditImagesMode">
             <v-card-title class="headline">補充照片尚未完成</v-card-title>
             <v-card-text>放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片</v-card-text>
             <v-container class="text-center">
               <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
               <a class="d-block mt-4" @click="cancelUpdateFactoryImages">確定放棄</a>
+            </v-container>
+          </v-card>
+          <v-card v-else>
+            <v-card-title class="headline">補充工廠描述尚未完成！</v-card-title>
+            <v-card-text>放棄補充工廠描述的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
+            <v-container class="text-center">
+              <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
+              <a class="d-block mt-4" @click="cancelUpdateFactoryComments">確定放棄</a>
             </v-container>
           </v-card>
         </v-dialog>
@@ -37,13 +46,23 @@
       submitText="確認新增照片"
       disableProgressiveUpload
     />
+
+    <div class="update-factory-comment-container w-100 px-4 py-4 d-flex flex-column justify-between" v-else>
+      <div>
+        <h3 class="mb-1">工廠描述</h3>
+        <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
+      </div>
+      <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;">
+        新增工廠描述
+      </v-btn>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { useUpdateFactoryImage } from '@/lib/imageUpload'
 import { updateFactoryImages } from '@/api'
-import { createComponent, inject, reactive, ref } from '@vue/composition-api'
+import { computed, createComponent, inject, reactive, ref } from '@vue/composition-api'
 import { useAppState } from '../lib/appState'
 import { useModalState } from '../lib/hooks'
 import ImageUploadForm from './ImageUploadForm.vue'
@@ -106,6 +125,14 @@ export default createComponent({
       pageTransition.cancelUpdateFactoryImages()
     }
 
+    const cancelUpdateFactoryComments = () => {
+      discardDialog.value = false
+      pageTransition.cancelUpdateFactoryComment()
+    }
+
+    const others = ref('')
+    const commentsValid = computed(() => others.value.length > 0)
+
     return {
       appState,
       pageTransition,
@@ -118,7 +145,10 @@ export default createComponent({
       onClickRemoveImage,
       imageUploadFormValid,
       submitImageUpload,
-      cancelUpdateFactoryImages
+      cancelUpdateFactoryImages,
+      cancelUpdateFactoryComments,
+      others,
+      commentsValid
     }
   }
 })
@@ -128,5 +158,25 @@ export default createComponent({
 .btn-container {
   position: absolute;
   right: 5px;
+}
+
+.update-factory-steps {
+  z-index: 6;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.update-factory-comment-container {
+  @import '@/styles/typography.scss';
+
+  background-color: white;
+  z-index: 2;
+  position: absolute;
+  height: 100%;
+
+  padding-bottom: 50px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 </style>
