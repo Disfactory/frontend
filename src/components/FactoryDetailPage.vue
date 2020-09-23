@@ -70,7 +70,11 @@
         </div>
 
         <hr v-if="full || $vuetify.breakpoint.mdAndUp">
-        <p class="text-body-1 m-0 mb-0" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">顯示更多資訊</p>
+        <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
+          顯示更多資訊
+          &nbsp;
+          <v-icon>mdi-menu-down</v-icon>
+        </v-btn>
 
         <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
           <h2 class="mb-5">其他工廠資訊</h2>
@@ -305,10 +309,9 @@ export default createComponent({
     width: 30px;
     height: 74px;
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+    // add important to workaround vutify style
     border-radius: 10px 0 0 10px !important;
     cursor: pointer;
-
-    // add important to workaround vutify style
   }
 }
 
