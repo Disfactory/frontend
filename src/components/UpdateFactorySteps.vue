@@ -40,7 +40,7 @@
       :error="imageUploadState.error"
       :previewImages="uploadedImages"
       :onClickRemoveImage="onClickRemoveImage"
-      :valid="imageUploadFormValid"
+      :valid="imagesValid"
       :submit="submitImageUpload"
       :formState="imageUploadFormState"
       submitText="確認新增照片"
@@ -92,10 +92,14 @@ export default createComponent({
       contact: ''
     })
 
+    const imageSubmitting = ref(false)
+    const imagesValid = computed(() => imageUploadFormValid.value && !imageSubmitting.value)
     const submitImageUpload = async () => {
       if (!appState.factoryData?.id || !selectedImages.value) {
         return
       }
+
+      imageSubmitting.value = true
 
       try {
         const newImages = await updateFactoryImages(
@@ -119,6 +123,8 @@ export default createComponent({
       } catch (err) {
         console.error(err)
       }
+
+      imageSubmitting.value = false
     }
 
     const discardDialog = ref(false)
@@ -168,7 +174,7 @@ export default createComponent({
       imageUploadState,
       uploadedImages,
       onClickRemoveImage,
-      imageUploadFormValid,
+      imagesValid,
       submitImageUpload,
       cancelUpdateFactoryImages,
       cancelUpdateFactoryComments,
