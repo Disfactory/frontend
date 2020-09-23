@@ -91,10 +91,19 @@
         </v-card>
       </v-dialog>
 
-      <update-factory-success-modal
-        :open="modalState.updateFactorySuccessModal"
-        :dismiss="modalActions.closeUpdateFactorySuccessModal"
-      />
+      <v-dialog v-model="modalState.updateFactorySuccessModal">
+        <v-card>
+          <v-card-title class="headline">
+            補充工廠資訊成功
+          </v-card-title>
+          <v-card-text>
+            <small>
+              3 秒後自動關閉提示訊息
+            </small>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
       <about-modal :open="modalState.aboutModalOpen" :dismiss="modalActions.closeAboutModal" />
       <contact-modal :open="modalState.contactModalOpen" :dismiss="modalActions.closeContactModal" />
       <getting-started-modal :open="modalState.gettingStartedModalOpen" :dismiss="modalActions.closeGettingStartedModal" />

@@ -52,7 +52,7 @@
         <h3 class="mb-1">工廠描述</h3>
         <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
       </div>
-      <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;">
+      <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
         新增工廠描述
       </v-btn>
     </div>
@@ -61,7 +61,7 @@
 
 <script lang="ts">
 import { useUpdateFactoryImage } from '@/lib/imageUpload'
-import { updateFactoryImages } from '@/api'
+import { updateFactoryImages, updateFactory } from '@/api'
 import { computed, createComponent, inject, reactive, ref } from '@vue/composition-api'
 import { useAppState } from '../lib/appState'
 import { useModalState } from '../lib/hooks'
@@ -98,10 +98,13 @@ export default createComponent({
       }
 
       try {
-        const newImages = await updateFactoryImages(appState.factoryData?.id, selectedImages.value, {
-          nickname: imageUploadFormState.nickname,
-          contact: imageUploadFormState.contact
-        })
+        const newImages = await updateFactoryImages(
+          appState.factoryData?.id,
+          selectedImages.value, {
+            nickname: imageUploadFormState.nickname,
+            contact: imageUploadFormState.contact
+          }
+        )
 
         if (mapController.value) {
           const factory = appState.factoryData
@@ -131,7 +134,29 @@ export default createComponent({
     }
 
     const others = ref('')
-    const commentsValid = computed(() => others.value.length > 0)
+    const submitting = ref(false)
+    const commentsValid = computed(() => others.value.length > 0 && !submitting.value)
+
+    const submitUpdateComments = async () => {
+      if (!appState.factoryData?.id || !others.value) {
+        return
+      }
+
+      submitting.value = true
+
+      try {
+        await updateFactory(appState.factoryData?.id, {
+          others: others.value
+        })
+
+        // TOOD: comments not displayed or stored in factory data for now
+
+        pageTransition.cancelUpdateFactoryComment()
+        modalActions.openUpdateFactorySuccessModal()
+      } catch (err) {}
+
+      submitting.value = false
+    }
 
     return {
       appState,
@@ -148,7 +173,8 @@ export default createComponent({
       cancelUpdateFactoryImages,
       cancelUpdateFactoryComments,
       others,
-      commentsValid
+      commentsValid,
+      submitUpdateComments
     }
   }
 })
