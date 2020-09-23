@@ -78,10 +78,32 @@
         </v-card>
       </v-dialog>
 
-      <update-factory-success-modal
-        :open="modalState.updateFactorySuccessModal"
-        :dismiss="modalActions.closeUpdateFactorySuccessModal"
-      />
+      <v-dialog v-model="modalState.updateFactoryImageSuccessModal">
+        <v-card>
+          <v-card-title class="headline">
+            補充工廠照片成功
+          </v-card-title>
+          <v-card-text>
+            <small>
+              3 秒後自動關閉提示訊息
+            </small>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="modalState.updateFactorySuccessModal">
+        <v-card>
+          <v-card-title class="headline">
+            補充工廠資訊成功
+          </v-card-title>
+          <v-card-text>
+            <small>
+              3 秒後自動關閉提示訊息
+            </small>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
       <about-modal :open="modalState.aboutModalOpen" :dismiss="modalActions.closeAboutModal" />
       <contact-modal :open="modalState.contactModalOpen" :dismiss="modalActions.closeContactModal" />
       <getting-started-modal :open="modalState.gettingStartedModalOpen" :dismiss="modalActions.closeGettingStartedModal" />
@@ -95,6 +117,7 @@
       />
 
       <create-factory-steps v-if="appState.isCreateMode" />
+      <update-factory-steps v-if="appState.isEditMode" />
     </v-main>
 
     <factory-detail-page />
@@ -111,6 +134,7 @@ import AppSidebar from './components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import FormPage from '@/components/FormPage.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
+import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
 import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
 
 import FilterModal from '@/components/FilterModal.vue'
@@ -150,6 +174,7 @@ export default createComponent({
     FormPage,
     IosVersionModal,
     CreateFactorySteps,
+    UpdateFactorySteps,
     FactoryDetailPage
   },
   setup (_, context) {

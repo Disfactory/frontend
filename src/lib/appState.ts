@@ -11,13 +11,19 @@ export const enum PageState {
   CREATE_FACTORY_1 = 'CREATE_FACTORY_1',
   CREATE_FACTORY_2 = 'CREATE_FACTORY_2',
   CREATE_FACTORY_3 = 'CREATE_FACTORY_3',
-  UPDATE_FACTORY = 'UPDATE_FACTORY'
+  UPDATE_FACTORY_IMAGES = 'UPDATE_FACTORY_IMAGES',
+  UPDATE_FACTORY_COMMENT = 'UPDATE_FACTORY_COMMENT'
 }
 
 const CreateFactoryPageState = [
   PageState.CREATE_FACTORY_1,
   PageState.CREATE_FACTORY_2,
   PageState.CREATE_FACTORY_3
+]
+
+const UpdateFactoryPageState = [
+  PageState.UPDATE_FACTORY_IMAGES,
+  PageState.UPDATE_FACTORY_COMMENT
 ]
 
 export const provideAppState = () => {
@@ -27,7 +33,7 @@ export const provideAppState = () => {
     factoryLocation: number[],
     isCreateMode: boolean,
     createStepIndex: number,
-    isEditMode: boolean,
+    isEditImagesMode: boolean,
     selectFactoryMode: boolean,
     formPageOpen: boolean,
     mapLngLat: number[],
@@ -43,9 +49,12 @@ export const provideAppState = () => {
     isCreateMode: computed(() => CreateFactoryPageState.includes(appState.pageState)),
     createStepIndex: computed(() => CreateFactoryPageState.indexOf(appState.pageState) + 1),
 
-    isEditMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY),
+    isEditImagesMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
+    isEditCommentMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_COMMENT),
+    isEditMode: computed(() => UpdateFactoryPageState.includes(appState.pageState)),
+
     selectFactoryMode: computed(() => appState.pageState === PageState.CREATE_FACTORY_1),
-    formPageOpen: computed(() => CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY),
+    formPageOpen: computed(() => CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
 
     // map states
     mapLngLat: [] as number[],
@@ -127,9 +136,9 @@ const registerMutator = (appState: AppState) => {
       }
     },
 
-    startUpdateFactory () {
+    startUpdateFactoryImages () {
       if (appState.pageState === PageState.INITIAL) {
-        appState.pageState = PageState.UPDATE_FACTORY
+        appState.pageState = PageState.UPDATE_FACTORY_IMAGES
       } else {
         invalidPageTransition()
       }
@@ -137,8 +146,38 @@ const registerMutator = (appState: AppState) => {
       pageview('/edit')
     },
 
+    cancelUpdateFactoryImages () {
+      if (appState.pageState === PageState.UPDATE_FACTORY_IMAGES) {
+        appState.pageState = PageState.INITIAL
+      } else {
+        invalidPageTransition()
+      }
+
+      event('exitUpdateFactoryImagesMode')
+    },
+
+    startUpdateFactoryComment () {
+      if (appState.pageState === PageState.INITIAL) {
+        appState.pageState = PageState.UPDATE_FACTORY_COMMENT
+      } else {
+        invalidPageTransition()
+      }
+
+      pageview('/editComment')
+    },
+
+    cancelUpdateFactoryComment () {
+      if (appState.pageState === PageState.UPDATE_FACTORY_COMMENT) {
+        appState.pageState = PageState.INITIAL
+      } else {
+        invalidPageTransition()
+      }
+
+      event('exitUpdateFactoryCommentsMode')
+    },
+
     closeFactoryPage () {
-      if (CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY) {
+      if (CreateFactoryPageState.includes(appState.pageState) || UpdateFactoryPageState.includes(appState.pageState)) {
         appState.pageState = PageState.INITIAL
       } else {
         invalidPageTransition()
@@ -171,7 +210,7 @@ const registerMutator = (appState: AppState) => {
 
     openEditFactoryForm (factory: FactoryData) {
       updateFactoryData(factory)
-      pageTransition.startUpdateFactory()
+      pageTransition.startUpdateFactoryImages()
 
       pageview('/edit')
     },
