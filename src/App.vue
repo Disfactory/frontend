@@ -40,7 +40,7 @@
       :enterSelectFactoryMode="appActions.enterSelectFactoryMode"
       :exitSelectFactoryMode="appActions.exitSelectFactoryMode"
       :factoryLocation="appState.factoryLocation"
-      :setCreateFactorySuccessModal="setCreateFactorySuccessModal"
+      :setCreateFactorySuccessModal="modalActions.openCreateFactorySuccessModal"
     />
 
   </div>
