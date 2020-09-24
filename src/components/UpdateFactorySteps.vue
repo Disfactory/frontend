@@ -1,5 +1,6 @@
 <template>
   <div class='update-factory-steps'>
+    <!-- AppBar for Mobile -->
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <v-spacer></v-spacer>
       <v-toolbar-title v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
@@ -33,6 +34,29 @@
       </div>
     </v-app-bar>
 
+    <!-- AppBar for Desktop -->
+    <v-app-bar fixed color="white" class="d-none d-md-block" v-if="appState.isEditImagesMode">
+      <v-toolbar-title>補充照片</v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-dialog v-model="discardDialog" max-width="290">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn v-on="on" v-bind="attrs" outlined>
+            取消
+          </v-btn>
+        </template>
+        <v-card>
+          <v-card-title class="headline">補充照片尚未完成</v-card-title>
+          <v-card-text>放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片</v-card-text>
+          <v-container class="text-center">
+            <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
+            <a class="d-block mt-4" @click="cancelUpdateFactoryImages">確定放棄</a>
+          </v-container>
+        </v-card>
+      </v-dialog>
+    </v-app-bar>
+
     <image-upload-form
       v-if="appState.isEditImagesMode"
       v-model="selectedImages"
@@ -47,7 +71,7 @@
       disableProgressiveUpload
     />
 
-    <div class="update-factory-comment-container w-100 px-4 py-4 d-flex flex-column justify-between" v-else>
+    <div class="update-factory-comment-container w-100 px-4 py-4 d-flex flex-column justify-between" v-else-if="$vuetify.breakpoint.smAndDown">
       <div>
         <h3 class="mb-1">工廠描述</h3>
         <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
@@ -56,6 +80,23 @@
         新增工廠描述
       </v-btn>
     </div>
+
+    <v-dialog v-model="appState.isEditCommentMode" persistent max-width="395" v-if="$vuetify.breakpoint.mdAndUp">
+      <div class="update-factory-comment-modal w-100 px-4 py-4 d-flex flex-column justify-between">
+        <div class="d-flex justify-end">
+          <v-btn icon @click="cancelUpdateFactoryComments">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </div>
+        <div>
+          <h3 class="mb-3">工廠描述</h3>
+          <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
+        </div>
+        <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
+          新增工廠描述
+        </v-btn>
+      </div>
+    </v-dialog>
   </div>
 </template>
 
@@ -210,5 +251,11 @@ export default createComponent({
   padding-bottom: 50px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.update-factory-comment-modal {
+  @import '@/styles/typography.scss';
+  background-color: white;
+  z-index: 2;
 }
 </style>

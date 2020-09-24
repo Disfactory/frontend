@@ -1,5 +1,6 @@
 <template>
   <div class="create-factory-steps">
+    <!-- AppBar for Mobile -->
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <div class="btn-container" :class="{ hide: appState.createStepIndex === 1 }">
         <v-btn icon @click="onBack">
@@ -30,6 +31,7 @@
       </div>
     </v-app-bar>
 
+    <!-- AppBar for Desktop -->
     <v-app-bar fixed color="white" class="d-none d-md-block">
       <v-toolbar-title>新增可疑工廠</v-toolbar-title>
 
@@ -64,7 +66,6 @@
           </v-container>
         </v-card>
       </v-dialog>
-
     </v-app-bar>
 
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">

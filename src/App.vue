@@ -65,7 +65,7 @@
       <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
       <filter-modal :open="modalState.filterModalOpen" :dismiss="modalActions.closeFilterModal" />
 
-      <v-dialog v-model="modalState.createFactorySuccessModal">
+      <v-dialog v-model="modalState.createFactorySuccessModal" max-width="395">
         <v-card>
           <v-card-title class="headline">
             新增可疑工廠成功
@@ -78,7 +78,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="modalState.updateFactoryImageSuccessModal">
+      <v-dialog v-model="modalState.updateFactoryImageSuccessModal" max-width="395">
         <v-card>
           <v-card-title class="headline">
             補充工廠照片成功
@@ -91,7 +91,7 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="modalState.updateFactorySuccessModal">
+      <v-dialog v-model="modalState.updateFactorySuccessModal" max-width="395">
         <v-card>
           <v-card-title class="headline">
             補充工廠資訊成功
