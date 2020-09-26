@@ -403,6 +403,7 @@ export default createComponent({
     width: 100%;
 
     .choose-location-btn-container {
+      left: 0;
       position: fixed;
       bottom: 50px;
     }
