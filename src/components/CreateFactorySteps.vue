@@ -3,28 +3,28 @@
     <!-- AppBar for Mobile -->
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <div class="btn-container" :class="{ hide: appState.createStepIndex === 1 }">
-        <v-btn icon @click="onBack">
+        <v-btn icon @click="onBack" class="secondary--text">
           <v-icon>mdi-keyboard-backspace</v-icon>
         </v-btn>
       </div>
 
       <v-spacer></v-spacer>
-      <v-toolbar-title>新增可疑工廠 步驟 ({{ appState.createStepIndex }}/3)</v-toolbar-title>
+      <v-toolbar-title class="secondary--text">新增可疑工廠 步驟 ({{ appState.createStepIndex }}/3)</v-toolbar-title>
       <v-spacer></v-spacer>
 
       <div class="btn-container">
         <v-dialog v-model="discardDialog" max-width="290">
           <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-on="on" v-bind="attrs">
+            <v-btn icon v-on="on" v-bind="attrs" class="secondary--text">
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </template>
           <v-card>
-            <v-card-title class="headline">放棄新增可疑工廠嗎？</v-card-title>
+            <v-card-title class="secondary--text">放棄新增可疑工廠嗎？</v-card-title>
             <v-card-text>放棄新增可疑工廠時，你將遺失所有已輸入的資料。下次需重新填寫。</v-card-text>
             <v-container class="text-center">
-              <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續填寫資料</v-btn>
-              <a class="d-block mt-4" @click="cancelCreateFactory">放棄新增</a>
+              <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續填寫資料</v-btn>
+              <a class="d-block mt-4 text-decoration-underline" @click="cancelCreateFactory">放棄新增</a>
             </v-container>
           </v-card>
         </v-dialog>
@@ -32,7 +32,7 @@
     </v-app-bar>
 
     <!-- AppBar for Desktop -->
-    <v-app-bar fixed color="white" class="d-none d-md-block">
+    <v-app-bar fixed color="white" v-show="$vuetify.breakpoint.mdAndUp">
       <v-toolbar-title>新增可疑工廠</v-toolbar-title>
 
       <div class="ml-15 desktop-step-item" @click="switchStep(1)">
@@ -51,38 +51,38 @@
 
       <v-spacer></v-spacer>
 
-      <v-dialog v-model="discardDialog" max-width="290">
+      <v-dialog v-model="discardDialog" max-width="290" v-if="$vuetify.breakpoint.mdAndUp">
         <template v-slot:activator="{ on, attrs }">
           <v-btn v-on="on" v-bind="attrs" outlined>
             取消新增
           </v-btn>
         </template>
         <v-card>
-          <v-card-title class="headline">放棄新增可疑工廠嗎？</v-card-title>
+          <v-card-title class="secondary--text">放棄新增可疑工廠嗎？</v-card-title>
           <v-card-text>放棄新增可疑工廠時，你將遺失所有已輸入的資料。下次需重新填寫。</v-card-text>
           <v-container class="text-center">
-            <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續填寫資料</v-btn>
-            <a class="d-block mt-4" @click="cancelCreateFactory">放棄新增</a>
+            <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續填寫資料</v-btn>
+            <a class="d-block mt-4 text-decoration-underline" @click="cancelCreateFactory">放棄新增</a>
           </v-container>
         </v-card>
       </v-dialog>
     </v-app-bar>
 
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">
-      <div class="select-location-container container-fluid pa-3 py-md-5 px-md-10" v-if="showLongLat">
+      <div class="select-location-container container-fluid pa-3 py-md-5 px-md-10" v-if="showLongLat" :class="{ desktop: $vuetify.breakpoint.mdAndUp }">
         <div class="d-flex flex-md-row justify-space-between align-end align-md-center">
           <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between justify-md-start flex-grow-1">
-            <p class="mb-4 mb-md-0 mr-md-10">以下經緯度版本為WGS84</p>
+            <p class="mb-4 my-md-3 mr-md-10 wgs">以下經緯度版本為WGS84</p>
 
-            <p class='font-weight-medium h5 mb-0 mr-md-10' v-if="!inlineLocationForm">
+            <p class='font-weight-medium h5 mb-0 mb-1-md mr-md-10 location-text' v-if="!inlineLocationForm">
               經度：{{ appState.mapLngLat[0].toFixed(7) }}
             </p>
 
-            <p class='font-weight-medium h5 mb-0 mr-md-8' v-if="!inlineLocationForm">
+            <p class='font-weight-medium h5 mb-0 mr-md-8 location-text' v-if="!inlineLocationForm">
               緯度：{{ appState.mapLngLat[1].toFixed(7) }}
             </p>
 
-            <v-btn rounded color="white" class="mr-2 d-none d-md-block"  v-if="!inlineLocationForm" @click="toggleInlineLocationForm">
+            <v-btn rounded color="white" class="mr-2 d-none d-md-block primary--text"  v-if="!inlineLocationForm" @click="toggleInlineLocationForm">
               搜尋經緯度
             </v-btn>
 
@@ -104,14 +104,14 @@
 
                 <h5 class="text-decoration-underline mr-5" style="cursor: pointer;" @click="clearLocationInput">清空</h5>
 
-                <v-btn rounded color="white" @click="setLocation">定位</v-btn>
+                <v-btn rounded color="white" class="primary--text" @click="setLocation">定位</v-btn>
               </div>
 
               <div class="d-flex align-center" v-if="inlineLocationForm" >
                 <div class="d-block d-none d-md-block mx-7" style="height: 36px; width: 1px; background-color: #EAF3BF;" />
 
-                <v-btn icon @click="toggleInlineLocationForm" color="white">
-                  <v-icon>mdi-close</v-icon>
+                <v-btn icon @click="toggleInlineLocationForm" class="primary--text">
+                  <v-icon color="white">mdi-close</v-icon>
                 </v-btn>
               </div>
             </div>
@@ -119,12 +119,12 @@
 
           <v-dialog v-model="chooseLocationDialog" max-width="290">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn rounded color="white" class="mr-2 d-md-none" v-on="on" v-bind="attrs" >
+              <v-btn rounded color="white" class="mr-2 d-md-none primary--text" v-on="on" v-bind="attrs" >
                 搜尋經緯度
               </v-btn>
             </template>
-            <v-card outlined>
-              <v-card-text class="pt-4">
+            <v-card outlined class="primary">
+              <v-card-text class="pt-4 white--text">
                 <p>
                   以下經緯度版本為WGS84
                 </p>
@@ -138,8 +138,8 @@
                 <v-text-field outilned solo v-model="locationInputState.latitude" placeholder="例：25.0458344" />
 
                 <div class="d-flex justify-space-between mt-3 align-end">
-                  <a class="text-decoration-underline" style="height: 36px; line-height: 36px;" @click="clearLocationInput">清空</a>
-                  <v-btn rounded color="white" @click="setLocation">定位</v-btn>
+                  <a class="text-decoration-underline white--text" style="height: 36px; line-height: 36px;" @click="clearLocationInput">清空</a>
+                  <v-btn rounded color="white" class="primary--text" @click="setLocation">定位</v-btn>
                 </div>
               </v-card-text>
             </v-card>
@@ -148,14 +148,14 @@
       </div>
 
       <div class="px-5 py-4">
-        <v-btn rounded color="white" class="mr-2" @click="toggleShowLongLat">
+        <v-btn rounded color="white" class="mr-2 primary--text" @click="toggleShowLongLat">
           {{ showLongLat ? '隱藏經緯度' : '顯示經緯度' }}
         </v-btn>
 
         <switch-map-mode-button />
 
         <v-container fluid class="choose-location-btn-container d-flex justify-center" bottom="50">
-          <v-btn x-large rounded @click="chooseLocation" class="px-md-15">
+          <v-btn x-large rounded @click="chooseLocation" class="px-md-15" color="secondary">
             選擇此地點
           </v-btn>
         </v-container>
@@ -199,7 +199,7 @@ import { useImageUpload } from '../lib/imageUpload'
 import ImageUploadForm from './ImageUploadForm.vue'
 import ConfirmFactory from './ConfirmFactory.vue'
 import SwitchMapModeButton from './SwitchMapModeButton.vue'
-import { FactoryPostData, FactoryType } from '../types'
+import { FactoryPostData } from '../types'
 import { useGA } from '../lib/useGA'
 import { useBackPressed } from '../lib/useBackPressed'
 import { useModalState } from '../lib/hooks'
@@ -249,7 +249,7 @@ export default createComponent({
       contact: '',
       others: '',
       name: '',
-      type: '0',
+      type: undefined,
       submitting: false
     })
 
@@ -269,7 +269,7 @@ export default createComponent({
         const factory: FactoryPostData = {
           name: createFactoryFormState.name,
           others: createFactoryFormState.others,
-          type: createFactoryFormState.type as FactoryType,
+          type: createFactoryFormState.type,
           lng,
           lat,
           images: uploadedImages.value.map(i => i.token),
@@ -403,6 +403,7 @@ export default createComponent({
     width: 100%;
 
     .choose-location-btn-container {
+      left: 0;
       position: fixed;
       bottom: 50px;
     }
@@ -411,6 +412,24 @@ export default createComponent({
   .select-location-container {
     background-color: $light-green-color;
     color: white;
+
+    .wgs {
+      font-size: 12px;
+    }
+
+    .location-text {
+      font-size: 14px;
+    }
+
+    &.desktop {
+      .wgs {
+        font-size: 14px;
+      }
+
+      .location-text {
+        font-size: 16px;
+      }
+    }
   }
 }
 

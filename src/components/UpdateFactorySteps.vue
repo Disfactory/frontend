@@ -3,8 +3,8 @@
     <!-- AppBar for Mobile -->
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <v-spacer></v-spacer>
-      <v-toolbar-title v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
-      <v-toolbar-title v-else>補充工廠描述</v-toolbar-title>
+      <v-toolbar-title class="secondary--text" v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
+      <v-toolbar-title class="secondary--text" v-else>補充工廠描述</v-toolbar-title>
       <v-spacer></v-spacer>
 
       <div class="btn-container">
@@ -23,10 +23,10 @@
             </v-container>
           </v-card>
           <v-card v-else>
-            <v-card-title class="headline">補充工廠描述尚未完成！</v-card-title>
+            <v-card-title class="secondary--text">補充工廠描述尚未完成！</v-card-title>
             <v-card-text>放棄補充工廠描述的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
             <v-container class="text-center">
-              <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
+              <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
               <a class="d-block mt-4" @click="cancelUpdateFactoryComments">確定放棄</a>
             </v-container>
           </v-card>
@@ -36,7 +36,7 @@
 
     <!-- AppBar for Desktop -->
     <v-app-bar fixed color="white" class="d-none d-md-block" v-if="appState.isEditImagesMode">
-      <v-toolbar-title>補充照片</v-toolbar-title>
+      <v-toolbar-title class="secondary--text">補充照片</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -47,10 +47,10 @@
           </v-btn>
         </template>
         <v-card>
-          <v-card-title class="headline">補充照片尚未完成</v-card-title>
+          <v-card-title class="secondary--text">補充照片尚未完成</v-card-title>
           <v-card-text>放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片</v-card-text>
           <v-container class="text-center">
-            <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
+            <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
             <a class="d-block mt-4" @click="cancelUpdateFactoryImages">確定放棄</a>
           </v-container>
         </v-card>
@@ -73,10 +73,10 @@
 
     <div class="update-factory-comment-container w-100 px-4 py-4 d-flex flex-column justify-between" v-else-if="$vuetify.breakpoint.smAndDown">
       <div>
-        <h3 class="mb-1">工廠描述</h3>
+        <h3 class="mt-4 mb-2 primary--text">工廠描述</h3>
         <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
       </div>
-      <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
+      <v-btn x-large rounded class="w-100 primary" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
         新增工廠描述
       </v-btn>
     </div>
@@ -92,7 +92,7 @@
           <h3 class="mb-3">工廠描述</h3>
           <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
         </div>
-        <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
+        <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments" color="primary">
           新增工廠描述
         </v-btn>
       </div>

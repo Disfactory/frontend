@@ -21,7 +21,7 @@
         <div class="d-flex justify-between align-items-center mb-3">
           <span class="factory-status-title">工廠狀態</span>
 
-          <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp" :outlined="showCopiedMessage">
+          <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp" :outlined="showCopiedMessage" :color="showCopiedMessage ? null : 'white'">
             <v-icon class="mr-1">mdi-share-variant</v-icon>
             {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
           </v-btn>
@@ -36,7 +36,7 @@
           <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
         </p>
 
-        <p class="caption mb-0">
+        <p class="caption mb-0" style="color: #A1A1A1;">
           工廠編號 {{ factoryId }} <br>
           最後更新 2020/4/12
         </p>
@@ -47,7 +47,7 @@
         </div>
       </v-card-text>
 
-      <v-slide-group>
+      <v-slide-group :show-arrows="images > 0 ? 'desktop' : false">
         <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
           <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
@@ -97,7 +97,7 @@
     </div>
 
     <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
-      <v-icon color="#697F01">mdi-menu-left</v-icon>
+      <v-icon color="primary">mdi-menu-left</v-icon>
     </div>
   </v-card>
 </template>
@@ -263,6 +263,10 @@ export default createComponent({
     right: 10px;
   }
 
+  &.full .factory-detail-scroller {
+    padding-bottom: 60px;
+  }
+
   // mobile expand
   &:not(.desktop) {
     &.full {
@@ -303,12 +307,12 @@ export default createComponent({
 
   .sidebar-collapse-button {
     position: absolute;
-    top: 52px;
+    top: 30px;
     left: -30px;
     background-color: white;
     width: 30px;
     height: 74px;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1),  inset -0.7px 0px 2px rgba(0, 0, 0, 0.1);
     // add important to workaround vutify style
     border-radius: 10px 0 0 10px !important;
     cursor: pointer;
