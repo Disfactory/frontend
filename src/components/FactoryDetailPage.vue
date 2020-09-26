@@ -47,7 +47,7 @@
         </div>
       </v-card-text>
 
-      <v-slide-group>
+      <v-slide-group show-arrows="desktop">
         <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
           <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
