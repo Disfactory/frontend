@@ -69,16 +69,16 @@
     </v-app-bar>
 
     <div class="create-factory-step-1" v-if="appState.createStepIndex === 1">
-      <div class="select-location-container container-fluid pa-3 py-md-5 px-md-10" v-if="showLongLat">
+      <div class="select-location-container container-fluid pa-3 py-md-5 px-md-10" v-if="showLongLat" :class="{ desktop: $vuetify.breakpoint.mdAndUp }">
         <div class="d-flex flex-md-row justify-space-between align-end align-md-center">
           <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between justify-md-start flex-grow-1">
-            <p class="mb-4 mb-md-0 mr-md-10" style="font-size: 12px;">以下經緯度版本為WGS84</p>
+            <p class="mb-4 my-md-3 mr-md-10 wgs">以下經緯度版本為WGS84</p>
 
-            <p class='font-weight-medium h5 mb-1 mr-md-10' style="font-size: 14px;" v-if="!inlineLocationForm">
+            <p class='font-weight-medium h5 mb-0 mb-1-md mr-md-10 location-text' v-if="!inlineLocationForm">
               經度：{{ appState.mapLngLat[0].toFixed(7) }}
             </p>
 
-            <p class='font-weight-medium h5 mb-0 mr-md-8' style="font-size: 14px;" v-if="!inlineLocationForm">
+            <p class='font-weight-medium h5 mb-0 mr-md-8 location-text' v-if="!inlineLocationForm">
               緯度：{{ appState.mapLngLat[1].toFixed(7) }}
             </p>
 
@@ -110,8 +110,8 @@
               <div class="d-flex align-center" v-if="inlineLocationForm" >
                 <div class="d-block d-none d-md-block mx-7" style="height: 36px; width: 1px; background-color: #EAF3BF;" />
 
-                <v-btn icon @click="toggleInlineLocationForm" color="white" class="primary--text">
-                  <v-icon>mdi-close</v-icon>
+                <v-btn icon @click="toggleInlineLocationForm" class="primary--text">
+                  <v-icon color="white">mdi-close</v-icon>
                 </v-btn>
               </div>
             </div>
@@ -412,6 +412,24 @@ export default createComponent({
   .select-location-container {
     background-color: $light-green-color;
     color: white;
+
+    .wgs {
+      font-size: 12px;
+    }
+
+    .location-text {
+      font-size: 14px;
+    }
+
+    &.desktop {
+      .wgs {
+        font-size: 14px;
+      }
+
+      .location-text {
+        font-size: 16px;
+      }
+    }
   }
 }
 
