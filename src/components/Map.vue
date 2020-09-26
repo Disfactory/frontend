@@ -28,7 +28,9 @@
 
     <div class="factory-button-group">
       <div class="create-factory-button" v-if="!appState.selectFactoryMode">
-        <app-button @click="onClickCreateFactoryButton" data-label="map-create-factory" color="dark-green">我想新增可疑工廠</app-button>
+        <v-btn @click="onClickCreateFactoryButton" color="primary" rounded large>
+          我想新增可疑工廠
+        </v-btn>
       </div>
     </div>
   </div>
