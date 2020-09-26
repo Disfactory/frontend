@@ -97,7 +97,7 @@
     </div>
 
     <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
-      <v-icon color="#697F01">mdi-menu-left</v-icon>
+      <v-icon color="primary">mdi-menu-left</v-icon>
     </div>
   </v-card>
 </template>
@@ -312,7 +312,7 @@ export default createComponent({
     background-color: white;
     width: 30px;
     height: 74px;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1),  inset -0.7px 0px 2px rgba(0, 0, 0, 0.1);
     // add important to workaround vutify style
     border-radius: 10px 0 0 10px !important;
     cursor: pointer;
