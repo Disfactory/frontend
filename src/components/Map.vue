@@ -16,12 +16,10 @@
 
     <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
 
-    <div class="factory-button-group">
-      <div class="create-factory-button" v-if="!appState.selectFactoryMode">
-        <v-btn @click="onClickCreateFactoryButton" color="primary" rounded large>
-          我想新增可疑工廠
-        </v-btn>
-      </div>
+    <div class="factory-button-group flex justify-center mb-5 mb-8-md" v-if="!appState.selectFactoryMode">
+      <v-btn @click="onClickCreateFactoryButton" color="primary" rounded large>
+        我想新增可疑工廠
+      </v-btn>
     </div>
   </div>
 </template>
@@ -253,34 +251,7 @@ export default createComponent({
   position: fixed;
   width: 100%;
   left: 0;
-  bottom: 60px;
-  display: flex;
-
-  flex-direction: column;
-  justify-content: center;
-
-  .create-factory-button {
-    max-width: 250px;
-    margin: 0 auto;
-  }
-
-  .choose-location-button {
-    position: relative;
-    margin: 0 auto;
-  }
-}
-
-.factory-secondary-actions-group {
-  max-width: 300px;
-  margin: 0 auto;
-
-  display: flex;
-  margin-bottom: 10px;
-  justify-content: center;
-
-  .ol-control:last-child {
-    margin-left: 5px;
-  }
+  bottom: 0px;
 }
 
 .center-point {
