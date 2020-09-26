@@ -123,8 +123,8 @@
                 搜尋經緯度
               </v-btn>
             </template>
-            <v-card outlined class="primary white--text">
-              <v-card-text class="pt-4">
+            <v-card outlined class="primary">
+              <v-card-text class="pt-4 white--text">
                 <p>
                   以下經緯度版本為WGS84
                 </p>
