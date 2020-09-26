@@ -69,9 +69,12 @@
       <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
       <filter-modal :open="modalState.filterModalOpen" :dismiss="modalActions.closeFilterModal" />
 
-      <v-dialog v-model="modalState.createFactorySuccessModal" max-width="395">
-        <v-card>
-          <v-card-title class="headline">
+      <v-dialog v-model="modalState.createFactorySuccessModal" max-width="305">
+        <v-card class="text-center pt-5">
+          <v-icon color="primary" style="font-size: 80px;">
+            mdi-checkbox-marked-circle
+          </v-icon>
+          <v-card-title class="secondary--text justify-center">
             新增可疑工廠成功
           </v-card-title>
           <v-card-text>
@@ -82,9 +85,12 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="modalState.updateFactoryImageSuccessModal" max-width="395">
-        <v-card>
-          <v-card-title class="headline">
+      <v-dialog v-model="modalState.updateFactoryImageSuccessModal" max-width="305">
+        <v-card class="text-center pt-5">
+          <v-icon color="primary" style="font-size: 80px;">
+            mdi-checkbox-marked-circle
+          </v-icon>
+          <v-card-title class="secondary--text justify-center">
             補充工廠照片成功
           </v-card-title>
           <v-card-text>
@@ -95,9 +101,12 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="modalState.updateFactorySuccessModal" max-width="395">
-        <v-card>
-          <v-card-title class="headline">
+      <v-dialog v-model="modalState.updateFactorySuccessModal" max-width="305">
+        <v-card class="text-center pt-5">
+          <v-icon color="primary" style="font-size: 80px;">
+            mdi-checkbox-marked-circle
+          </v-icon>
+          <v-card-title class="secondary--text justify-center">
             補充工廠資訊成功
           </v-card-title>
           <v-card-text>
