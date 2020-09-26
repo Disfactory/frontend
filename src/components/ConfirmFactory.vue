@@ -29,11 +29,11 @@
         </div>
       </div>
 
-      <h3 class="mt-5 mb-2 required primary--text">聯絡人暱稱</h3>
+      <h3 class="mt-5 mb-2 primary--text">聯絡人暱稱</h3>
 
       <p>{{ formState.nickname || '未填寫'  }}</p>
 
-      <h3 class="mt-5 mb-2 required primary--text">聯絡方式 (email或電話)</h3>
+      <h3 class="mt-5 mb-2 primary--text">聯絡方式 (email或電話)</h3>
 
       <p>{{ formState.contact || '未填寫' }}</p>
 
@@ -49,7 +49,7 @@
 
       <h3 class="mt-5 mb-2 primary--text">工廠外部文字</h3>
 
-      <v-text-field outilned solo v-model="formState.name" placeholder="例：小明化工廠" color="primary" />
+      <v-text-field outlined v-model="formState.name" placeholder="例：小明化工廠" color="primary" />
 
       <h3 class="mt-5 mb-2 primary--text">工廠類型</h3>
 

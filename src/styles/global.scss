@@ -29,3 +29,10 @@ html {
 *:focus {
   outline:none
 }
+
+.required:after {
+  content: '*';
+  color: #A22A29;
+  font-size: 13px;
+  position: absolute;
+}

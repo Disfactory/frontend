@@ -23,10 +23,10 @@
             </v-container>
           </v-card>
           <v-card v-else>
-            <v-card-title class="headline">補充工廠描述尚未完成！</v-card-title>
+            <v-card-title class="secondary--text">補充工廠描述尚未完成！</v-card-title>
             <v-card-text>放棄補充工廠描述的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
             <v-container class="text-center">
-              <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
+              <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
               <a class="d-block mt-4" @click="cancelUpdateFactoryComments">確定放棄</a>
             </v-container>
           </v-card>
@@ -47,10 +47,10 @@
           </v-btn>
         </template>
         <v-card>
-          <v-card-title class="headline">補充照片尚未完成</v-card-title>
+          <v-card-title class="secondary--text">補充照片尚未完成</v-card-title>
           <v-card-text>放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片</v-card-text>
           <v-container class="text-center">
-            <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
+            <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
             <a class="d-block mt-4" @click="cancelUpdateFactoryImages">確定放棄</a>
           </v-container>
         </v-card>

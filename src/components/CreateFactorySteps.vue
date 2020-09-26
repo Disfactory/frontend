@@ -3,19 +3,19 @@
     <!-- AppBar for Mobile -->
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <div class="btn-container" :class="{ hide: appState.createStepIndex === 1 }">
-        <v-btn icon @click="onBack">
+        <v-btn icon @click="onBack" class="secondary--text">
           <v-icon>mdi-keyboard-backspace</v-icon>
         </v-btn>
       </div>
 
       <v-spacer></v-spacer>
-      <v-toolbar-title>新增可疑工廠 步驟 ({{ appState.createStepIndex }}/3)</v-toolbar-title>
+      <v-toolbar-title class="secondary--text">新增可疑工廠 步驟 ({{ appState.createStepIndex }}/3)</v-toolbar-title>
       <v-spacer></v-spacer>
 
       <div class="btn-container">
         <v-dialog v-model="discardDialog" max-width="290">
           <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-on="on" v-bind="attrs">
+            <v-btn icon v-on="on" v-bind="attrs" class="secondary--text">
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </template>
@@ -82,7 +82,7 @@
               緯度：{{ appState.mapLngLat[1].toFixed(7) }}
             </p>
 
-            <v-btn rounded color="white" class="mr-2 d-none d-md-block"  v-if="!inlineLocationForm" @click="toggleInlineLocationForm">
+            <v-btn rounded color="white" class="mr-2 d-none d-md-block primary--text"  v-if="!inlineLocationForm" @click="toggleInlineLocationForm">
               搜尋經緯度
             </v-btn>
 
@@ -104,13 +104,13 @@
 
                 <h5 class="text-decoration-underline mr-5" style="cursor: pointer;" @click="clearLocationInput">清空</h5>
 
-                <v-btn rounded color="white" @click="setLocation">定位</v-btn>
+                <v-btn rounded color="white" class="primary--text" @click="setLocation">定位</v-btn>
               </div>
 
               <div class="d-flex align-center" v-if="inlineLocationForm" >
                 <div class="d-block d-none d-md-block mx-7" style="height: 36px; width: 1px; background-color: #EAF3BF;" />
 
-                <v-btn icon @click="toggleInlineLocationForm" color="white">
+                <v-btn icon @click="toggleInlineLocationForm" color="white" class="primary--text">
                   <v-icon>mdi-close</v-icon>
                 </v-btn>
               </div>
@@ -119,11 +119,11 @@
 
           <v-dialog v-model="chooseLocationDialog" max-width="290">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn rounded color="white" class="mr-2 d-md-none" v-on="on" v-bind="attrs" >
+              <v-btn rounded color="white" class="mr-2 d-md-none primary--text" v-on="on" v-bind="attrs" >
                 搜尋經緯度
               </v-btn>
             </template>
-            <v-card outlined>
+            <v-card outlined class="primary white--text">
               <v-card-text class="pt-4">
                 <p>
                   以下經緯度版本為WGS84
@@ -138,8 +138,8 @@
                 <v-text-field outilned solo v-model="locationInputState.latitude" placeholder="例：25.0458344" />
 
                 <div class="d-flex justify-space-between mt-3 align-end">
-                  <a class="text-decoration-underline" style="height: 36px; line-height: 36px;" @click="clearLocationInput">清空</a>
-                  <v-btn rounded color="white" @click="setLocation">定位</v-btn>
+                  <a class="text-decoration-underline white--text" style="height: 36px; line-height: 36px;" @click="clearLocationInput">清空</a>
+                  <v-btn rounded color="white" class="primary--text" @click="setLocation">定位</v-btn>
                 </div>
               </v-card-text>
             </v-card>
@@ -148,7 +148,7 @@
       </div>
 
       <div class="px-5 py-4">
-        <v-btn rounded color="white" class="mr-2" @click="toggleShowLongLat">
+        <v-btn rounded color="white" class="mr-2 primary--text" @click="toggleShowLongLat">
           {{ showLongLat ? '隱藏經緯度' : '顯示經緯度' }}
         </v-btn>
 

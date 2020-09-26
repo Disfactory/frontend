@@ -4,6 +4,7 @@
       <v-btn
         rounded
         color="white"
+        class="primary--text"
         v-bind="attrs"
         v-on="on"
       >
@@ -17,7 +18,7 @@
         :key="mode.type"
         @click="clickChangeBaseLayer(mode)"
       >
-        <v-list-item-title>{{ mode.name }}</v-list-item-title>
+        <v-list-item-title class="primary--text">{{ mode.name }}</v-list-item-title>
       </v-list-item>
     </v-list>
   </v-bottom-sheet>

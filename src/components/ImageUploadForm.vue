@@ -5,18 +5,23 @@
 
       <p>請至少上傳一張工廠照片。</p>
 
-      <h3 class="mb-3 mt-7 primary--text">工廠照片</h3>
+      <h3 class="mb-3 mt-7 primary--text required">工廠照片</h3>
 
-      <v-btn :disabled="uploading" class="mb-3 mr-2">
-        <label>
-          <input multiple type="file" accept="image/*" ref="image" style="display: none;" @change="onChange" :disabled="uploading">
-            新增照片
-        </label>
-      </v-btn>
+      <div class="flex align-items-center mb-3">
+        <v-btn :disabled="uploading" outlined class="mr-3">
+          <label>
+            <input multiple type="file" accept="image/*" ref="image" style="display: none;" @change="onChange" :disabled="uploading">
+              新增照片
+          </label>
+        </v-btn>
 
-      <span v-if="uploading && !disableProgressiveUpload">上傳中</span>
-      <span v-if="valid && !uploading && !error && !disableProgressiveUpload">上傳成功</span>
-      <span v-if="error && !disableProgressiveUpload">上傳錯誤</span>
+        <span v-if="uploading && !disableProgressiveUpload">上傳中...</span>
+        <span v-if="valid && !uploading && !error && !disableProgressiveUpload">
+          上傳成功
+          <v-icon class="primary--text">mdi-checkbox-marked-circle</v-icon>
+        </span>
+        <span v-if="error && !disableProgressiveUpload">上傳錯誤</span>
+      </div>
 
       <div class="preview-images-container mb-2">
         <div v-for="image of previewImages" :key="image.token" class="uploaded-image">
