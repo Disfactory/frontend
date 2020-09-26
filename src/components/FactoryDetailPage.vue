@@ -1,6 +1,6 @@
 <template>
   <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }" v-show="!appState.formPageOpen">
-    <div class="factory-detail-scroller" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
+    <div class="factory-detail-scroller pb-15" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
       <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
         <v-spacer></v-spacer>
         <v-toolbar-title>
