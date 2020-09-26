@@ -20,11 +20,11 @@
             </v-btn>
           </template>
           <v-card>
-            <v-card-title class="headline">放棄新增可疑工廠嗎？</v-card-title>
+            <v-card-title class="secondary--text">放棄新增可疑工廠嗎？</v-card-title>
             <v-card-text>放棄新增可疑工廠時，你將遺失所有已輸入的資料。下次需重新填寫。</v-card-text>
             <v-container class="text-center">
-              <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續填寫資料</v-btn>
-              <a class="d-block mt-4" @click="cancelCreateFactory">放棄新增</a>
+              <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續填寫資料</v-btn>
+              <a class="d-block mt-4 text-decoration-underline" @click="cancelCreateFactory">放棄新增</a>
             </v-container>
           </v-card>
         </v-dialog>
@@ -51,7 +51,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-dialog v-model="discardDialog" max-width="290">
+      <v-dialog v-model="discardDialog" max-width="290" v-if="$vuetify.breakpoint.mdAndUp">
         <template v-slot:activator="{ on, attrs }">
           <v-btn v-on="on" v-bind="attrs" outlined>
             取消新增
