@@ -2,16 +2,6 @@
   <div class="map-container">
     <div ref="root" class="map"></div>
 
-    <div ref="popup" :class="['popup', { show: popupState.show }]" :style="{ borderColor: popupData.color }">
-      <div class="close" @click="popupState.show = false" data-label="map-popup-close" />
-      <small :style="{ color: popupData.color }">{{ popupData.status }}</small>
-      <h3>{{ popupData.name }}</h3>
-      <p class="summary">{{ popupData.summary }}</p>
-      <app-button outline @click="onClickEditFactoryData" :color="getButtonColorFromStatus()" data-label="map-popup-modify">
-        補充資料
-      </app-button>
-    </div>
-
     <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!appState.selectFactoryMode">
       <button>
         <img src="/images/filter.svg" alt="search">
@@ -436,11 +426,6 @@ export default createComponent({
     font-size: 14px;
     font-weight: 500;
   }
-}
-
-.popup.show {
-  display: block;
-  opacity: 1;
 }
 
 .navbar-container {
