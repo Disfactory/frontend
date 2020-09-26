@@ -1,6 +1,10 @@
 <template>
   <v-app>
     <v-app-bar app color="#6E8501" dark clipped-right>
+      <v-btn icon class="d-sm-none" style="visibility: hidden;">
+        <v-icon>mdi-temp</v-icon>
+      </v-btn>
+      <v-spacer class="d-sm-none" />
       <v-toolbar-title>農地工廠回報</v-toolbar-title>
       <v-spacer />
       <div class="d-none d-sm-flex">
