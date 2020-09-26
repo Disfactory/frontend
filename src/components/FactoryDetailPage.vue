@@ -47,7 +47,7 @@
         </div>
       </v-card-text>
 
-      <v-slide-group show-arrows="desktop">
+      <v-slide-group :show-arrows="images > 0 ? 'desktop' : false">
         <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
           <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
@@ -307,7 +307,7 @@ export default createComponent({
 
   .sidebar-collapse-button {
     position: absolute;
-    top: 52px;
+    top: 30px;
     left: -30px;
     background-color: white;
     width: 30px;
