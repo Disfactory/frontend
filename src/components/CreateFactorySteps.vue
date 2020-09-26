@@ -32,7 +32,7 @@
     </v-app-bar>
 
     <!-- AppBar for Desktop -->
-    <v-app-bar fixed color="white" class="d-none d-md-block">
+    <v-app-bar fixed color="white" v-show="$vuetify.breakpoint.mdAndUp">
       <v-toolbar-title>新增可疑工廠</v-toolbar-title>
 
       <div class="ml-15 desktop-step-item" @click="switchStep(1)">
