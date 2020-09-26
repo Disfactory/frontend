@@ -1,11 +1,11 @@
 <template>
   <div class="image-upload-form w-100">
-    <v-container style="max-width: 620px; position: relative;" class="pt-3 pt-md-12">
-      <h2 class="mb-2">上傳工廠照片</h2>
+    <v-container style="max-width: 620px; position: relative;" class="pt-3 pt-md-12 pb-md-8">
+      <h2 class="mb-4 secondary--text">上傳工廠照片</h2>
 
       <p>請至少上傳一張工廠照片。</p>
 
-      <h3 class="mb-3">工廠照片</h3>
+      <h3 class="mb-3 mt-7 primary--text">工廠照片</h3>
 
       <v-btn :disabled="uploading" class="mb-3 mr-2">
         <label>
@@ -27,7 +27,7 @@
 
       <hr>
 
-      <h2 class="mt-2 mb-2">聯絡資訊（非必填）</h2>
+      <h2 class="mt-7 mb-2 secondary--text">聯絡資訊（非必填）</h2>
 
       <p>
         如果對於照片有疑問，<br>
@@ -35,7 +35,7 @@
         如不願揭露自己身份，可跳過不填。
       </p>
 
-      <h3>聯絡人暱稱</h3>
+      <h3 class="primary--text mt-7 mb-2">聯絡人暱稱</h3>
 
       <v-text-field
         outlined
@@ -43,7 +43,7 @@
         v-model="formState.nickname"
       ></v-text-field>
 
-      <h3>聯絡方式 (email或電話)</h3>
+      <h3 class="primary--text mt-7 mb-2">聯絡方式 (email或電話)</h3>
 
       <v-text-field
         outlined
@@ -52,7 +52,7 @@
       ></v-text-field>
 
       <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
-        <v-btn x-large rounded @click="onSubmit" :disabled="!valid" style="width: 100%; max-width: 345px;">
+        <v-btn x-large rounded @click="onSubmit" :disabled="!valid" style="width: 100%; max-width: 345px;" color="primary">
           {{ submitText || '下一步' }}
         </v-btn>
       </div>
@@ -139,6 +139,14 @@ export default createComponent({
   bottom: 0;
   left: 0;
   padding: 10px 15px;
+}
+
+hr {
+  color: #EAF3BF;
+  border-color: #EAF3BF;
+  background-color: #EAF3BF;
+  height: 1px;
+  border-width: inherit;
 }
 
 </style>

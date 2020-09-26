@@ -58,11 +58,11 @@
           </v-btn>
         </template>
         <v-card>
-          <v-card-title class="headline">放棄新增可疑工廠嗎？</v-card-title>
+          <v-card-title class="secondary--text">放棄新增可疑工廠嗎？</v-card-title>
           <v-card-text>放棄新增可疑工廠時，你將遺失所有已輸入的資料。下次需重新填寫。</v-card-text>
           <v-container class="text-center">
-            <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續填寫資料</v-btn>
-            <a class="d-block mt-4" @click="cancelCreateFactory">放棄新增</a>
+            <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續填寫資料</v-btn>
+            <a class="d-block mt-4 text-decoration-underline" @click="cancelCreateFactory">放棄新增</a>
           </v-container>
         </v-card>
       </v-dialog>
@@ -155,7 +155,7 @@
         <switch-map-mode-button />
 
         <v-container fluid class="choose-location-btn-container d-flex justify-center" bottom="50">
-          <v-btn x-large rounded @click="chooseLocation" class="px-md-15">
+          <v-btn x-large rounded @click="chooseLocation" class="px-md-15" color="secondary">
             選擇此地點
           </v-btn>
         </v-container>

@@ -52,6 +52,7 @@ export const provideAppState = () => {
     isEditImagesMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
     isEditCommentMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_COMMENT),
     isEditMode: computed(() => UpdateFactoryPageState.includes(appState.pageState)),
+    isInitialState: computed(() => appState.pageState === PageState.INITIAL),
 
     selectFactoryMode: computed(() => appState.pageState === PageState.CREATE_FACTORY_1),
     formPageOpen: computed(() => CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY_IMAGES),

@@ -92,7 +92,7 @@
           <h3 class="mb-3">工廠描述</h3>
           <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
         </div>
-        <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
+        <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments" color="primary">
           新增工廠描述
         </v-btn>
       </div>

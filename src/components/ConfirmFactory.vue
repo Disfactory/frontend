@@ -1,11 +1,15 @@
 <template>
   <div class="confirm-factory-page">
     <v-container style="max-width: 620px; position: relative;" class="pt-3 pt-md-12">
-      <h2 class="mt-2 mb-2">確認及補充工廠資訊</h2>
+      <h2 class="mt-2 mb-2 secondary--text">確認及補充工廠資訊</h2>
 
       <p>請確認工廠地點及照片，並補充工廠資訊。</p>
 
-      <h3 class="mt-2 mb-2 required">工廠地點</h3>
+      <h3 class="mt-7 mb-2 required primary--text">工廠地點</h3>
+
+      <p>
+        返回<a @click="gotoStepOne">步驟(1/3)</a>編輯
+      </p>
 
       <minimap
         :initialFactories="initialFactories"
@@ -13,11 +17,7 @@
         :pinLocation="appState.factoryLocation"
       />
 
-      <p>
-        返回<a @click="gotoStepOne">步驟(1/3)</a>編輯
-      </p>
-
-      <h3 class="mt-2 mb-2 required">工廠照片</h3>
+      <h3 class="mt-7 mb-2 required primary--text">工廠照片</h3>
 
       <p>
         返回<a @click="gotoStepTwo">步驟(2/3)</a>編輯
@@ -29,32 +29,34 @@
         </div>
       </div>
 
-      <h3 class="mt-2 mb-2 required">聯絡人暱稱</h3>
+      <h3 class="mt-5 mb-2 required primary--text">聯絡人暱稱</h3>
 
-      <p>{{ formState.nickname }}</p>
+      <p>{{ formState.nickname || '未填寫'  }}</p>
 
-      <h3 class="mt-2 mb-2 required">聯絡方式 (email或電話)</h3>
+      <h3 class="mt-5 mb-2 required primary--text">聯絡方式 (email或電話)</h3>
 
-      <p>{{ formState.contact }}</p>
+      <p>{{ formState.contact || '未填寫' }}</p>
 
-      <h2>其他工廠資訊（非必填）</h2>
+      <hr>
+
+      <h2 class="mt-5 secondary--text mb-5">其他工廠資訊（非必填）</h2>
 
       <p>提供明確的工廠資訊能夠幫助我們更快速的填寫公文。</p>
 
-      <h3 class="mt-2 mb-2">工廠描述</h3>
+      <h3 class="mt-5 mb-2 primary--text">工廠描述</h3>
 
       <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" />
 
-      <h3 class="mt-2 mb-2">工廠外部文字</h3>
+      <h3 class="mt-5 mb-2 primary--text">工廠外部文字</h3>
 
-      <v-text-field outilned solo v-model="formState.name" placeholder="例：小明化工廠" />
+      <v-text-field outilned solo v-model="formState.name" placeholder="例：小明化工廠" color="primary" />
 
-      <h3 class="mt-2 mb-2">工廠類型</h3>
+      <h3 class="mt-5 mb-2 primary--text">工廠類型</h3>
 
       <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined />
 
       <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
-        <v-btn x-large rounded @click="submit" style="width: 100%; max-width: 345px;" v-bind="attrs" v-on="on">
+        <v-btn x-large rounded @click="submit" style="width: 100%; max-width: 345px;" v-bind="attrs" v-on="on" color="primary">
           確認送出
         </v-btn>
       </div>
@@ -138,6 +140,10 @@ export default createComponent({
   overflow-x: hidden;
 
   padding-bottom: 72px;
+
+  h2 {
+    font-size: 24px;
+  }
 }
 
 .bottom-button-container {
@@ -147,4 +153,13 @@ export default createComponent({
   left: 0;
   padding: 10px 15px;
 }
+
+hr {
+  color: #EAF3BF;
+  border-color: #EAF3BF;
+  background-color: #EAF3BF;
+  height: 1px;
+  border-width: inherit;
+}
+
 </style>
