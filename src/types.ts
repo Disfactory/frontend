@@ -68,7 +68,7 @@ export type FactoriesResponse = Array<FactoryData>
 
 export type FactoryPostData = {
   name: string,
-  type: FactoryType,
+  type?: FactoryType,
   images?: string[],
   others?: string,
   lat: number,

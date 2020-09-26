@@ -199,7 +199,7 @@ import { useImageUpload } from '../lib/imageUpload'
 import ImageUploadForm from './ImageUploadForm.vue'
 import ConfirmFactory from './ConfirmFactory.vue'
 import SwitchMapModeButton from './SwitchMapModeButton.vue'
-import { FactoryPostData, FactoryType } from '../types'
+import { FactoryPostData } from '../types'
 import { useGA } from '../lib/useGA'
 import { useBackPressed } from '../lib/useBackPressed'
 import { useModalState } from '../lib/hooks'
@@ -249,7 +249,7 @@ export default createComponent({
       contact: '',
       others: '',
       name: '',
-      type: '0',
+      type: undefined,
       submitting: false
     })
 
@@ -269,7 +269,7 @@ export default createComponent({
         const factory: FactoryPostData = {
           name: createFactoryFormState.name,
           others: createFactoryFormState.others,
-          type: createFactoryFormState.type as FactoryType,
+          type: createFactoryFormState.type,
           lng,
           lat,
           images: uploadedImages.value.map(i => i.token),

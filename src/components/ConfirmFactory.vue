@@ -53,7 +53,7 @@
 
       <h3 class="mt-5 mb-2 primary--text">工廠類型</h3>
 
-      <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined />
+      <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined placeholder="未選擇" />
 
       <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
         <v-btn x-large rounded @click="submit" style="width: 100%; max-width: 345px;" v-bind="attrs" v-on="on" color="primary">
@@ -99,8 +99,7 @@ export default createComponent({
     const initialFactories = mapController.value?.factories
     const initialLocation = mapController.value?.mapInstance.map.getView().getCenter()
 
-    const factoryTypeItems: Array<{ text: string, value: string }> = [
-      { text: '未選擇', value: '0' },
+    const factoryTypeItems: Array<{ text: string, value?: string }> = [
       ...FACTORY_TYPE
     ]
 
