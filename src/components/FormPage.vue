@@ -196,15 +196,15 @@ export default createComponent({
 
     const mode = computed(() => appState.isCreateMode ? 'create' : 'edit')
 
-    const factoryTypeItems: Array<{ text: string, value: string }> = [
-      { text: '請選擇工廠類型', value: '0' },
+    const factoryTypeItems: Array<{ text: string, value?: string }> = [
+      { text: '請選擇工廠類型', value: undefined },
       ...FACTORY_TYPE
     ]
 
     const initialFactoryState = {
       name: '',
       others: '', // description
-      type: '0' as FactoryType | '0',
+      type: undefined as FactoryType | undefined,
       lng: 0,
       lat: 0,
 
