@@ -36,7 +36,7 @@
           <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
         </p>
 
-        <p class="caption mb-0">
+        <p class="caption mb-0" style="color: #A1A1A1;">
           工廠編號 {{ factoryId }} <br>
           最後更新 2020/4/12
         </p>
