@@ -72,13 +72,13 @@
       <div class="select-location-container container-fluid pa-3 py-md-5 px-md-10" v-if="showLongLat">
         <div class="d-flex flex-md-row justify-space-between align-end align-md-center">
           <div class="d-flex flex-column flex-md-row align-start align-md-center justify-space-between justify-md-start flex-grow-1">
-            <p class="mb-4 mb-md-0 mr-md-10">以下經緯度版本為WGS84</p>
+            <p class="mb-4 mb-md-0 mr-md-10" style="font-size: 12px;">以下經緯度版本為WGS84</p>
 
-            <p class='font-weight-medium h5 mb-0 mr-md-10' v-if="!inlineLocationForm">
+            <p class='font-weight-medium h5 mb-1 mr-md-10' style="font-size: 14px;" v-if="!inlineLocationForm">
               經度：{{ appState.mapLngLat[0].toFixed(7) }}
             </p>
 
-            <p class='font-weight-medium h5 mb-0 mr-md-8' v-if="!inlineLocationForm">
+            <p class='font-weight-medium h5 mb-0 mr-md-8' style="font-size: 14px;" v-if="!inlineLocationForm">
               緯度：{{ appState.mapLngLat[1].toFixed(7) }}
             </p>
 
