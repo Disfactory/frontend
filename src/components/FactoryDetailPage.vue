@@ -47,7 +47,7 @@
         </div>
       </v-card-text>
 
-      <v-slide-group :show-arrows="images > 0 ? 'desktop' : false">
+      <v-slide-group :show-arrows="images > 0 ? 'desktop' : false" ref="slideGroup">
         <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
           <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
@@ -103,14 +103,14 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref } from '@vue/composition-api'
+import { createComponent, computed, ref, onUpdated } from '@vue/composition-api'
 import copy from 'copy-to-clipboard'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
 import useScroll from '@/lib/hooks/useScroll'
 
 import { useAppState } from '../lib/appState'
-import { FactoryStatusText } from '../types'
+import { FactoryImage, FactoryStatusText } from '../types'
 
 export default createComponent({
   name: 'FactoryDetailPage',
@@ -185,6 +185,32 @@ export default createComponent({
       }, 1000)
     }
 
+    // Workaround https://github.com/vuetifyjs/vuetify/issues/10971
+    const slideGroup = ref(null)
+    let prevImages: FactoryImage[]
+    onUpdated(() => {
+      if (JSON.stringify(images.value) === JSON.stringify(prevImages)) {
+        return
+      } else {
+        if (!prevImages) {
+          prevImages = images.value.slice()
+          return
+        } else {
+          prevImages = images.value.slice()
+        }
+      }
+
+      if (!slideGroup.value) {
+        return
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const content = (slideGroup.value as any)?.$refs.content
+      window.setTimeout(() => {
+        content.style = 'translateX(0px)'
+      }, 50)
+    })
+
     return {
       full,
       appState,
@@ -203,7 +229,8 @@ export default createComponent({
       factoryDetailScrollerRef,
       scrollOff,
       showCopiedMessage,
-      copyToClipboard
+      copyToClipboard,
+      slideGroup
     }
   }
 })
