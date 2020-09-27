@@ -389,4 +389,8 @@ export default createComponent({
     margin-left: 15px;
   }
 }
+
+.v-slide-group__wrapper {
+  touch-action: auto !important;
+}
 </style>
