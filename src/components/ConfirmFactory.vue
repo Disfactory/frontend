@@ -1,6 +1,6 @@
 <template>
   <div class="confirm-factory-page">
-    <v-container style="max-width: 620px; position: relative;" class="pt-3 pt-md-12">
+    <v-container style="max-width: 630px; position: relative;" class="pt-3 pt-md-12">
       <h2 class="mt-2 mb-2 secondary--text">確認及補充工廠資訊</h2>
 
       <p>請確認工廠地點及照片，並補充工廠資訊。</p>
@@ -11,11 +11,28 @@
         返回<a @click="gotoStepOne">步驟(1/3)</a>編輯
       </p>
 
-      <minimap
-        :initialFactories="initialFactories"
-        :initialLocation="initialLocation"
-        :pinLocation="appState.factoryLocation"
-      />
+      <div class="d-flex flex-column flex-md-row justify-md-between">
+        <div class="w-100 minimap-container" style="position: relative;" :class="{ desktop: $vuetify.breakpoint.mdAndUp }">
+          <minimap
+            :initialFactories="initialFactories"
+            :initialLocation="initialLocation"
+            :pinLocation="appState.factoryLocation"
+          />
+          <div class="minimap-overlay" @click="gotoStepOne" />
+        </div>
+
+        <div class="d-flex justify-between mt-3 mt-md-0 ml-md-4 d-md-inline-flex flex-md-column justify-md-start">
+          <p>
+            經度：{{ appState.factoryLocation[0].toFixed(7) }}
+            <br>
+            緯度：{{ appState.factoryLocation[1].toFixed(7) }}
+          </p>
+
+          <p>
+            <small>以上經緯度版本為WGS84</small>
+          </p>
+        </div>
+      </div>
 
       <h3 class="mt-7 mb-2 required primary--text">工廠照片</h3>
 
@@ -161,4 +178,17 @@ hr {
   border-width: inherit;
 }
 
+.minimap-container {
+  &.desktop {
+    max-width: 430px;
+  }
+}
+
+.minimap-overlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 </style>
