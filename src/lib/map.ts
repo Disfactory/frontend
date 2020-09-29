@@ -404,6 +404,13 @@ export class OLMap {
       }
     })
 
+    // snippet taken from https://gis.stackexchange.com/q/310775
+    map.on('pointermove', event => {
+      if (!event.dragging) {
+        map.getTargetElement().style.cursor = map.hasFeatureAtPixel(map.getEventPixel(event.originalEvent)) ? 'pointer' : ''
+      }
+    })
+
     this.getLUIMAPLayer().then(layer => {
       layer.on('change:visible', function () {
         if (handler.onLUILayerVisibilityChange) {
