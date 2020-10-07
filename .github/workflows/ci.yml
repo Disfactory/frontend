@@ -70,18 +70,20 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 10.x
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
       - name: Install and Build
         run: |
           npm ci
           echo "VUE_APP_BASE_URL=https://api.disfactory.tw/api" > .env.production
           npm run build
+          echo "disfactory.tw" > dist/CNAME
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.5.9
-        with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          REPOSITORY_NAME: Disfactory/disfactory.tw
-          BASE_BRANCH: production
-          BRANCH: gh-pages
-          SINGLE_COMMIT: true
-          COMMIT_MESSAGE: Deploy [ci skip]
-          FOLDER: dist
+        run: |
+          npm install --silent gh-pages@3.0
+          git config user.email "ci-build@disfactory.tw"
+          git config user.name "ci-build"
+          npx gh-pages -r "git@github.com:Disfactory/disfactory.tw.git" -m "Deploy [ci skip]" --dist dist
