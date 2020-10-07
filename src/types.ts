@@ -13,6 +13,7 @@ export const FACTORY_TYPE = [
 ] as const
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
+// #region !FIXME: deprecate old status
 type CetReportStatus = 'A' | 'B'
 
 export const CetReportStatusText = {
@@ -40,6 +41,33 @@ export const FACTORY_STATUS_ITEMS: FactoryStatus[] = [
   FactoryStatus.EXISTING_INCOMPLETE,
   FactoryStatus.REPORTED
 ]
+// #endregion
+
+export const FactoryDisplayStatusText = [
+  '已檢舉',
+  '已排程稽查',
+  '陳述意見期',
+  '已勒令停工',
+  '已發函斷電',
+  '已排程拆除',
+  '已拆除',
+  '不再追蹤'
+]
+
+export const FactoryDisplayStatusColors = [
+  '#697F01',
+  '#C8D48D',
+  '#457287',
+  '#E59B9B',
+  '#CF5E5D',
+  '#A22A29',
+  '#364516',
+  '#A1A1A1'
+]
+
+export type FactoryDisplayStatusType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+export const defaultFactoryDisplayStatuses = new Array(8).fill(0).map((_, i) => i) as FactoryDisplayStatusType[]
 
 export type FactoryImage = {
   id: string,
@@ -61,7 +89,8 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  cet_report_status: CetReportStatus
+  cet_report_status: CetReportStatus,
+  display_status?: FactoryDisplayStatusType
 }
 
 export type FactoriesResponse = Array<FactoryData>

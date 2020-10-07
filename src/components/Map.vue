@@ -2,10 +2,11 @@
   <div class="map-container">
     <div ref="root" class="map"></div>
 
-    <div class="ol-map-search ol-unselectable ol-control" @click="openFilterModal" data-label="map-search" v-show="!appState.selectFactoryMode">
-      <button>
-        <img src="/images/filter.svg" alt="search">
-      </button>
+    <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container">
+      <v-btn class="mx-2 text--primary" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
+        <v-icon :color="button.color">mdi-map-marker</v-icon>
+        {{ button.text }}
+      </v-btn>
     </div>
 
     <div class="ol-fit-location ol-unselectable ol-control" @click="zoomToGeolocation" data-label="map-locate">
@@ -25,21 +26,20 @@
 </template>
 
 <script lang="ts">
-import { createComponent, onMounted, onUnmounted, ref, inject, computed } from '@vue/composition-api'
+import { createComponent, onMounted, onUnmounted, ref, inject } from '@vue/composition-api'
 
 import AppButton from '@/components/AppButton.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import AppTextField from '@/components/AppTextField.vue'
 
-import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
+import { initializeMap, MapFactoryController } from '../lib/map'
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Overlay } from 'ol'
 import OverlayPositioning from 'ol/OverlayPositioning'
-import { FactoryStatus } from '../types'
+import { FactoryDisplayStatusText, FactoryDisplayStatusColors, defaultFactoryDisplayStatuses, FactoryDisplayStatusType } from '../types'
 import { useGA } from '@/lib/useGA'
 import { useModalState } from '../lib/hooks'
-import { useFactoryPopup, getPopupData } from '../lib/factoryPopup'
 import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 import { permalink } from '../lib/permalink'
@@ -55,10 +55,6 @@ export default createComponent({
     setFactoryLocation: {
       type: Function,
       required: true
-    },
-    openFilterModal: {
-      type: Function,
-      required: true
     }
   },
   setup (props, context) {
@@ -70,9 +66,6 @@ export default createComponent({
     const [, modalActions] = useModalState()
     const [appState, { openEditFactoryForm, pageTransition, expandFactoryDetail }] = useAppState()
     const [, alertActions] = useAlertState()
-
-    const [popupState] = useFactoryPopup()
-    const popupData = computed(() => appState.factoryData ? getPopupData(appState.factoryData) : {})
 
     const openFactoryDetail = (id: string) => {
       if (!mapControllerRef.value) return
@@ -174,9 +167,33 @@ export default createComponent({
       mapControllerRef.value.mapInstance.setLUILayerVisible(true)
 
       pageTransition.startCreateFactory()
-
-      popupState.show = false
     }
+
+    const appliedFilters = ref<FactoryDisplayStatusType[]>([])
+    const checkActive = (status: FactoryDisplayStatusType) => appliedFilters.value.includes(status)
+
+    const onClickFilterButton = (status: FactoryDisplayStatusType) => {
+      if (!mapControllerRef.value) {
+        return
+      }
+
+      if (checkActive(status)) {
+        appliedFilters.value = appliedFilters.value.filter(f => f !== status)
+      } else {
+        appliedFilters.value = [
+          ...appliedFilters.value,
+          status
+        ]
+      }
+
+      mapControllerRef.value.setFactoryStatusFilter(appliedFilters.value)
+    }
+
+    const filterButtonsData = defaultFactoryDisplayStatuses.map(v => ({
+      text: FactoryDisplayStatusText[v],
+      color: FactoryDisplayStatusColors[v],
+      value: v
+    }))
 
     return {
       root,
@@ -193,23 +210,12 @@ export default createComponent({
         }
       },
       appState,
-      popupState,
-      popupData,
       onClickEditFactoryData,
-      getButtonColorFromStatus: function () {
-        if (!appState.factoryData) {
-          return 'default'
-        }
-
-        const status = getFactoryStatus(appState.factoryData)
-        return {
-          [FactoryStatus.NEW]: 'blue',
-          [FactoryStatus.EXISTING_INCOMPLETE]: 'gray',
-          [FactoryStatus.EXISTING_COMPLETE]: 'gray',
-          [FactoryStatus.REPORTED]: 'default'
-        }[status]
-      },
-      onClickCreateFactoryButton
+      onClickCreateFactoryButton,
+      onClickFilterButton,
+      filterButtonsData,
+      checkActive,
+      appliedFilters
     }
   }
 })
@@ -288,5 +294,13 @@ export default createComponent({
   padding: 10px 20px;
   font-size: 14px;
   line-height: 19px;
+}
+
+.filter-buttons-container {
+  position: absolute;
+  top: 0;
+  overflow-x: auto;
+  max-width: 100%;
+  white-space: nowrap;
 }
 </style>

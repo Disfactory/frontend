@@ -110,7 +110,7 @@ import { getFactoryTypeText } from '@/lib/factory'
 import useScroll from '@/lib/hooks/useScroll'
 
 import { useAppState } from '../lib/appState'
-import { FactoryImage, FactoryStatusText } from '../types'
+import { FactoryImage, FactoryDisplayStatusText } from '../types'
 
 export default createComponent({
   name: 'FactoryDetailPage',
@@ -135,7 +135,7 @@ export default createComponent({
 
     const factoryStatusText = computed(() => {
       if (factoryStatus.value) {
-        return FactoryStatusText[factoryStatus.value]?.[0] || ''
+        return FactoryDisplayStatusText[factoryStatus.value]
       } else {
         return ''
       }
