@@ -178,7 +178,15 @@ export default createComponent({
 
     const showCopiedMessage = ref(false)
     const copyToClipboard = () => {
-      copy(window.location.href)
+      if (!appState.factoryData) {
+        return
+      }
+
+      const { host, protocol } = window.location
+      const url = `${protocol}//${host}/#map=16/${appState.factoryData?.lng}/${appState.factoryData?.lat}`
+
+      copy(url)
+
       showCopiedMessage.value = true
       window.setTimeout(() => {
         showCopiedMessage.value = false
