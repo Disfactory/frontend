@@ -129,12 +129,12 @@ export default createComponent({
       if (appState.factoryData) {
         return getFactoryStatus(appState.factoryData)
       } else {
-        return null
+        return undefined
       }
     })
 
     const factoryStatusText = computed(() => {
-      if (factoryStatus.value) {
+      if (typeof factoryStatus.value !== 'undefined') {
         return FactoryDisplayStatusText[factoryStatus.value]
       } else {
         return ''
@@ -142,7 +142,7 @@ export default createComponent({
     })
 
     const statusColor = computed(() => {
-      if (factoryStatus.value) {
+      if (typeof factoryStatus.value !== 'undefined') {
         return getStatusBorderColor(factoryStatus.value)
       } else {
         return null
@@ -219,6 +219,7 @@ export default createComponent({
       expandFactoryDetail,
       collapseFactoryDetail,
       toggleFactoryDetail,
+      factoryStatus,
       factoryStatusText,
       statusColor,
       factoryId,
