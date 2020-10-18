@@ -2,8 +2,8 @@
   <div class="map-container">
     <div ref="root" class="map"></div>
 
-    <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container">
-      <v-btn class="mx-2 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
+    <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }">
+      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
         <v-icon :color="button.color">mdi-map-marker</v-icon>
         {{ button.text }}
       </v-btn>
@@ -302,5 +302,13 @@ export default createComponent({
   overflow-x: auto;
   max-width: 100%;
   white-space: nowrap;
+
+  &.desktop {
+    white-space: normal;
+  }
+
+  &.sidebar-expanded {
+    max-width: calc(100% - 395px);
+  }
 }
 </style>
