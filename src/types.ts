@@ -13,36 +13,6 @@ export const FACTORY_TYPE = [
 ] as const
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
-// #region !FIXME: deprecate old status
-type CetReportStatus = 'A' | 'B'
-
-export const CetReportStatusText = {
-  A: '未舉報',
-  B: '已舉報'
-}
-
-export enum FactoryStatus {
-  NEW = 'NEW',
-  EXISTING_INCOMPLETE = 'EXISTING_INCOMPLETE',
-  EXISTING_COMPLETE = 'EXISTING_COMPLETE',
-  REPORTED = 'REPORTED'
-}
-
-export const FactoryStatusText = {
-  [FactoryStatus.NEW]: ['民眾回報工廠'],
-  [FactoryStatus.EXISTING_COMPLETE]: ['政府盤查工廠'],
-  [FactoryStatus.EXISTING_INCOMPLETE]: ['政府盤查工廠', '資料不齊'],
-  [FactoryStatus.REPORTED]: ['已舉報違章工廠']
-}
-
-export const FACTORY_STATUS_ITEMS: FactoryStatus[] = [
-  FactoryStatus.NEW,
-  FactoryStatus.EXISTING_COMPLETE,
-  FactoryStatus.EXISTING_INCOMPLETE,
-  FactoryStatus.REPORTED
-]
-// #endregion
-
 export const FactoryDisplayStatusText = [
   '已檢舉',
   '已排程稽查',
@@ -89,7 +59,6 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  cet_report_status: CetReportStatus,
   display_status?: FactoryDisplayStatusType
 }
 
