@@ -3,7 +3,7 @@
     <div ref="root" class="map"></div>
 
     <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container">
-      <v-btn class="mx-2 text--primary" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
+      <v-btn class="mx-2 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
         <v-icon :color="button.color">mdi-map-marker</v-icon>
         {{ button.text }}
       </v-btn>

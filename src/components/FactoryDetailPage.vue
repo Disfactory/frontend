@@ -32,7 +32,7 @@
           </span>
         </div>
 
-        <p class="factory-status text--primary mb-2" style="clear: both">
+        <p class="factory-status secondary--text mb-2" style="clear: both">
           <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
         </p>
 
@@ -92,7 +92,7 @@
     </div>
 
     <div class="factory-detail-scroller px-4 py-5" v-show="!appState.factoryData">
-      <h1 class="text--primary mb-5">請選擇一個地標</h1>
+      <h1 class="secondary--text mb-5">請選擇一個地標</h1>
       <p>請選擇一間工廠查看工廠詳細資訊。</p>
     </div>
 
