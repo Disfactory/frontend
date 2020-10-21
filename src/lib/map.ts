@@ -24,7 +24,7 @@ export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
 }
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
-  return factory.display_status || 0
+  return factory.document_display_status || 0
 }
 
 export enum BASE_MAP {

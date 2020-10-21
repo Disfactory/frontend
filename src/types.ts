@@ -59,7 +59,7 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  display_status?: FactoryDisplayStatusType
+  document_display_status?: FactoryDisplayStatusType
 }
 
 export type FactoriesResponse = Array<FactoryData>
