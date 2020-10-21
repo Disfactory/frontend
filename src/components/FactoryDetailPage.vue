@@ -79,14 +79,20 @@
         <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
           <h2 class="mb-5">其他工廠資訊</h2>
 
-          <h3 class="mb-1" v-if="factoryName">工廠外部文字</h3>
-          <p class="mb-5" v-if="factoryName">{{ factoryName }}</p>
+          <h3 class="mb-1">工廠外部文字</h3>
+          <p class="mb-3" v-if="factoryName">{{ factoryName }}</p>
+          <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('name')">
+            {{ factoryName ? '更改外部文字' : '回報外部文字' }}
+          </v-btn>
 
-          <h3 v-if="factoryType" class="mb-1">工廠類型</h3>
-          <p class="mb-5" v-if="factoryType">{{ factoryType }}</p>
+          <h3 class="mb-1">工廠類型</h3>
+          <p class="mb-3" v-if="factoryType">{{ factoryType }}</p>
+          <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('type')">
+            {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
+          </v-btn>
 
           <h3 class="mb-1">工廠描述</h3>
-          <v-btn outlined @click="pageTransition.startUpdateFactoryComment">補充工廠描述</v-btn>
+          <v-btn outlined @click="startUpdateFactoryCommentFor('comment')">補充工廠描述</v-btn>
         </div>
       </div>
     </div>
@@ -219,6 +225,10 @@ export default createComponent({
       }, 50)
     })
 
+    const startUpdateFactoryCommentFor = (field = 'comment') => {
+      pageTransition.startUpdateFactoryComment(field)
+    }
+
     return {
       full,
       appState,
@@ -239,7 +249,8 @@ export default createComponent({
       scrollOff,
       showCopiedMessage,
       copyToClipboard,
-      slideGroup
+      slideGroup,
+      startUpdateFactoryCommentFor
     }
   }
 })

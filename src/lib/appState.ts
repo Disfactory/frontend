@@ -38,7 +38,8 @@ export const provideAppState = () => {
     formPageOpen: boolean,
     mapLngLat: number[],
     canPlaceFactory: boolean,
-    factoryDetailsExpanded: boolean
+    factoryDetailsExpanded: boolean,
+    updateFactoryField: string
   } = reactive({
     // Page state
     pageState: PageState.INITIAL,
@@ -51,6 +52,7 @@ export const provideAppState = () => {
 
     isEditImagesMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
     isEditCommentMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_COMMENT),
+    updateFactoryField: 'comment',
     isEditMode: computed(() => UpdateFactoryPageState.includes(appState.pageState)),
     isInitialState: computed(() => appState.pageState === PageState.INITIAL),
 
@@ -157,9 +159,10 @@ const registerMutator = (appState: AppState) => {
       event('exitUpdateFactoryImagesMode')
     },
 
-    startUpdateFactoryComment () {
+    startUpdateFactoryComment (field = 'comment') {
       if (appState.pageState === PageState.INITIAL) {
         appState.pageState = PageState.UPDATE_FACTORY_COMMENT
+        appState.updateFactoryField = field
       } else {
         invalidPageTransition()
       }
