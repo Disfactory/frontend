@@ -29,7 +29,7 @@
       </div>
       <v-app-bar-nav-icon class="d-flex d-sm-none" @click="drawer = !drawer" />
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" app right hide-overlay stateless clipped>
+    <v-navigation-drawer v-model="drawer" app right temporary>
       <v-list
         nav
         dense
