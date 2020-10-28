@@ -87,12 +87,12 @@
 
           <h3 class="mb-1">工廠類型</h3>
           <p class="mb-3" v-if="factoryType">{{ factoryType }}</p>
-          <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('type')">
+          <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('factory_type')">
             {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
           </v-btn>
 
           <h3 class="mb-1">工廠描述</h3>
-          <v-btn outlined @click="startUpdateFactoryCommentFor('comment')">補充工廠描述</v-btn>
+          <v-btn outlined @click="startUpdateFactoryCommentFor('others')">補充工廠描述</v-btn>
         </div>
       </div>
     </div>
@@ -225,7 +225,7 @@ export default createComponent({
       }, 50)
     })
 
-    const startUpdateFactoryCommentFor = (field = 'comment') => {
+    const startUpdateFactoryCommentFor = (field = 'others') => {
       pageTransition.startUpdateFactoryComment(field)
     }
 
