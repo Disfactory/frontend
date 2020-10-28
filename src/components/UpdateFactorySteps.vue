@@ -4,7 +4,9 @@
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <v-spacer></v-spacer>
       <v-toolbar-title class="secondary--text" v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
-      <v-toolbar-title class="secondary--text" v-else>補充工廠描述</v-toolbar-title>
+      <v-toolbar-title class="secondary--text" v-else>
+        {{ updateFormAppTitle }}
+      </v-toolbar-title>
       <v-spacer></v-spacer>
 
       <div class="btn-container">
@@ -23,8 +25,8 @@
             </v-container>
           </v-card>
           <v-card v-else>
-            <v-card-title class="secondary--text">補充工廠描述尚未完成！</v-card-title>
-            <v-card-text>放棄補充工廠描述的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
+            <v-card-title class="secondary--text">{{ updateFormAppTitle }}尚未完成！</v-card-title>
+            <v-card-text>放棄編輯的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
             <v-container class="text-center">
               <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
               <a class="d-block mt-4" @click="cancelUpdateFactory">確定放棄</a>
@@ -214,6 +216,11 @@ export default createComponent({
       return validStates[field].value
     })
 
+    const updateFormAppTitle = computed(() => {
+      return appState.isEditComment ? '補充工廠描述'
+        : appState.isEditName ? '更改外部文字' : '更改工廠類型'
+    })
+
     const updateFormTitle = computed(() => {
       if (appState.isEditComment) {
         return '工廠描述'
@@ -272,6 +279,7 @@ export default createComponent({
       cancelUpdateFactoryImages,
       cancelUpdateFactory,
 
+      updateFormAppTitle,
       updateFormTitle,
       updateFormButton,
 
