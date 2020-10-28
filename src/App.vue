@@ -67,7 +67,6 @@
     <v-main style="max-height: 100%; height: 100%;">
       <!-- alert or modal -->
       <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
-      <filter-modal :open="modalState.filterModalOpen" :dismiss="modalActions.closeFilterModal" />
 
       <v-dialog v-model="modalState.createFactorySuccessModal" max-width="305">
         <v-card class="text-center pt-5">
@@ -126,7 +125,6 @@
       <!-- alert or modal -->
       <Map
         :setFactoryLocation="appActions.setFactoryLocation"
-        :openFilterModal="modalActions.openFilterModal"
       />
 
       <create-factory-steps v-if="appState.isCreateMode" />
@@ -145,12 +143,10 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppSidebar from './components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
-import FormPage from '@/components/FormPage.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
 import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
 import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
 
-import FilterModal from '@/components/FilterModal.vue'
 import AboutModal from '@/components/AboutModal.vue'
 import ContactModal from '@/components/ContactModal.vue'
 import GettingStartedModal from '@/components/GettingStartedModal.vue'
@@ -163,7 +159,6 @@ import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
 import { MapFactoryController } from './lib/map'
 import { MainMapControllerSymbol } from './symbols'
 import { provideModalState, useModalState } from './lib/hooks'
-import { providePopupState } from './lib/factoryPopup'
 import { provideGA } from './lib/useGA'
 import { provideAppState, useAppState } from './lib/appState'
 import { provideAlertState, useAlertState } from './lib/useAlert'
@@ -176,7 +171,6 @@ export default createComponent({
     AppButton,
     AppNavbar,
     AppSidebar,
-    FilterModal,
     AboutModal,
     ContactModal,
     GettingStartedModal,
@@ -184,7 +178,6 @@ export default createComponent({
     CreateFactorySuccessModal,
     UpdateFactorySuccessModal,
     TutorialModal,
-    FormPage,
     IosVersionModal,
     CreateFactorySteps,
     UpdateFactorySteps,
@@ -192,7 +185,6 @@ export default createComponent({
   },
   setup (_, context) {
     provideGA(context)
-    providePopupState()
 
     provideModalState()
     provideAppState()

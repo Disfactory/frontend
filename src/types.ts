@@ -13,33 +13,31 @@ export const FACTORY_TYPE = [
 ] as const
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
-type CetReportStatus = 'A' | 'B'
-
-export const CetReportStatusText = {
-  A: '未舉報',
-  B: '已舉報'
-}
-
-export enum FactoryStatus {
-  NEW = 'NEW',
-  EXISTING_INCOMPLETE = 'EXISTING_INCOMPLETE',
-  EXISTING_COMPLETE = 'EXISTING_COMPLETE',
-  REPORTED = 'REPORTED'
-}
-
-export const FactoryStatusText = {
-  [FactoryStatus.NEW]: ['民眾回報工廠'],
-  [FactoryStatus.EXISTING_COMPLETE]: ['政府盤查工廠'],
-  [FactoryStatus.EXISTING_INCOMPLETE]: ['政府盤查工廠', '資料不齊'],
-  [FactoryStatus.REPORTED]: ['已舉報違章工廠']
-}
-
-export const FACTORY_STATUS_ITEMS: FactoryStatus[] = [
-  FactoryStatus.NEW,
-  FactoryStatus.EXISTING_COMPLETE,
-  FactoryStatus.EXISTING_INCOMPLETE,
-  FactoryStatus.REPORTED
+export const FactoryDisplayStatusText = [
+  '已檢舉',
+  '已排程稽查',
+  '陳述意見期',
+  '已勒令停工',
+  '已發函斷電',
+  '已排程拆除',
+  '已拆除',
+  '不再追蹤'
 ]
+
+export const FactoryDisplayStatusColors = [
+  '#697F01',
+  '#C8D48D',
+  '#457287',
+  '#E59B9B',
+  '#CF5E5D',
+  '#A22A29',
+  '#364516',
+  '#A1A1A1'
+]
+
+export type FactoryDisplayStatusType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+
+export const defaultFactoryDisplayStatuses = new Array(8).fill(0).map((_, i) => i) as FactoryDisplayStatusType[]
 
 export type FactoryImage = {
   id: string,
@@ -61,7 +59,7 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  cet_report_status: CetReportStatus
+  document_display_status?: FactoryDisplayStatusType
 }
 
 export type FactoriesResponse = Array<FactoryData>
