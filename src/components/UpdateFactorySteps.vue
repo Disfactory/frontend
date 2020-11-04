@@ -115,6 +115,7 @@
 import { useUpdateFactoryImage } from '@/lib/imageUpload'
 import { updateFactoryImages, updateFactory } from '@/api'
 import { computed, createComponent, inject, reactive, ref } from '@vue/composition-api'
+import { useGA } from '@/lib/useGA'
 import { useAppState } from '../lib/appState'
 import { useModalState } from '../lib/hooks'
 import ImageUploadForm from './ImageUploadForm.vue'
@@ -131,6 +132,7 @@ export default createComponent({
     const [appState, { pageTransition }] = useAppState()
     const [, modalActions] = useModalState()
     const mapController = inject(MainMapControllerSymbol, ref<MapFactoryController>())
+    const { event } = useGA()
 
     const {
       selectedImages,
@@ -194,9 +196,9 @@ export default createComponent({
 
     const formState = reactive({
       others: '',
-      name: '',
+      name: appState.factoryData?.name,
       // eslint-disable-next-line @typescript-eslint/camelcase
-      factory_type: null,
+      factory_type: appState.factoryData?.type,
       submitting: false
     })
 
@@ -206,7 +208,7 @@ export default createComponent({
 
     const validStates = {
       others: computed(() => formState.others.length > 0 && !formState.submitting),
-      name: computed(() => formState.name.length > 0 && !formState.submitting),
+      name: computed(() => formState?.name?.length > 0 && !formState.submitting),
       // eslint-disable-next-line @typescript-eslint/camelcase
       factory_type: computed(() => !!formState.factory_type && !formState.submitting)
     }
@@ -251,9 +253,15 @@ export default createComponent({
       try {
         const field = appState.updateFactoryField as 'others' | 'name' | 'factory_type'
 
-        await updateFactory(appState.factoryData?.id, {
+        event('updateFactory', { field })
+        const factory = await updateFactory(appState.factoryData?.id, {
           [field]: formState[field]
         })
+
+        if (mapController.value) {
+          mapController.value.updateFactory(factory.id, factory)
+          appState.factoryData = factory
+        }
 
         // TOOD: comments not displayed or stored in factory data for now
 
