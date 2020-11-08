@@ -3,6 +3,7 @@
     <div ref="root" class="map"></div>
 
     <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }">
+      <display-setting-bottom-sheet />
       <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
         <v-icon :color="button.color">mdi-map-marker</v-icon>
         {{ button.text }}
@@ -31,6 +32,7 @@ import { createComponent, onMounted, onUnmounted, ref, inject } from '@vue/compo
 import AppButton from '@/components/AppButton.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import AppTextField from '@/components/AppTextField.vue'
+import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 
 import { initializeMap, MapFactoryController } from '../lib/map'
 import { getFactories } from '../api'
@@ -49,7 +51,8 @@ export default createComponent({
   components: {
     AppButton,
     AppNavbar,
-    AppTextField
+    AppTextField,
+    DisplaySettingBottomSheet
   },
   props: {
     setFactoryLocation: {

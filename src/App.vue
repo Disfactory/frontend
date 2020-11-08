@@ -162,6 +162,7 @@ import { provideModalState, useModalState } from './lib/hooks'
 import { provideGA } from './lib/useGA'
 import { provideAppState, useAppState } from './lib/appState'
 import { provideAlertState, useAlertState } from './lib/useAlert'
+import { provideMapMode } from './lib/useMapMode'
 
 export default createComponent({
   name: 'App',
@@ -189,6 +190,7 @@ export default createComponent({
     provideModalState()
     provideAppState()
     provideAlertState()
+    provideMapMode()
 
     const [modalState, modalActions] = useModalState()
     const [appState, appActions] = useAppState()
