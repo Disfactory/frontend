@@ -22,7 +22,7 @@ export const FactoryDisplayStatusText = [
   '已排程拆除',
   '已拆除',
   '不再追蹤'
-]
+] as const
 
 export const FactoryDisplayStatusColors = [
   '#697F01',
@@ -59,7 +59,7 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  document_display_status?: FactoryDisplayStatusType
+  document_display_status?: typeof FactoryDisplayStatusText[number]
 }
 
 export type FactoriesResponse = Array<FactoryData>
