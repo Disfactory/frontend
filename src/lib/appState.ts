@@ -12,7 +12,7 @@ export const enum PageState {
   CREATE_FACTORY_2 = 'CREATE_FACTORY_2',
   CREATE_FACTORY_3 = 'CREATE_FACTORY_3',
   UPDATE_FACTORY_IMAGES = 'UPDATE_FACTORY_IMAGES',
-  UPDATE_FACTORY_COMMENT = 'UPDATE_FACTORY_COMMENT'
+  UPDATE_FACTORY_MODE = 'UPDATE_FACTORY_MODE'
 }
 
 const CreateFactoryPageState = [
@@ -23,7 +23,7 @@ const CreateFactoryPageState = [
 
 const UpdateFactoryPageState = [
   PageState.UPDATE_FACTORY_IMAGES,
-  PageState.UPDATE_FACTORY_COMMENT
+  PageState.UPDATE_FACTORY_MODE
 ]
 
 export const provideAppState = () => {
@@ -38,7 +38,11 @@ export const provideAppState = () => {
     formPageOpen: boolean,
     mapLngLat: number[],
     canPlaceFactory: boolean,
-    factoryDetailsExpanded: boolean
+    factoryDetailsExpanded: boolean,
+    updateFactoryField: string,
+    isEditComment: boolean,
+    isEditName: boolean,
+    isEditType: boolean
   } = reactive({
     // Page state
     pageState: PageState.INITIAL,
@@ -50,7 +54,12 @@ export const provideAppState = () => {
     createStepIndex: computed(() => CreateFactoryPageState.indexOf(appState.pageState) + 1),
 
     isEditImagesMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
-    isEditCommentMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_COMMENT),
+    isEditFactoryMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE),
+    updateFactoryField: 'others',
+    isEditComment: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'others'),
+    isEditName: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'name'),
+    isEditType: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'factory_type'),
+
     isEditMode: computed(() => UpdateFactoryPageState.includes(appState.pageState)),
     isInitialState: computed(() => appState.pageState === PageState.INITIAL),
 
@@ -157,9 +166,10 @@ const registerMutator = (appState: AppState) => {
       event('exitUpdateFactoryImagesMode')
     },
 
-    startUpdateFactoryComment () {
+    startUpdateFactoryComment (field = 'others') {
       if (appState.pageState === PageState.INITIAL) {
-        appState.pageState = PageState.UPDATE_FACTORY_COMMENT
+        appState.pageState = PageState.UPDATE_FACTORY_MODE
+        appState.updateFactoryField = field
       } else {
         invalidPageTransition()
       }
@@ -168,7 +178,7 @@ const registerMutator = (appState: AppState) => {
     },
 
     cancelUpdateFactoryComment () {
-      if (appState.pageState === PageState.UPDATE_FACTORY_COMMENT) {
+      if (appState.pageState === PageState.UPDATE_FACTORY_MODE) {
         appState.pageState = PageState.INITIAL
       } else {
         invalidPageTransition()

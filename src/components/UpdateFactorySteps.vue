@@ -4,7 +4,9 @@
     <v-app-bar fixed color="white" class="d-block d-md-none">
       <v-spacer></v-spacer>
       <v-toolbar-title class="secondary--text" v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
-      <v-toolbar-title class="secondary--text" v-else>補充工廠描述</v-toolbar-title>
+      <v-toolbar-title class="secondary--text" v-else>
+        {{ updateFormAppTitle }}
+      </v-toolbar-title>
       <v-spacer></v-spacer>
 
       <div class="btn-container">
@@ -23,11 +25,11 @@
             </v-container>
           </v-card>
           <v-card v-else>
-            <v-card-title class="secondary--text">補充工廠描述尚未完成！</v-card-title>
-            <v-card-text>放棄補充工廠描述的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
+            <v-card-title class="secondary--text">{{ updateFormAppTitle }}尚未完成！</v-card-title>
+            <v-card-text>放棄編輯的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
             <v-container class="text-center">
               <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
-              <a class="d-block mt-4" @click="cancelUpdateFactoryComments">確定放棄</a>
+              <a class="d-block mt-4" @click="cancelUpdateFactory">確定放棄</a>
             </v-container>
           </v-card>
         </v-dialog>
@@ -71,29 +73,38 @@
       disableProgressiveUpload
     />
 
+    <!-- Update factory field page (Desktop) -->
     <div class="update-factory-comment-container w-100 px-4 py-4 d-flex flex-column justify-between" v-else-if="$vuetify.breakpoint.smAndDown">
       <div>
-        <h3 class="mt-4 mb-2 primary--text">工廠描述</h3>
-        <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
+        <h3 class="mt-4 mb-2 primary--text">{{ updateFormTitle }}</h3>
+
+        <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" v-if="appState.isEditComment" />
+        <v-text-field outlined v-model="formState.name" placeholder="例：小明化工廠" color="primary" v-if="appState.isEditName" />
+        <v-select :items="factoryTypeItems" v-model="formState.factory_type" solo outlined placeholder="未選擇" v-if="appState.isEditType" />
+
       </div>
-      <v-btn x-large rounded class="w-100 primary" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments">
-        新增工廠描述
+      <v-btn x-large rounded class="w-100 primary" :disabled="!isCurrentFieldValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateFactory">
+        {{ updateFormButton }}
       </v-btn>
     </div>
 
-    <v-dialog v-model="appState.isEditCommentMode" persistent max-width="395" v-if="$vuetify.breakpoint.mdAndUp">
+    <!-- Update factory field modal (Mobile) -->
+    <v-dialog v-model="appState.isEditFactoryMode" persistent max-width="395" v-if="$vuetify.breakpoint.mdAndUp">
       <div class="update-factory-comment-modal w-100 px-4 py-4 d-flex flex-column justify-between">
         <div class="d-flex justify-end">
-          <v-btn icon @click="cancelUpdateFactoryComments">
+          <v-btn icon @click="cancelUpdateFactory">
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </div>
         <div>
-          <h3 class="mb-3">工廠描述</h3>
-          <v-textarea outlined solo v-model="others" placeholder="例：常常散發異味" />
+          <h3 class="mb-3">{{ updateFormTitle }}</h3>
+
+          <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" v-if="appState.isEditComment" />
+          <v-text-field outlined v-model="formState.name" placeholder="例：小明化工廠" color="primary" v-if="appState.isEditName" />
+          <v-select :items="factoryTypeItems" v-model="formState.factory_type" solo outlined placeholder="未選擇" v-if="appState.isEditType" />
         </div>
-        <v-btn x-large rounded class="w-100" :disabled="!commentsValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateComments" color="primary">
-          新增工廠描述
+        <v-btn x-large rounded class="w-100" :disabled="!isCurrentFieldValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateFactory" color="primary">
+          {{ updateFormButton }}
         </v-btn>
       </div>
     </v-dialog>
@@ -104,11 +115,13 @@
 import { useUpdateFactoryImage } from '@/lib/imageUpload'
 import { updateFactoryImages, updateFactory } from '@/api'
 import { computed, createComponent, inject, reactive, ref } from '@vue/composition-api'
+import { useGA } from '@/lib/useGA'
 import { useAppState } from '../lib/appState'
 import { useModalState } from '../lib/hooks'
 import ImageUploadForm from './ImageUploadForm.vue'
 import { MainMapControllerSymbol } from '@/symbols'
 import { MapFactoryController } from '@/lib/map'
+import { FACTORY_TYPE } from '@/types'
 
 export default createComponent({
   name: 'UpdateFactorySteps',
@@ -119,6 +132,7 @@ export default createComponent({
     const [appState, { pageTransition }] = useAppState()
     const [, modalActions] = useModalState()
     const mapController = inject(MainMapControllerSymbol, ref<MapFactoryController>())
+    const { event } = useGA()
 
     const {
       selectedImages,
@@ -175,26 +189,79 @@ export default createComponent({
       pageTransition.cancelUpdateFactoryImages()
     }
 
-    const cancelUpdateFactoryComments = () => {
+    const cancelUpdateFactory = () => {
       discardDialog.value = false
       pageTransition.cancelUpdateFactoryComment()
     }
 
-    const others = ref('')
-    const submitting = ref(false)
-    const commentsValid = computed(() => others.value.length > 0 && !submitting.value)
+    const formState = reactive({
+      others: '',
+      name: appState.factoryData?.name,
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      factory_type: appState.factoryData?.type,
+      submitting: false
+    })
 
-    const submitUpdateComments = async () => {
-      if (!appState.factoryData?.id || !others.value) {
+    const factoryTypeItems: Array<{ text: string, value?: string }> = [
+      ...FACTORY_TYPE
+    ]
+
+    const validStates = {
+      others: computed(() => formState.others.length > 0 && !formState.submitting),
+      name: computed(() => formState?.name?.length && formState.name?.length > 0 && !formState.submitting),
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      factory_type: computed(() => !!formState.factory_type && !formState.submitting)
+    }
+
+    const isCurrentFieldValid = computed(() => {
+      const field = appState.updateFactoryField as 'others' | 'name' | 'factory_type'
+      return validStates[field].value
+    })
+
+    const updateFormAppTitle = computed(() => {
+      return appState.isEditComment ? '補充工廠描述'
+        : appState.isEditName ? '更改外部文字' : '更改工廠類型'
+    })
+
+    const updateFormTitle = computed(() => {
+      if (appState.isEditComment) {
+        return '工廠描述'
+      } else if (appState.isEditName) {
+        return '工廠外部文字'
+      } else if (appState.isEditType) {
+        return '工廠類型'
+      }
+    })
+
+    const updateFormButton = computed(() => {
+      if (appState.isEditComment) {
+        return '新增工廠描述'
+      } else if (appState.isEditName) {
+        return '確認更改工廠外部文字'
+      } else if (appState.isEditType) {
+        return '確認更改工廠類型'
+      }
+    })
+
+    const submitUpdateFactory = async () => {
+      if (!appState.factoryData?.id || !isCurrentFieldValid.value) {
         return
       }
 
-      submitting.value = true
+      formState.submitting = true
 
       try {
-        await updateFactory(appState.factoryData?.id, {
-          others: others.value
+        const field = appState.updateFactoryField as 'others' | 'name' | 'factory_type'
+
+        event('updateFactory', { field })
+        const factory = await updateFactory(appState.factoryData?.id, {
+          [field]: formState[field]
         })
+
+        if (mapController.value) {
+          mapController.value.updateFactory(factory.id, factory)
+          appState.factoryData = factory
+        }
 
         // TOOD: comments not displayed or stored in factory data for now
 
@@ -202,7 +269,7 @@ export default createComponent({
         modalActions.openUpdateFactorySuccessModal()
       } catch (err) {}
 
-      submitting.value = false
+      formState.submitting = false
     }
 
     return {
@@ -218,10 +285,17 @@ export default createComponent({
       imagesValid,
       submitImageUpload,
       cancelUpdateFactoryImages,
-      cancelUpdateFactoryComments,
-      others,
-      commentsValid,
-      submitUpdateComments
+      cancelUpdateFactory,
+
+      updateFormAppTitle,
+      updateFormTitle,
+      updateFormButton,
+
+      formState,
+      isCurrentFieldValid,
+      factoryTypeItems,
+
+      submitUpdateFactory
     }
   }
 })

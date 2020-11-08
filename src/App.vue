@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary" dark clipped-right v-show="appState.isInitialState || (appState.isEditCommentMode && $vuetify.breakpoint.mdAndUp)">
+    <v-app-bar app color="primary" dark clipped-right v-show="appState.isInitialState || (appState.isEditFactoryMode && $vuetify.breakpoint.mdAndUp)">
       <v-btn icon class="d-sm-none" style="visibility: hidden;">
         <v-icon>mdi-temp</v-icon>
       </v-btn>
