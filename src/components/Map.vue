@@ -2,7 +2,7 @@
   <div class="map-container">
     <div ref="root" class="map"></div>
 
-    <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }">
+    <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }" v-if="appState.isInitialPage">
       <display-setting-bottom-sheet />
       <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
         <v-icon :color="button.color">mdi-map-marker</v-icon>

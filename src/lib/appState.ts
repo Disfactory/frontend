@@ -42,7 +42,8 @@ export const provideAppState = () => {
     updateFactoryField: string,
     isEditComment: boolean,
     isEditName: boolean,
-    isEditType: boolean
+    isEditType: boolean,
+    isInitialPage: boolean
   } = reactive({
     // Page state
     pageState: PageState.INITIAL,
@@ -65,6 +66,7 @@ export const provideAppState = () => {
 
     selectFactoryMode: computed(() => appState.pageState === PageState.CREATE_FACTORY_1),
     formPageOpen: computed(() => CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
+    isInitialPage: computed(() => appState.pageState === PageState.INITIAL),
 
     // map states
     mapLngLat: [] as number[],
