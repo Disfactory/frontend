@@ -18,7 +18,7 @@
     "vue": "^2.6.10",
     "vue-carousel": "^0.18.0",
     "vue-gtag": "^1.1.1",
-    "vuetify": "^2.3.4"
+    "vuetify": "^2.3.17"
   },
   "devDependencies": {
     "@types/ol": "^5.3.6",
