@@ -17,7 +17,7 @@ module.exports = {
   },
   pwa: {
     name: '農地違章工廠',
-    themeColor: '#2196f3',
+    themeColor: '#697F01',
     workboxOptions: {
       skipWaiting: true,
       clientsClaim: true
