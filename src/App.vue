@@ -119,7 +119,7 @@
       <about-modal :open="modalState.aboutModalOpen" :dismiss="modalActions.closeAboutModal" />
       <contact-modal :open="modalState.contactModalOpen" :dismiss="modalActions.closeContactModal" />
       <getting-started-modal :open="modalState.gettingStartedModalOpen" :dismiss="modalActions.closeGettingStartedModal" />
-      <safety-modal :open="modalState.safetyModalOpen" :dismiss="modalActions.closeSafetyModal" />
+      <safety-modal v-model="modalState.safetyModalOpen" />
       <tutorial-modal :open="modalState.tutorialModalOpen" :dismiss="modalActions.closeTutorialModal" />
       <ios-version-modal :open="modalState.supportIOSVersionModalOpen" :dismiss="modalActions.closesupportIOSVersionModal" />
       <!-- alert or modal -->

@@ -11,7 +11,7 @@
 
         <p>
           地球公民基金會<br>
-          TEL: 07-2156809<br>
+          TEL: 02-23920371<br>
           Email: <a href="mailto:cet@cet-taiwan.org">cet@cet-taiwan.org</a><br>
         </p>
       </div>
