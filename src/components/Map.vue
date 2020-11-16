@@ -260,6 +260,12 @@ export default createComponent({
   width: 100%;
   left: 0;
   bottom: 0px;
+
+  .v-btn.v-size--large {
+    font-size: 24px;
+    height: 48px;
+    padding: 0 35px;
+  }
 }
 
 .center-point {
