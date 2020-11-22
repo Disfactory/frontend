@@ -38,12 +38,12 @@ export const FactoryDisplayStatuses: FactoryDisplayStatus[] = [
   {
     type: 1,
     name: '已排程稽查',
-    color: '#457287'
+    color: '#C8D48D'
   },
   {
     type: 2,
     name: '陳述意見期',
-    color: '#C8D48D'
+    color: '#457287'
   },
   {
     type: 3,
