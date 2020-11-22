@@ -13,31 +13,81 @@ export const FACTORY_TYPE = [
 ] as const
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
-export const FactoryDisplayStatusText = [
-  '已檢舉',
-  '已排程稽查',
-  '陳述意見期',
-  '已勒令停工',
-  '已發函斷電',
-  '已排程拆除',
-  '已拆除',
-  '不再追蹤'
-] as const
+export type FactoryDisplayStatusType = 'default' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 
-export const FactoryDisplayStatusColors = [
-  '#697F01',
-  '#C8D48D',
-  '#457287',
-  '#E59B9B',
-  '#CF5E5D',
-  '#A22A29',
-  '#364516',
-  '#A1A1A1'
+export const defaultFactoryDisplayStatuses = [
+  'default', 0, 1, 2, 3, 4, 5, 6, 7
+] as FactoryDisplayStatusType[]
+
+type FactoryDisplayStatus = {
+  type: FactoryDisplayStatusType,
+  name: string,
+  color: string
+}
+export const FactoryDisplayStatuses: FactoryDisplayStatus[] = [
+  {
+    type: 'default',
+    name: '疑似工廠',
+    color: '#D27E00'
+  },
+  {
+    type: 0,
+    name: '已檢舉',
+    color: '#697F01'
+  },
+  {
+    type: 1,
+    name: '已排程稽查',
+    color: '#457287'
+  },
+  {
+    type: 2,
+    name: '陳述意見期',
+    color: '#C8D48D'
+  },
+  {
+    type: 3,
+    name: '已勒令停工',
+    color: '#E59B9B'
+  },
+  {
+    type: 4,
+    name: '已發函斷電',
+    color: '#CF5E5D'
+  },
+  {
+    type: 5,
+    name: '已排程拆除',
+    color: '#A22A29'
+  },
+  {
+    type: 6,
+    name: '已拆除',
+    color: '#364516'
+  },
+  {
+    type: 7,
+    name: '不再追蹤',
+    color: '#A1A1A1'
+  }
 ]
 
-export type FactoryDisplayStatusType = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+const FactoryDisplayStatusMap = FactoryDisplayStatuses.reduce((acc, c) => {
+  return {
+    ...acc,
+    [c.type]: c
+  }
+}, {}) as {
+  [key in FactoryDisplayStatusType]: FactoryDisplayStatus
+}
 
-export const defaultFactoryDisplayStatuses = new Array(8).fill(0).map((_, i) => i) as FactoryDisplayStatusType[]
+export const getDisplayStatusText = (status: FactoryDisplayStatusType) => {
+  return FactoryDisplayStatusMap[status].name
+}
+
+export const getDisplayStatusColor = (status: FactoryDisplayStatusType) => {
+  return FactoryDisplayStatusMap[status].color
+}
 
 export type FactoryImage = {
   id: string,
@@ -59,7 +109,7 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  document_display_status?: typeof FactoryDisplayStatusText[number]
+  document_display_status?: string
 }
 
 export type FactoriesResponse = Array<FactoryData>

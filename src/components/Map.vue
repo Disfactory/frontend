@@ -39,7 +39,7 @@ import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Overlay } from 'ol'
 import OverlayPositioning from 'ol/OverlayPositioning'
-import { FactoryDisplayStatusText, FactoryDisplayStatusColors, defaultFactoryDisplayStatuses, FactoryDisplayStatusType } from '../types'
+import { defaultFactoryDisplayStatuses, FactoryDisplayStatusType, getDisplayStatusColor, getDisplayStatusText } from '../types'
 import { useGA } from '@/lib/useGA'
 import { useModalState } from '../lib/hooks'
 import { useAppState } from '../lib/appState'
@@ -193,8 +193,8 @@ export default createComponent({
     }
 
     const filterButtonsData = defaultFactoryDisplayStatuses.map(v => ({
-      text: FactoryDisplayStatusText[v],
-      color: FactoryDisplayStatusColors[v],
+      text: getDisplayStatusText(v),
+      color: getDisplayStatusColor(v),
       value: v
     }))
 

@@ -12,7 +12,7 @@ import { Zoom, ScaleLine, Rotate } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
 
-import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusColors, FactoryDisplayStatusType, FactoryDisplayStatusText } from '../types'
+import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, FactoryDisplayStatuses } from '../types'
 import { flipArgriculturalLand } from '../lib/image'
 import RenderFeature from 'ol/render/Feature'
 import { MapOptions } from 'ol/PluggableMap'
@@ -20,11 +20,15 @@ import IconOrigin from 'ol/style/IconOrigin'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
-  return FactoryDisplayStatusColors[status]
+  return FactoryDisplayStatuses.find(s => s.type === status)?.color
 }
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
-  return factory.document_display_status ? FactoryDisplayStatusText.indexOf(factory.document_display_status) as FactoryDisplayStatusType : 0
+  if (factory.document_display_status) {
+    return FactoryDisplayStatuses.find(s => s.name === factory.document_display_status)?.type as FactoryDisplayStatusType
+  } else {
+    return FactoryDisplayStatuses[0].type
+  }
 }
 
 export enum BASE_MAP {

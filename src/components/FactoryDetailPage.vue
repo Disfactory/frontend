@@ -116,7 +116,7 @@ import { getFactoryTypeText } from '@/lib/factory'
 import useScroll from '@/lib/hooks/useScroll'
 
 import { useAppState } from '../lib/appState'
-import { FactoryImage, FactoryDisplayStatusText } from '../types'
+import { FactoryImage, getDisplayStatusText } from '../types'
 
 export default createComponent({
   name: 'FactoryDetailPage',
@@ -141,7 +141,7 @@ export default createComponent({
 
     const factoryStatusText = computed(() => {
       if (typeof factoryStatus.value !== 'undefined') {
-        return FactoryDisplayStatusText[factoryStatus.value]
+        return getDisplayStatusText(factoryStatus.value)
       } else {
         return ''
       }
