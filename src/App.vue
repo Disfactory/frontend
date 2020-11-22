@@ -29,7 +29,7 @@
       </div>
       <v-app-bar-nav-icon class="d-flex d-sm-none" @click="drawer = !drawer" />
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" app right temporary>
+    <v-navigation-drawer v-model="drawer" app right temporary class="app-sidebar">
       <v-list
         nav
         dense
@@ -225,6 +225,12 @@ export default createComponent({
   .v-application--wrap {
     min-height: unset !important;
     max-height: 100%;
+  }
+}
+
+.app-sidebar {
+  .v-list-item--dense .v-list-item__title, .v-list-item--dense .v-list-item__subtitle, .v-list--dense .v-list-item .v-list-item__title, .v-list--dense .v-list-item .v-list-item__subtitle {
+    font-size: 16px;
   }
 }
 
