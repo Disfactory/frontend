@@ -13,33 +13,81 @@ export const FACTORY_TYPE = [
 ] as const
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
-type CetReportStatus = 'A' | 'B'
+export type FactoryDisplayStatusType = 'default' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
 
-export const CetReportStatusText = {
-  A: '未舉報',
-  B: '已舉報'
+export const defaultFactoryDisplayStatuses = [
+  'default', 0, 1, 2, 3, 4, 5, 6, 7
+] as FactoryDisplayStatusType[]
+
+type FactoryDisplayStatus = {
+  type: FactoryDisplayStatusType,
+  name: string,
+  color: string
 }
-
-export enum FactoryStatus {
-  NEW = 'NEW',
-  EXISTING_INCOMPLETE = 'EXISTING_INCOMPLETE',
-  EXISTING_COMPLETE = 'EXISTING_COMPLETE',
-  REPORTED = 'REPORTED'
-}
-
-export const FactoryStatusText = {
-  [FactoryStatus.NEW]: ['民眾回報工廠'],
-  [FactoryStatus.EXISTING_COMPLETE]: ['政府盤查工廠'],
-  [FactoryStatus.EXISTING_INCOMPLETE]: ['政府盤查工廠', '資料不齊'],
-  [FactoryStatus.REPORTED]: ['已舉報違章工廠']
-}
-
-export const FACTORY_STATUS_ITEMS: FactoryStatus[] = [
-  FactoryStatus.NEW,
-  FactoryStatus.EXISTING_COMPLETE,
-  FactoryStatus.EXISTING_INCOMPLETE,
-  FactoryStatus.REPORTED
+export const FactoryDisplayStatuses: FactoryDisplayStatus[] = [
+  {
+    type: 'default',
+    name: '疑似工廠',
+    color: '#D27E00'
+  },
+  {
+    type: 0,
+    name: '已檢舉',
+    color: '#697F01'
+  },
+  {
+    type: 1,
+    name: '已排程稽查',
+    color: '#C8D48D'
+  },
+  {
+    type: 2,
+    name: '陳述意見期',
+    color: '#457287'
+  },
+  {
+    type: 3,
+    name: '已勒令停工',
+    color: '#E59B9B'
+  },
+  {
+    type: 4,
+    name: '已發函斷電',
+    color: '#CF5E5D'
+  },
+  {
+    type: 5,
+    name: '已排程拆除',
+    color: '#A22A29'
+  },
+  {
+    type: 6,
+    name: '已拆除',
+    color: '#364516'
+  },
+  {
+    type: 7,
+    name: '不再追蹤',
+    color: '#A1A1A1'
+  }
 ]
+
+const FactoryDisplayStatusMap = FactoryDisplayStatuses.reduce((acc, c) => {
+  return {
+    ...acc,
+    [c.type]: c
+  }
+}, {}) as {
+  [key in FactoryDisplayStatusType]: FactoryDisplayStatus
+}
+
+export const getDisplayStatusText = (status: FactoryDisplayStatusType) => {
+  return FactoryDisplayStatusMap[status].name
+}
+
+export const getDisplayStatusColor = (status: FactoryDisplayStatusType) => {
+  return FactoryDisplayStatusMap[status].color
+}
 
 export type FactoryImage = {
   id: string,
@@ -49,6 +97,7 @@ export type FactoryImage = {
 
 export type FactoryData = {
   id: string,
+  display_number: string,
   lat: number,
   lng: number,
   name: string,
@@ -60,14 +109,14 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  cet_report_status: CetReportStatus
+  document_display_status?: string
 }
 
 export type FactoriesResponse = Array<FactoryData>
 
 export type FactoryPostData = {
   name: string,
-  type: FactoryType,
+  type?: FactoryType,
   images?: string[],
   others?: string,
   lat: number,

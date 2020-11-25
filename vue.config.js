@@ -10,22 +10,25 @@ module.exports = {
           '^/server': ''
         }
       }
-    }
-  },
-  chainWebpack: config => {
-    if (process.env.NODE_ENV === 'development') {
-      config
-        .output
-        .filename('[name].[hash].js')
-        .end()
+    },
+    headers: {
+      'Cache-Control': 'no-store'
     }
   },
   pwa: {
     name: '農地違章工廠',
-    themeColor: '#2196f3',
+    themeColor: '#697F01',
     workboxOptions: {
       skipWaiting: true,
       clientsClaim: true
+    }
+  },
+  transpileDependencies: [
+    'vuetify'
+  ],
+  chainWebpack: (config) => {
+    if (process.env.NODE_ENV === 'development') {
+      config.plugins.delete('preload')
     }
   }
 }
