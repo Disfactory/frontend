@@ -48,7 +48,7 @@ export const provideAppState = () => {
     // Page state
     pageState: PageState.INITIAL,
 
-    factoryData: null as FactoryData | null,
+    factoryData: null,
     factoryLocation: [] as number[],
 
     isCreateMode: computed(() => CreateFactoryPageState.includes(appState.pageState)),
@@ -208,6 +208,10 @@ const registerMutator = (appState: AppState) => {
   }
 
   function collapseFactoryDetail () {
+    if (appState.factoryData?.feature?.get('defaultStyle')) {
+      appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
+      appState.factoryData?.feature?.unset('defaultStyle')
+    }
     appState.factoryDetailsExpanded = false
     appState.factoryData = null
   }
