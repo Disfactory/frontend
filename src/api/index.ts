@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage } from '@/types'
+import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage, ReportRecord } from '@/types'
 import EXIF from '@disfactory/exif-js'
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_URL : '/server/api'
@@ -84,6 +84,11 @@ function readImageExif (file: File): Promise<AfterExifData> {
   })
 }
 
+export type UploadedImage = {
+  token: string,
+  src: string
+}
+
 async function uploadExifAndGetToken ({ link, file }: { link: string, file: File }) {
   const exifData = await readImageExif(file)
   const { data }: { data: ImageResponse } = await instance.post('/images', { url: link, ...exifData })
@@ -91,7 +96,7 @@ async function uploadExifAndGetToken ({ link, file }: { link: string, file: File
   return {
     token: data.token,
     src: URL.createObjectURL(file)
-  }
+  } as UploadedImage
 }
 
 export async function uploadImages (files: FileList): Promise<UploadedImages> {
@@ -140,5 +145,15 @@ export async function updateFactory (factoryId: string, factoryData: Partial<Upd
   } catch (err) {
     console.error(err)
     throw new TypeError('Update factory failed')
+  }
+}
+
+export async function getFactoryReportRecords (factoryId: string) {
+  try {
+    const { data }: { data: ReportRecord[] } = await instance.get(`/factories/${factoryId}/report_records`)
+    return data
+  } catch (err) {
+    console.error(err)
+    throw new TypeError('Fetch factory error')
   }
 }

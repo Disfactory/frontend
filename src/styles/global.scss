@@ -1,6 +1,8 @@
 @import './variables.scss';
 @import '~ol/ol.css';
 @import './openlayer';
+@import './vuetify-extend';
+@import './utils';
 
 html,
 body {
@@ -14,6 +16,10 @@ body {
   touch-action: manipulation;
 }
 
+html {
+  overflow-y: hidden;
+}
+
 * {
   line-height: 1;
   box-sizing: border-box;
@@ -22,4 +28,15 @@ body {
 
 *:focus {
   outline:none
+}
+
+.required:after {
+  content: '*';
+  color: #A22A29;
+  font-size: 13px;
+  position: absolute;
+}
+
+.color-gray-light {
+  color: $gray-light-color;
 }
