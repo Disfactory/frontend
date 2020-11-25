@@ -124,3 +124,9 @@ export type FactoryPostData = {
   nickname?: string,
   contact?: string
 }
+
+export type ReportRecord = {
+  id: string,
+  created_at: string,
+  others?: string
+}

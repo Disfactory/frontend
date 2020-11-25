@@ -92,7 +92,12 @@
           </v-btn>
 
           <h3 class="mb-1">工廠描述</h3>
-          <v-btn outlined @click="startUpdateFactoryCommentFor('others')">補充工廠描述</v-btn>
+          <v-btn outlined @click="startUpdateFactoryCommentFor('others')" class="mb-2">補充工廠描述</v-btn>
+
+          <div v-for="(desc, index) in pastDescriptions" :key="index" class="mt-2" style="font-size: 14px">
+            <p class="color-gray-light mb-1">{{ desc.date }}</p>
+            <p style="line-height: 24px;">{{ desc.others }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -109,14 +114,15 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref, onUpdated } from '@vue/composition-api'
+import { createComponent, computed, ref, onUpdated, watch } from '@vue/composition-api'
 import copy from 'copy-to-clipboard'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
 import useScroll from '@/lib/hooks/useScroll'
+import { getFactoryReportRecords } from '@/api'
 
 import { useAppState } from '../lib/appState'
-import { FactoryImage, getDisplayStatusText } from '../types'
+import { FactoryImage, getDisplayStatusText, ReportRecord } from '../types'
 
 export default createComponent({
   name: 'FactoryDetailPage',
@@ -229,6 +235,28 @@ export default createComponent({
       pageTransition.startUpdateFactoryComment(field)
     }
 
+    const reportRecords = ref<ReportRecord[]>([])
+    watch(() => appState.factoryData, function () {
+      if (appState.factoryData) {
+        (async () => {
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          reportRecords.value = await getFactoryReportRecords(appState.factoryData?.id!)
+        })()
+      }
+    })
+    const pastDescriptions = computed(() => {
+      return reportRecords.value.sort((a, b) => {
+        return new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1
+      }).map(record => {
+        const date = new Date(record.created_at)
+        const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDay()}`
+        return {
+          date: dateStr,
+          others: record.others
+        }
+      }).filter(rec => rec.others)
+    })
+
     return {
       full,
       appState,
@@ -243,6 +271,7 @@ export default createComponent({
       factoryId,
       factoryType,
       factoryName,
+      pastDescriptions,
       longitude,
       latitude,
       factoryDetailScrollerRef,

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage } from '@/types'
+import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage, ReportRecord } from '@/types'
 import EXIF from '@disfactory/exif-js'
 
 const baseURL = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_URL : '/server/api'
@@ -145,5 +145,15 @@ export async function updateFactory (factoryId: string, factoryData: Partial<Upd
   } catch (err) {
     console.error(err)
     throw new TypeError('Update factory failed')
+  }
+}
+
+export async function getFactoryReportRecords (factoryId: string) {
+  try {
+    const { data }: { data: ReportRecord[] } = await instance.get(`/factories/${factoryId}/report_records`)
+    return data
+  } catch (err) {
+    console.error(err)
+    throw new TypeError('Fetch factory error')
   }
 }
