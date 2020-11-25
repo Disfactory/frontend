@@ -37,7 +37,7 @@ import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vu
 import { initializeMap, MapFactoryController } from '../lib/map'
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
-import { Overlay } from 'ol'
+import { Feature, Overlay } from 'ol'
 import OverlayPositioning from 'ol/OverlayPositioning'
 import { defaultFactoryDisplayStatuses, FactoryDisplayStatusType, getDisplayStatusColor, getDisplayStatusText } from '../types'
 import { useGA } from '@/lib/useGA'
@@ -46,6 +46,7 @@ import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 import { permalink } from '../lib/permalink'
 import { waitNextTick } from '../lib/utils'
+import { Stroke, Style } from 'ol/style'
 
 export default createComponent({
   components: {
@@ -70,11 +71,12 @@ export default createComponent({
     const [appState, { openEditFactoryForm, pageTransition, expandFactoryDetail }] = useAppState()
     const [, alertActions] = useAlertState()
 
-    const openFactoryDetail = (id: string) => {
+    const openFactoryDetail = (feature: Feature) => {
       if (!mapControllerRef.value) return
-      const factory = mapControllerRef.value.getFactory(id)
+      const factory = mapControllerRef.value.getFactory(feature.getId() as string)
 
       if (factory) {
+        factory.feature = feature
         appState.factoryData = factory
       }
     }
@@ -122,9 +124,22 @@ export default createComponent({
           }
         }, // TODO: do on start move to lock selection
         onClicked: async function (_, feature) {
+          if (appState.factoryData?.feature?.get('defaultStyle')) {
+            appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
+            appState.factoryData?.feature?.unset('defaultStyle')
+          }
           if (feature) {
+            if ('setStyle' in feature) {
+              const originalStyle = (feature.getStyle() as Style).clone()
+              feature.set('defaultStyle', originalStyle.clone())
+              const originalImage = originalStyle.getImage().clone()
+              originalImage.setScale(1.25)
+              originalStyle.setImage(originalImage)
+              originalStyle.setZIndex(2)
+              feature.setStyle(originalStyle)
+            }
             event('clickFactoryPin')
-            openFactoryDetail(feature.getId() as string)
+            openFactoryDetail(feature as Feature)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
               expandFactoryDetail()

@@ -1,3 +1,5 @@
+import Feature from 'ol/Feature'
+
 /* eslint-disable quote-props */
 export const FACTORY_TYPE = [
   { value: '2-1', text: '金屬: 沖床、銑床、車床、鏜孔' },
@@ -109,7 +111,8 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  document_display_status?: string
+  document_display_status?: string,
+  feature?: Feature
 }
 
 export type FactoriesResponse = Array<FactoryData>
