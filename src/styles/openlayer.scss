@@ -3,7 +3,7 @@
 
 
 .ol-control {
-  background: none;
+  background: white;
   cursor: pointer;
 
   &:hover {
@@ -18,21 +18,22 @@
   }
 
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
-  border: solid 1px #ffffff;
 }
 
 .ol-zoom, .ol-fit-location, .ol-map-search {
-  background-color: $primary-color;
+  color: $primary-color;
+
   border-radius: 9px;
   left: 21px;
 
   &:hover {
-    background-color: $primary-color;
+    background-color: #f5f5f5;
   }
 }
 
 .ol-zoom {
-  top: 78px;
+  top: auto;
+  bottom: 100px;
 
   .ol-zoom-in,
   .ol-zoom-out {
@@ -51,7 +52,7 @@
 }
 
 .ol-fit-location {
-  top: 161px;
+  bottom: 185px;
 
   &.ol-control button {
     padding: 2px;
@@ -77,14 +78,18 @@
   }
 }
 
-.ol-rotate {
-  background-color: $primary-color;
+.ol-rotate{
+  left: 21px;
+  right: auto;
+  bottom: 235px;
+  top: auto;
 
   &:hover {
-    background-color: $primary-color;
+    background-color: #f5f5f5;
   }
 
   .ol-compass {
+    color: $primary-color;
     margin-top: -5px;
   }
 }
