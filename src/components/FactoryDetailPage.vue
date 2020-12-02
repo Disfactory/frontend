@@ -60,8 +60,10 @@
       </v-slide-group>
 
       <div class="mt-4 mx-3 mb-2">
+        <!--
         <h3 class="mb-1">地段 / 地址</h3>
         <p class="mb-5">台中市大雅區自強段（701）7 地號</p>
+        -->
 
         <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
           <h3 class="mb-1">經緯度</h3>
