@@ -24,7 +24,7 @@
 
           <carousel :per-page="1" paginationActiveColor='#6E8501' paginationColor='#e3e3e3' :paginationPadding="5" ref="createCarousel">
             <slide v-for="(image, index) in addImages" :key="image">
-              <h2>新增違章工廠({{index + 1}}/5)</h2>
+              <h2>新增違章工廠({{index + 1}}/7)</h2>
               <img :src="image">
             </slide>
           </carousel>
@@ -33,7 +33,7 @@
         <div id="tutorial-update-factory" v-show="isUpdate">
           <carousel :per-page="1" paginationActiveColor='#6E8501' paginationColor='#e3e3e3' :paginationPadding="5" ref="updateCarousel">
             <slide v-for="(image, index) in updateImages" :key="image">
-              <h2>補充工廠資訊({{index + 1}}/2)</h2>
+              <h2>補充工廠資訊({{index + 1}}/4)</h2>
               <img :src="image">
             </slide>
           </carousel>
@@ -87,8 +87,8 @@ export default createComponent({
       page.value = 'update'
     }
 
-    const addImages = new Array(5).fill(true).map((_, index) => `/images/tutorial/new_${index + 1}.png`)
-    const updateImages = new Array(2).fill(true).map((_, index) => `/images/tutorial/update_${index + 1}.png`)
+    const addImages = new Array(7).fill(true).map((_, index) => `/images/tutorial/create-${index + 1}.jpg`)
+    const updateImages = new Array(4).fill(true).map((_, index) => `/images/tutorial/update-${index + 1}.jpg`)
 
     const onDismissClick = () => {
       openHome()
