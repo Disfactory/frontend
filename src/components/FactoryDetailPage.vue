@@ -48,14 +48,14 @@
       </v-card-text>
 
       <v-slide-group :show-arrows="images > 0 ? 'desktop' : false" ref="slideGroup">
-        <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
-          <img :src="image.url" class="factory-slide-image" />
-        </v-slide-item>
         <v-slide-item>
           <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
             <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
             補充照片
           </div>
+        </v-slide-item>
+        <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
+          <img :src="image.url" class="factory-slide-image" />
         </v-slide-item>
       </v-slide-group>
 
