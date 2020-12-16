@@ -172,11 +172,13 @@ export default createComponent({
     const factoryType = computed(() => {
       if (appState.factoryData) {
         return getFactoryTypeText(appState.factoryData)
+      } else {
+        return null
       }
     })
 
     const factoryName = computed(() => {
-      return appState.factoryData?.name
+      return appState.factoryData?.name || ''
     })
 
     const factoryAddressAndLandcode = computed(() => {
@@ -184,6 +186,8 @@ export default createComponent({
         const { townname, sectname, sectcode, landcode } = appState.factoryData
         // 白鷺段（1005）817地號
         return `${townname} ${sectname} (${sectcode}) ${landcode}地號`
+      } else {
+        return ''
       }
     })
 
