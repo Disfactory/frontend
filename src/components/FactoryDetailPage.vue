@@ -60,10 +60,8 @@
       </v-slide-group>
 
       <div class="mt-4 mx-3 mb-2">
-        <!--
         <h3 class="mb-1">地段 / 地址</h3>
-        <p class="mb-5">台中市大雅區自強段（701）7 地號</p>
-        -->
+        <p class="mb-5" style="line-height: 1.3;">{{ factoryAddressAndLandcode }}</p>
 
         <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
           <h3 class="mb-1">經緯度</h3>
@@ -174,11 +172,23 @@ export default createComponent({
     const factoryType = computed(() => {
       if (appState.factoryData) {
         return getFactoryTypeText(appState.factoryData)
+      } else {
+        return null
       }
     })
 
     const factoryName = computed(() => {
-      return appState.factoryData?.name
+      return appState.factoryData?.name || ''
+    })
+
+    const factoryAddressAndLandcode = computed(() => {
+      if (appState.factoryData) {
+        const { townname, sectname, sectcode, landcode } = appState.factoryData
+        // 白鷺段（1005）817地號
+        return `${townname} ${sectname} (${sectcode}) ${landcode}地號`
+      } else {
+        return ''
+      }
     })
 
     const full = computed(() => appState.factoryDetailsExpanded)
@@ -273,6 +283,7 @@ export default createComponent({
       factoryId,
       factoryType,
       factoryName,
+      factoryAddressAndLandcode,
       pastDescriptions,
       longitude,
       latitude,
