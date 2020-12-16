@@ -104,6 +104,9 @@ export type FactoryData = {
   lng: number,
   name: string,
   landcode: string,
+  townname: string,
+  sectname: string,
+  sectcode: string,
   type: FactoryType,
   images: FactoryImage[],
   // TODO: can be one of https://docs.djangoproject.com/en/2.2/ref/settings/#datetime-input-formats
