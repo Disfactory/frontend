@@ -8,15 +8,15 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "allowJs": true,
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "mocha",
-      "chai",
-      "vuetify"
+      "vuetify",
+      "jest"
     ],
     "paths": {
       "@/*": [
@@ -29,16 +29,13 @@
       "dom.iterable",
       "scripthost"
     ],
-    "typeRoots": [
-      "./node_modules/vuetify/types"
-    ]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx", "src/lib/browserCheck.js"
+    "src/lib/browserCheck.js",
+    "test/**/*.ts"
   ],
   "exclude": [
     "node_modules"
