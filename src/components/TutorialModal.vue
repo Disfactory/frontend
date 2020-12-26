@@ -1,7 +1,7 @@
 <template>
   <div class="tutorial-modal-container">
     <app-modal :open="open" :dismiss="onDismissClick">
-      <div class="back-button" v-if="isAdd || isUpdate" @click="openHome">
+      <div class="back-button" v-if="isAdd || isUpdate" @click="openHome" data-testid="back-button">
         <span />
         <span />
         <span />

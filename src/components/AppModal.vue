@@ -4,7 +4,7 @@
   >
     <div class="app-modal-backdrop" @click="dismiss" data-label="modal-backdrop" />
     <div class="app-modal">
-      <div class="close" @click="dismiss" v-if="showCloseButton" data-label="modal-close" />
+      <div class="close" @click="dismiss" v-if="showCloseButton" data-label="modal-close" data-testid="modal-close" />
       <slot />
     </div>
   </div>
