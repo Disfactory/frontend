@@ -17,6 +17,7 @@
     "register-service-worker": "^1.6.2",
     "vue": "^2.6.10",
     "vue-carousel": "^0.18.0",
+    "vue-cool-lightbox": "^2.7.0",
     "vue-gtag": "^1.1.1",
     "vuetify": "^2.3.17"
   },
