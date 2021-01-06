@@ -445,6 +445,7 @@ export default createComponent({
   height: 68px;
   overflow: hidden;
   object-fit: cover;
+  cursor: pointer;
 }
 
 .copied-message {
