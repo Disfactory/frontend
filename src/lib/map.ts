@@ -14,7 +14,6 @@ import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
 
 import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, FactoryDisplayStatuses } from '../types'
 import { flipArgriculturalLand } from '../lib/image'
-import RenderFeature from 'ol/render/Feature'
 import { MapOptions } from 'ol/PluggableMap'
 import IconOrigin from 'ol/style/IconOrigin'
 
@@ -308,7 +307,7 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
 
 type MapEventHandler = {
   onMoved?: (location: [number, number, number, number], canPlaceFactory: boolean) => void,
-  onClicked?: (location: [number, number], feature?: Feature | RenderFeature) => void,
+  onClicked?: (location: [number, number], feature?: Feature) => void,
   onZoomed?: (zoom: number) => void,
   onLUILayerVisibilityChange?: (visible: boolean) => void
 }
@@ -387,7 +386,7 @@ export class OLMap {
             return layer.getZIndex() !== 5 // TODO: Hack
           }
         })
-        handler.onClicked([lng, lat], feature)
+        handler.onClicked([lng, lat], feature as Feature)
       }
     })
 

@@ -231,7 +231,7 @@ export default createComponent({
       }
 
       const { host, protocol } = window.location
-      const url = `${protocol}//${host}/#map=16/${appState.factoryData?.lng}/${appState.factoryData?.lat}`
+      const url = `${protocol}//${host}/#map=16/${appState.factoryData?.lng}/${appState.factoryData?.lat}&factoryId=${appState.factoryData.id}`
 
       copy(url)
 
