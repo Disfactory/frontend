@@ -70,7 +70,8 @@ const iconStyleMap = defaultFactoryDisplayStatuses.reduce((acc, status) => ({
       anchorYUnits: IconAnchorUnits.PIXELS,
       anchorOrigin: IconOrigin.BOTTOM_LEFT,
       src: getFactoryStatusImage(status)
-    })
+    }),
+    zIndex: defaultFactoryDisplayStatuses.indexOf(status)
   })
 }), {}) as {[key in FactoryDisplayStatusType]: Style}
 
