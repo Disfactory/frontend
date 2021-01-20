@@ -141,13 +141,12 @@ export class MapFactoryController {
 
   public addFactories (factories: FactoryData[]) {
     const createFactoryFeature = this.createFactoryFeature.bind(this)
-    const features = factories
-      .filter(factory => !this.factoryMap.has(factory.id))
-      .map(createFactoryFeature)
+    const filteredFactories = factories.filter(factory => !this.factoryMap.has(factory.id))
+    const features = filteredFactories.map(createFactoryFeature)
 
     this.factoriesLayerSource.addFeatures(features)
 
-    factories.forEach((factory) => this.updateFactory(factory.id, factory))
+    filteredFactories.forEach((factory) => this.updateFactory(factory.id, factory))
   }
 
   public hideFactories (factories: FactoryData[]) {
