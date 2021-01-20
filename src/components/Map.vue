@@ -103,19 +103,19 @@ export default createComponent({
       })
 
       const onClickFactoryFeature = async (_: [number, number], feature?: Feature) => {
+        // unset active factory data style
         if (appState.factoryData?.feature?.get('defaultStyle')) {
           appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
-          appState.factoryData?.feature?.unset('defaultStyle')
         }
+
         if (feature) {
           if ('setStyle' in feature) {
-            const originalStyle = (feature.getStyle() as Style).clone()
-            feature.set('defaultStyle', originalStyle.clone())
-            const originalImage = originalStyle.getImage().clone()
+            const zoomedStyle = (feature.get('defaultStyle') as Style).clone()
+            const originalImage = zoomedStyle.getImage().clone()
             originalImage.setScale(1.25)
-            originalStyle.setImage(originalImage)
-            originalStyle.setZIndex(2)
-            feature.setStyle(originalStyle)
+            zoomedStyle.setImage(originalImage)
+            zoomedStyle.setZIndex(2)
+            feature.setStyle(zoomedStyle)
           }
           event('clickFactoryPin')
           openFactoryDetail(feature)
@@ -126,6 +126,8 @@ export default createComponent({
         } else {
           appState.factoryData = null
         }
+
+        // Workaround map resizing issue
         await waitNextTick(context)
         resizeMap()
       }

@@ -133,7 +133,9 @@ export class MapFactoryController {
     // Update factory feature style base on new data
     const feature = this.factoriesLayerSource.getFeatureById(id)
     if (feature) {
-      feature.setStyle(this.getFactoryStyle(factory))
+      const style = this.getFactoryStyle(factory)
+      feature.set('defaultStyle', style.clone())
+      feature.setStyle(style)
     }
   }
 
@@ -180,7 +182,9 @@ export class MapFactoryController {
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
     feature.setId(factory.id)
-    feature.setStyle(this.getFactoryStyle(factory))
+    const style = this.getFactoryStyle(factory)
+    feature.set('defaultStyle', style.clone())
+    feature.setStyle(style)
 
     return feature
   }
