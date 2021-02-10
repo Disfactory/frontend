@@ -14,7 +14,6 @@ import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
 
 import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, FactoryDisplayStatuses } from '../types'
 import { flipArgriculturalLand } from '../lib/image'
-import RenderFeature from 'ol/render/Feature'
 import { MapOptions } from 'ol/PluggableMap'
 import IconOrigin from 'ol/style/IconOrigin'
 
@@ -134,19 +133,20 @@ export class MapFactoryController {
     // Update factory feature style base on new data
     const feature = this.factoriesLayerSource.getFeatureById(id)
     if (feature) {
-      feature.setStyle(this.getFactoryStyle(factory))
+      const style = this.getFactoryStyle(factory)
+      feature.set('defaultStyle', style.clone())
+      feature.setStyle(style)
     }
   }
 
   public addFactories (factories: FactoryData[]) {
     const createFactoryFeature = this.createFactoryFeature.bind(this)
-    const features = factories
-      .filter(factory => !this.factoryMap.has(factory.id))
-      .map(createFactoryFeature)
+    const filteredFactories = factories.filter(factory => !this.factoryMap.has(factory.id))
+    const features = filteredFactories.map(createFactoryFeature)
 
     this.factoriesLayerSource.addFeatures(features)
 
-    factories.forEach((factory) => this.updateFactory(factory.id, factory))
+    filteredFactories.forEach((factory) => this.updateFactory(factory.id, factory))
   }
 
   public hideFactories (factories: FactoryData[]) {
@@ -181,7 +181,9 @@ export class MapFactoryController {
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
     feature.setId(factory.id)
-    feature.setStyle(this.getFactoryStyle(factory))
+    const style = this.getFactoryStyle(factory)
+    feature.set('defaultStyle', style.clone())
+    feature.setStyle(style)
 
     return feature
   }
@@ -308,7 +310,7 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
 
 type MapEventHandler = {
   onMoved?: (location: [number, number, number, number], canPlaceFactory: boolean) => void,
-  onClicked?: (location: [number, number], feature?: Feature | RenderFeature) => void,
+  onClicked?: (location: [number, number], feature?: Feature) => void,
   onZoomed?: (zoom: number) => void,
   onLUILayerVisibilityChange?: (visible: boolean) => void
 }
@@ -387,7 +389,7 @@ export class OLMap {
             return layer.getZIndex() !== 5 // TODO: Hack
           }
         })
-        handler.onClicked([lng, lat], feature)
+        handler.onClicked([lng, lat], feature as Feature)
       }
     })
 

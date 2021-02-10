@@ -44,9 +44,9 @@ import { useGA } from '@/lib/useGA'
 import { useModalState } from '../lib/hooks'
 import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
-import { permalink } from '../lib/permalink'
+import { moveToSharedFactory, permalink } from '../lib/permalink'
 import { waitNextTick } from '../lib/utils'
-import { Stroke, Style } from 'ol/style'
+import { Style } from 'ol/style'
 
 export default createComponent({
   components: {
@@ -102,6 +102,36 @@ export default createComponent({
         positioning: OverlayPositioning.BOTTOM_LEFT
       })
 
+      const onClickFactoryFeature = async (_: [number, number], feature?: Feature) => {
+        // unset active factory data style
+        if (appState.factoryData?.feature?.get('defaultStyle')) {
+          appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
+        }
+
+        if (feature) {
+          if ('setStyle' in feature) {
+            const zoomedStyle = (feature.get('defaultStyle') as Style).clone()
+            const originalImage = zoomedStyle.getImage().clone()
+            originalImage.setScale(1.25)
+            zoomedStyle.setImage(originalImage)
+            zoomedStyle.setZIndex(2)
+            feature.setStyle(zoomedStyle)
+          }
+          event('clickFactoryPin')
+          openFactoryDetail(feature)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
+            expandFactoryDetail()
+          }
+        } else {
+          appState.factoryData = null
+        }
+
+        // Workaround map resizing issue
+        await waitNextTick(context)
+        resizeMap()
+      }
+
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const mapController = initializeMap(root.value!, {
         onMoved: async function ([longitude, latitude, range, zoom], canPlaceFactory) {
@@ -123,33 +153,7 @@ export default createComponent({
             // TODO: handle here
           }
         }, // TODO: do on start move to lock selection
-        onClicked: async function (_, feature) {
-          if (appState.factoryData?.feature?.get('defaultStyle')) {
-            appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
-            appState.factoryData?.feature?.unset('defaultStyle')
-          }
-          if (feature) {
-            if ('setStyle' in feature) {
-              const originalStyle = (feature.getStyle() as Style).clone()
-              feature.set('defaultStyle', originalStyle.clone())
-              const originalImage = originalStyle.getImage().clone()
-              originalImage.setScale(1.25)
-              originalStyle.setImage(originalImage)
-              originalStyle.setZIndex(2)
-              feature.setStyle(originalStyle)
-            }
-            event('clickFactoryPin')
-            openFactoryDetail(feature as Feature)
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
-              expandFactoryDetail()
-            }
-          } else {
-            appState.factoryData = null
-          }
-          await waitNextTick(context)
-          resizeMap()
-        },
+        onClicked: onClickFactoryFeature,
         onZoomed: function (zoom) {
           permalink.zoom(zoom)
           window.location.hash = permalink.dumps()
@@ -163,6 +167,12 @@ export default createComponent({
             return [permalink.lng()!, permalink.lat()!, permalink.zoom()!]
           }
         }
+      })
+
+      moveToSharedFactory(mapController, window.location, (factoryId) => {
+        const feature = mapController.factoriesLayerSource.getFeatureById(factoryId)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        onClickFactoryFeature([0, 0], feature as Feature)
       })
 
       mapController.mapInstance.map.addOverlay(popupOverlay)
