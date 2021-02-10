@@ -3,11 +3,15 @@ module.exports = {
   env: {
     node: true
   },
+  plugins: ['testing-library', 'jest-dom'],
   'extends': [
     'plugin:vue/essential',
     '@vue/standard',
     '@vue/typescript/recommended',
-    'plugin:@typescript-eslint/recommended-requiring-type-checking'
+    'plugin:@typescript-eslint/recommended-requiring-type-checking',
+    'plugin:testing-library/recommended',
+    'plugin:testing-library/vue',
+    'plugin:jest-dom/recommended'
   ],
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
@@ -32,11 +36,10 @@ module.exports = {
   overrides: [
     {
       files: [
-        '**/__tests__/*.{j,t}s?(x)',
-        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+        '**/__tests__/*.{j,t}s?(x)'
       ],
       env: {
-        mocha: true
+        jest: true
       }
     }
   ]

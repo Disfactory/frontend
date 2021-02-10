@@ -33,12 +33,25 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 10.x
-      - name: Run test
+      - name: Run typecheck
         run: |
           npm ci
           npm run typecheck
+  unit-test:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js 10.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 10.x
+      - name: Run unit test
+        run: |
+          npm ci
+          npm run test
   dev-deploy:
-    needs: [lint, typecheck]
+    needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/master'"
     steps:
@@ -61,7 +74,7 @@ jobs:
           COMMIT_MESSAGE: Deploy [ci skip]
           FOLDER: dist
   production-deploy:
-    needs: [lint, typecheck]
+    needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/production'"
     steps:

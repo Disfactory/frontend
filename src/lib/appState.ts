@@ -210,7 +210,6 @@ const registerMutator = (appState: AppState) => {
   function collapseFactoryDetail () {
     if (appState.factoryData?.feature?.get('defaultStyle')) {
       appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
-      appState.factoryData?.feature?.unset('defaultStyle')
     }
     appState.factoryDetailsExpanded = false
     appState.factoryData = null

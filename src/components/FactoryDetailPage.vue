@@ -1,116 +1,124 @@
 <template>
-  <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }" v-show="!appState.formPageOpen">
-    <div class="factory-detail-scroller" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
-      <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
-        <v-spacer></v-spacer>
-        <v-toolbar-title>
-          <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <div class="btn-container">
-          <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
-          <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
-        </div>
-        <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage">
-          <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
-          已複製連結
-        </div>
-      </v-app-bar>
-
-      <v-card-text>
-        <div class="d-flex justify-between align-items-center mb-3">
-          <span class="factory-status-title">工廠狀態</span>
-
-          <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp" :outlined="showCopiedMessage" :color="showCopiedMessage ? null : 'white'">
-            <v-icon class="mr-1">mdi-share-variant</v-icon>
-            {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
-          </v-btn>
-
-          <span v-else>
-            <v-icon class="mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
-            <v-icon @click="collapseFactoryDetail">mdi-close</v-icon>
-          </span>
-        </div>
-
-        <p class="factory-status secondary--text mb-2" style="clear: both">
-          <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
-        </p>
-
-        <p class="caption mb-0" style="color: #A1A1A1;">
-          工廠編號 {{ factoryId }} <br>
-          最後更新 2020/4/12
-        </p>
-
-        <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
-          <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
-          已複製連結
-        </div>
-      </v-card-text>
-
-      <v-slide-group :show-arrows="images > 0 ? 'desktop' : false" ref="slideGroup">
-        <v-slide-item>
-          <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
-            <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
-            補充照片
+  <div>
+    <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }" v-show="!appState.formPageOpen">
+      <div class="factory-detail-scroller" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
+        <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
+          <v-spacer></v-spacer>
+          <v-toolbar-title>
+            <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
+          </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <div class="btn-container">
+            <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
+            <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
           </div>
-        </v-slide-item>
-        <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }">
-          <img :src="image.url" class="factory-slide-image" />
-        </v-slide-item>
-      </v-slide-group>
+          <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage">
+            <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
+            已複製連結
+          </div>
+        </v-app-bar>
 
-      <div class="mt-4 mx-3 mb-2">
-        <h3 class="mb-1">地段 / 地址</h3>
-        <p class="mb-5" style="line-height: 1.3;">{{ factoryAddressAndLandcode }}</p>
+        <v-card-text>
+          <div class="d-flex justify-between align-items-center mb-3">
+            <span class="factory-status-title">工廠狀態</span>
 
-        <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
-          <h3 class="mb-1">經緯度</h3>
-          <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
-          <p class="text-caption">以上經緯度版本為 WGS84</p>
-        </div>
+            <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp" :outlined="showCopiedMessage" :color="showCopiedMessage ? null : 'white'">
+              <v-icon class="mr-1">mdi-share-variant</v-icon>
+              {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
+            </v-btn>
 
-        <hr v-if="full || $vuetify.breakpoint.mdAndUp">
-        <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
-          顯示更多資訊
-          &nbsp;
-          <v-icon>mdi-menu-down</v-icon>
-        </v-btn>
+            <span v-else>
+              <v-icon class="mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
+              <v-icon @click="collapseFactoryDetail">mdi-close</v-icon>
+            </span>
+          </div>
 
-        <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
-          <h2 class="mb-5">其他工廠資訊</h2>
+          <p class="factory-status secondary--text mb-2" style="clear: both">
+            <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
+          </p>
 
-          <h3 class="mb-1">工廠外部文字</h3>
-          <p class="mb-3" v-if="factoryName">{{ factoryName }}</p>
-          <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('name')">
-            {{ factoryName ? '更改外部文字' : '回報外部文字' }}
+          <p class="caption mb-0" style="color: #A1A1A1;">
+            工廠編號 {{ factoryId }} <br>
+            最後更新 2020/4/12
+          </p>
+
+          <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
+            <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
+            已複製連結
+          </div>
+        </v-card-text>
+
+        <v-slide-group :show-arrows="images > 0 ? 'desktop' : false" ref="slideGroup">
+          <v-slide-item>
+            <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
+              <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
+              補充照片
+            </div>
+          </v-slide-item>
+          <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }" @click.native="setLightboxIndex(index)">
+            <img :src="image.url" class="factory-slide-image" />
+          </v-slide-item>
+        </v-slide-group>
+
+        <div class="mt-4 mx-3 mb-2">
+          <h3 class="mb-1">地段 / 地址</h3>
+          <p class="mb-5" style="line-height: 1.3;">{{ factoryAddressAndLandcode }}</p>
+
+          <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
+            <h3 class="mb-1">經緯度</h3>
+            <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
+            <p class="text-caption">以上經緯度版本為 WGS84</p>
+          </div>
+
+          <hr v-if="full || $vuetify.breakpoint.mdAndUp">
+          <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
+            顯示更多資訊
+            &nbsp;
+            <v-icon>mdi-menu-down</v-icon>
           </v-btn>
 
-          <h3 class="mb-1">工廠類型</h3>
-          <p class="mb-3" v-if="factoryType">{{ factoryType }}</p>
-          <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('factory_type')">
-            {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
-          </v-btn>
+          <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
+            <h2 class="mb-5">其他工廠資訊</h2>
 
-          <h3 class="mb-1">工廠描述</h3>
-          <v-btn outlined @click="startUpdateFactoryCommentFor('others')" class="mb-2">補充工廠描述</v-btn>
+            <h3 class="mb-1">工廠外部文字</h3>
+            <p class="mb-3" v-if="factoryName">{{ factoryName }}</p>
+            <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('name')">
+              {{ factoryName ? '更改外部文字' : '回報外部文字' }}
+            </v-btn>
 
-          <div v-for="(desc, index) in pastDescriptions" :key="index" class="mt-2" style="font-size: 14px">
-            <p class="color-gray-light mb-1">{{ desc.date }}</p>
-            <p style="line-height: 24px;">{{ desc.others }}</p>
+            <h3 class="mb-1">工廠類型</h3>
+            <p class="mb-3" v-if="factoryType">{{ factoryType }}</p>
+            <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('factory_type')">
+              {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
+            </v-btn>
+
+            <h3 class="mb-1">工廠描述</h3>
+            <v-btn outlined @click="startUpdateFactoryCommentFor('others')" class="mb-2">補充工廠描述</v-btn>
+
+            <div v-for="(desc, index) in pastDescriptions" :key="index" class="mt-2" style="font-size: 14px">
+              <p class="color-gray-light mb-1">{{ desc.date }}</p>
+              <p style="line-height: 24px;">{{ desc.others }}</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="factory-detail-scroller px-4 py-5" v-show="!appState.factoryData">
-      <h1 class="secondary--text mb-5">請選擇一個地標</h1>
-      <p>請選擇一間工廠查看工廠詳細資訊。</p>
-    </div>
+      <div class="factory-detail-scroller px-4 py-5" v-show="!appState.factoryData">
+        <h1 class="secondary--text mb-5">請選擇一個地標</h1>
+        <p>請選擇一間工廠查看工廠詳細資訊。</p>
+      </div>
 
-    <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
-      <v-icon color="primary">mdi-menu-left</v-icon>
-    </div>
-  </v-card>
+      <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
+        <v-icon color="primary">mdi-menu-left</v-icon>
+      </div>
+    </v-card>
+
+    <CoolLightBox
+      :items="lightboxItems"
+      :index="lightboxIndex"
+      @close="() => setLightboxIndex(null)">
+    </CoolLightBox>
+  </div>
 </template>
 
 <script lang="ts">
@@ -136,6 +144,22 @@ export default createComponent({
         return []
       }
     })
+
+    const lightboxItems = computed(() => {
+      if (appState.factoryData) {
+        return appState.factoryData.images.map(image => ({
+          title: '',
+          description: '',
+          src: image.url
+        }))
+      } else {
+        return []
+      }
+    })
+    const lightboxIndex = ref<number|null>(null)
+    const setLightboxIndex = (i: number) => {
+      lightboxIndex.value = i
+    }
 
     const factoryStatus = computed(() => {
       if (appState.factoryData) {
@@ -207,7 +231,7 @@ export default createComponent({
       }
 
       const { host, protocol } = window.location
-      const url = `${protocol}//${host}/#map=16/${appState.factoryData?.lng}/${appState.factoryData?.lat}`
+      const url = `${protocol}//${host}/#map=16/${appState.factoryData?.lng}/${appState.factoryData?.lat}&factoryId=${appState.factoryData.id}`
 
       copy(url)
 
@@ -292,7 +316,10 @@ export default createComponent({
       showCopiedMessage,
       copyToClipboard,
       slideGroup,
-      startUpdateFactoryCommentFor
+      startUpdateFactoryCommentFor,
+      lightboxItems,
+      lightboxIndex,
+      setLightboxIndex
     }
   }
 })
@@ -418,6 +445,7 @@ export default createComponent({
   height: 68px;
   overflow: hidden;
   object-fit: cover;
+  cursor: pointer;
 }
 
 .copied-message {
