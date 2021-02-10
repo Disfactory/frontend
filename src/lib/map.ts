@@ -8,7 +8,7 @@ import { get as getProjection, transform } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
 import { Vector as VectorSource, OSM } from 'ol/source'
-import { Zoom, ScaleLine, Rotate } from 'ol/control'
+import { Zoom, ScaleLine, Rotate, Attribution } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
 
@@ -452,7 +452,8 @@ export class OLMap {
           zoomOutLabel: mapControlButtons.zoomOut
         }),
         new ScaleLine(),
-        new Rotate()
+        new Rotate(),
+        new Attribution()
       ],
       interactions: defaultInteractions({
         pinchRotate: false
