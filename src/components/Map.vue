@@ -16,7 +16,7 @@
       </button>
     </div>
 
-    <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
+    <div class="center-point" v-if="appState.selectFactoryMode" />
 
     <div class="factory-button-group flex justify-center mb-5 mb-8-md" v-if="!appState.selectFactoryMode">
       <v-btn @click="onClickCreateFactoryButton" color="primary" rounded large>
