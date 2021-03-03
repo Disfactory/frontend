@@ -56,8 +56,7 @@ export default createComponent({
     const isLUIMapVisable$ = ref(false)
     const isLUIMapVisable = computed({
       get: () => {
-        mapController.value?.mapInstance.getLUILayerVisible()
-          .then((el) => { isLUIMapVisable$.value = el })
+        isLUIMapVisable$.value = !!mapController.value?.mapInstance.getLUILayerVisible()
 
         return isLUIMapVisable$.value
       },
