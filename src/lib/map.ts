@@ -400,12 +400,11 @@ export class OLMap {
       }
     })
 
-    this.getLUIMAPLayer().then(layer => {
-      layer.on('change:visible', function () {
-        if (handler.onLUILayerVisibilityChange) {
-          handler.onLUILayerVisibilityChange(layer.getVisible())
-        }
-      })
+    const layer = this.getLUIMAPLayer()
+    layer.on('change:visible', function () {
+      if (handler.onLUILayerVisibilityChange) {
+        handler.onLUILayerVisibilityChange(layer.getVisible())
+      }
     })
   }
 
@@ -585,29 +584,28 @@ export class OLMap {
     })
   }
 
-  private getLUIMAPLayer (): Promise<Layer> {
-    return new Promise((resolve, reject) => {
-      let layer
-      this._map.getLayers().forEach(_layer => {
-        if (_layer.getProperties().source.layer_ === 'LUIMAP') {
-          layer = _layer
-          resolve(_layer as Layer)
-        }
-      })
-
-      if (!layer) {
-        reject(new TypeError('LUIMAP Layer not found'))
+  private getLUIMAPLayer (): Layer {
+    let layer
+    this._map.getLayers().forEach(_layer => {
+      if (_layer.getProperties().source.layer_ === 'LUIMAP') {
+        layer = _layer
       }
     })
+
+    if (!layer) {
+      throw (new TypeError('LUIMAP Layer not found'))
+    }
+
+    return layer as Layer
   }
 
-  public async setLUILayerVisible (visible: boolean) {
-    const layer = await this.getLUIMAPLayer()
+  public setLUILayerVisible (visible: boolean) {
+    const layer = this.getLUIMAPLayer()
     layer.setVisible(visible)
   }
 
-  public async getLUILayerVisible () {
-    const layer = await this.getLUIMAPLayer()
+  public getLUILayerVisible () {
+    const layer = this.getLUIMAPLayer()
     return layer.getVisible()
   }
 
