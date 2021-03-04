@@ -16,6 +16,11 @@ import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, F
 import { flipArgriculturalLand } from '../lib/image'
 import { MapOptions } from 'ol/PluggableMap'
 import IconOrigin from 'ol/style/IconOrigin'
+import VectorTileLayer from 'ol/layer/VectorTile'
+import VectorTileSource from 'ol/source/VectorTile'
+import MVT from 'ol/format/MVT'
+import VectorTileRenderType from 'ol/layer/VectorTileRenderType'
+import { createOl3Style, vectorTileLoader } from './vectorTileLoader'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
@@ -33,13 +38,15 @@ export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusTyp
 export enum BASE_MAP {
   OSM,
   TAIWAN,
-  SATELITE
+  SATELITE,
+  PROTOMAP
 }
 
 export const BASE_MAP_NAME = {
   [BASE_MAP.OSM]: '簡易地圖',
   [BASE_MAP.TAIWAN]: '詳細地圖',
-  [BASE_MAP.SATELITE]: '衛星地圖'
+  [BASE_MAP.SATELITE]: '衛星地圖',
+  [BASE_MAP.PROTOMAP]: '向量地圖'
 }
 
 type ButtonElements = {
@@ -230,55 +237,74 @@ const getWMTSTileGrid = () => {
 }
 
 const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
-  const source = (() => {
-    switch (type) {
-      case BASE_MAP.OSM:
-        return new OSM({
-          crossOrigin: 'Anonymous',
-          attributions:
-            '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
-        })
-      case BASE_MAP.TAIWAN:
-        return new WMTS({
-          matrixSet: 'EPSG:3857',
-          format: 'image/png',
-          url: 'https://wmts.nlsc.gov.tw/wmts',
-          layer: 'EMAP',
-          tileGrid: wmtsTileGrid,
-          crossOrigin: 'Anonymous',
-          style: 'default',
-          wrapX: true,
-          attributions:
-            '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
-        })
-      case BASE_MAP.SATELITE:
-        return new WMTS({
-          matrixSet: 'EPSG:3857',
-          format: 'image/png',
-          url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
-          layer: 'EMAP',
-          tileGrid: wmtsTileGrid,
-          requestEncoding: 'REST',
-          crossOrigin: 'Anonymous',
-          style: 'default',
-          wrapX: true,
-          attributions:
-            '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
-        })
-      default:
-        return new OSM({
-          crossOrigin: 'Anonymous',
-          attributions:
-            '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
-        })
-    }
-  })()
+  if (type === BASE_MAP.PROTOMAP) {
+    const key = process.env.VUE_APP_PROTOMAP_API_KEY
+    const layer = new VectorTileLayer({
+      source: new VectorTileSource({
+        attributions: [
+        ],
+        format: new MVT(),
+        url: `https://api.protomaps.com/tiles/v1/{z}/{x}/{y}.pbf?key=${key}`,
+        maxZoom: 14,
+        tileLoadFunction: vectorTileLoader
+      }),
+      style: createOl3Style(),
+      opacity: 1,
+      zIndex: 1,
+      renderMode: VectorTileRenderType.VECTOR
+    })
+    return layer
+  } else {
+    const source = (() => {
+      switch (type) {
+        case BASE_MAP.OSM:
+          return new OSM({
+            crossOrigin: 'Anonymous',
+            attributions:
+              '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
+          })
+        case BASE_MAP.TAIWAN:
+          return new WMTS({
+            matrixSet: 'EPSG:3857',
+            format: 'image/png',
+            url: 'https://wmts.nlsc.gov.tw/wmts',
+            layer: 'EMAP',
+            tileGrid: wmtsTileGrid,
+            crossOrigin: 'Anonymous',
+            style: 'default',
+            wrapX: true,
+            attributions:
+              '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
+          })
+        case BASE_MAP.SATELITE:
+          return new WMTS({
+            matrixSet: 'EPSG:3857',
+            format: 'image/png',
+            url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
+            layer: 'EMAP',
+            tileGrid: wmtsTileGrid,
+            requestEncoding: 'REST',
+            crossOrigin: 'Anonymous',
+            style: 'default',
+            wrapX: true,
+            attributions:
+              '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
+          })
+        default:
+          return new OSM({
+            crossOrigin: 'Anonymous',
+            attributions:
+              '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
+          })
+      }
+    })()
 
-  return new TileLayer({
-    source,
-    opacity: 0.6,
-    zIndex: 1
-  })
+    return new TileLayer({
+      source,
+      opacity: 0.6,
+      zIndex: 1
+    })
+  }
 }
 
 const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
@@ -324,7 +350,7 @@ export class OLMap {
   private _map: OlMap
   private mapDom: HTMLElement
   private geolocation?: Geolocation
-  private baseLayer: TileLayer
+  private baseLayer: TileLayer | VectorTileLayer
   private tileGrid: WMTSTileGrid = getWMTSTileGrid()
   private minimapPinFeature?: Feature
   private hasInitialLocation = false
@@ -417,7 +443,7 @@ export class OLMap {
     view.setZoom(zoom)
   }
 
-  private instantiateOLMap (target: HTMLElement, baseLayer: TileLayer, options: OLMapOptions = {}) {
+  private instantiateOLMap (target: HTMLElement, baseLayer: TileLayer | VectorTileLayer, options: OLMapOptions = {}) {
     const tileGrid = getWMTSTileGrid()
 
     let view
