@@ -242,8 +242,7 @@ const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
     const key = process.env.VUE_APP_PROTOMAP_API_KEY
     const layer = new VectorTileLayer({
       source: new VectorTileSource({
-        attributions: [
-        ],
+        attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
         format: new MVT(),
         url: `https://api.protomaps.com/tiles/v1/{z}/{x}/{y}.pbf?key=${key}`,
         maxZoom: 14
