@@ -1,21 +1,4 @@
-import { loadFeaturesXhr } from 'ol/featureloader'
 import { Fill, Stroke, Style } from 'ol/style'
-
-export function vectorTileLoader (tile, url) {
-  tile.setLoader(
-    function (extent, resolution, projection) {
-      loadFeaturesXhr(
-        url,
-        tile.getFormat(),
-        extent,
-        resolution,
-        projection,
-        tile.onLoad.bind(tile),
-        tile.onError.bind(tile)
-      )
-    }
-  )
-}
 
 // Taken from https://github.com/mapzen/openlayers-mapzen-vector-tile-example/blob/master/js/custom/app.js
 export function createOl3Style () {

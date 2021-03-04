@@ -20,7 +20,7 @@ import VectorTileLayer from 'ol/layer/VectorTile'
 import VectorTileSource from 'ol/source/VectorTile'
 import MVT from 'ol/format/MVT'
 import VectorTileRenderType from 'ol/layer/VectorTileRenderType'
-import { createOl3Style, vectorTileLoader } from './vectorTileLoader'
+import { createOl3Style } from './vectorTileLoader'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
@@ -245,8 +245,7 @@ const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
         ],
         format: new MVT(),
         url: `https://api.protomaps.com/tiles/v1/{z}/{x}/{y}.pbf?key=${key}`,
-        maxZoom: 14,
-        tileLoadFunction: vectorTileLoader
+        maxZoom: 14
       }),
       style: createOl3Style(),
       opacity: 1,
