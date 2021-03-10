@@ -35,7 +35,8 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "src/lib/browserCheck.js",
-    "test/**/*.ts"
+    "test/**/*.ts",
+    "src/lib/vectorTileLoader.js"
   ],
   "exclude": [
     "node_modules"

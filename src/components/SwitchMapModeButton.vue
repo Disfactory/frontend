@@ -55,7 +55,12 @@ export default createComponent({
       }
     })
 
-    const mapModes = [BASE_MAP.SATELITE, BASE_MAP.OSM, BASE_MAP.TAIWAN].map(type => ({
+    const mapModes = [
+      BASE_MAP.SATELITE,
+      BASE_MAP.OSM,
+      BASE_MAP.TAIWAN,
+      BASE_MAP.PROTOMAP
+    ].map(type => ({
       type,
       name: BASE_MAP_NAME[type]
     }))
