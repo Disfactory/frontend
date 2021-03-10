@@ -54,6 +54,8 @@ jobs:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/master'"
+    env:
+      VUE_APP_PROTOMAP_API_KEY: e6cfbd46818cf623
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js 10.x
