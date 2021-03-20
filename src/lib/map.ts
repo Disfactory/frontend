@@ -101,7 +101,7 @@ const minimapPinStyle = new Style({
 
 export class MapFactoryController {
   private _map: OLMap
-  private appliedFilters: FactoryDisplayStatusType[] = []
+  private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
   private _factoriesLayerSource?: VectorSource
   private factoryMap = new Map<string, FactoryData>()
 
@@ -173,12 +173,7 @@ export class MapFactoryController {
   }
 
   private isFactoryVisible (factory: FactoryData) {
-    if (this.appliedFilters.length === 0) {
-      // always visible if no filters applied
-      return true
-    } else {
-      return this.appliedFilters.includes(getFactoryStatus(factory))
-    }
+    return this.appliedFilters.includes(getFactoryStatus(factory))
   }
 
   private getFactoryStyle (factory: FactoryData): Style {
