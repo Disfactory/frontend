@@ -475,7 +475,9 @@ export class OLMap {
       controls: [
         new Zoom({
           zoomInLabel: mapControlButtons.zoomIn,
-          zoomOutLabel: mapControlButtons.zoomOut
+          zoomOutLabel: mapControlButtons.zoomOut,
+          zoomInTipLabel: '放大',
+          zoomOutTipLabel: '縮小'
         }),
         new ScaleLine(),
         new Rotate(),
