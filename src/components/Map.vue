@@ -339,7 +339,7 @@ export default createComponent({
   white-space: nowrap;
 
   .v-btn.inactive-filter {
-    opacity: 50%;
+    opacity: 0.5;
   }
 
   &.desktop {
