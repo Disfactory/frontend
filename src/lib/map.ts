@@ -1,5 +1,5 @@
 import { Map as OlMap, View, Feature, MapBrowserEvent } from 'ol'
-import { Style, Icon, Circle, Fill, Stroke } from 'ol/style'
+import { Style, Icon, Circle, Fill, Stroke, Text } from 'ol/style'
 import IconAnchorUnits from 'ol/style/IconAnchorUnits'
 import { Point } from 'ol/geom'
 import WMTS from 'ol/source/WMTS'
@@ -7,7 +7,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import { get as getProjection, transform } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
-import { Vector as VectorSource, OSM } from 'ol/source'
+import { Vector as VectorSource, OSM, Cluster } from 'ol/source'
 import { Zoom, ScaleLine, Rotate, Attribution } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
@@ -121,10 +121,42 @@ export class MapFactoryController {
     // create or return _factoriesLayerSource
     if (!this._factoriesLayerSource) {
       this._factoriesLayerSource = new VectorSource({ features: [] })
+      const clusterSource = new Cluster({
+        distance: 50,
+        source: this._factoriesLayerSource
+      })
 
+      const styleCache = {}
       const vectorLayer = new VectorLayer({
-        source: this._factoriesLayerSource,
-        zIndex: 3
+        source: clusterSource,
+        zIndex: 3,
+        style: function (feature) {
+          const size = feature.get('features').length
+          // @ts-ignore
+          let style = styleCache[size]
+          if (!style) {
+            style = new Style({
+              image: new Circle({
+                radius: 10,
+                stroke: new Stroke({
+                  color: '#fff'
+                }),
+                fill: new Fill({
+                  color: '#3399CC'
+                })
+              }),
+              text: new Text({
+                text: size.toString(),
+                fill: new Fill({
+                  color: '#fff'
+                })
+              })
+            })
+            // @ts-ignore
+            styleCache[size] = style
+          }
+          return style
+        }
       })
 
       this.mapInstance.map.addLayer(vectorLayer)
