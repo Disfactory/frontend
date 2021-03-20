@@ -4,7 +4,7 @@
 
     <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }" v-if="appState.isInitialPage">
       <display-setting-bottom-sheet />
-      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
+      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white" :name="button.text">
         <v-icon :color="button.color">mdi-map-marker</v-icon>
         {{ button.text }}
       </v-btn>
@@ -220,7 +220,8 @@ export default createComponent({
     const filterButtonsData = defaultFactoryDisplayStatuses.map(v => ({
       text: getDisplayStatusText(v),
       color: getDisplayStatusColor(v),
-      value: v
+      value: v,
+      name: v
     }))
 
     return {
