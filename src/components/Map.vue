@@ -11,7 +11,7 @@
     </div>
 
     <div class="ol-fit-location ol-unselectable ol-control" @click="zoomToGeolocation" data-label="map-locate">
-      <button>
+      <button title="定位">
         <img src="/images/locate.svg" alt="locate">
       </button>
     </div>
