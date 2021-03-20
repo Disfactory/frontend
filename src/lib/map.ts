@@ -62,6 +62,8 @@ const makeMapButtons = () => {
   }).reduce((acc, [key, image]) => {
     const label = document.createElement('img')
     label.setAttribute('src', image)
+    label.setAttribute('alt',
+      key === 'zoomIn' ? '放大' : '縮小')
 
     return {
       ...acc,
@@ -475,7 +477,9 @@ export class OLMap {
       controls: [
         new Zoom({
           zoomInLabel: mapControlButtons.zoomIn,
-          zoomOutLabel: mapControlButtons.zoomOut
+          zoomOutLabel: mapControlButtons.zoomOut,
+          zoomInTipLabel: '放大',
+          zoomOutTipLabel: '縮小'
         }),
         new ScaleLine(),
         new Rotate(),
