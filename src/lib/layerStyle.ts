@@ -1,6 +1,5 @@
 export const baseStyle = {
   version: 8,
-  glyphs: 'https://cdn.protomaps.com/fonts/pbf/{fontstack}/{range}.pbf',
   name: 'Light',
   sources: {
     protomaps: {
@@ -1210,7 +1209,8 @@ export const baseStyle = {
       layout: {
         'symbol-placement': 'line',
         'text-font': [
-          'NotoSans-Regular'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-field': [
           'get',
@@ -1670,10 +1670,12 @@ export const baseStyle = {
       type: 'symbol',
       source: 'protomaps',
       'source-layer': 'roads',
+      minzoom: 13,
       layout: {
         'symbol-placement': 'line',
         'text-font': [
-          'NotoSans-Regular'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-field': [
           'get',
@@ -1716,7 +1718,8 @@ export const baseStyle = {
       ],
       layout: {
         'text-font': [
-          'NotoSans-Regular'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-field': [
           'get',
@@ -1746,7 +1749,8 @@ export const baseStyle = {
       ],
       layout: {
         'text-font': [
-          'NotoSans-Regular'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-field': [
           'get',
@@ -1770,21 +1774,23 @@ export const baseStyle = {
         'pmap:kind',
         'neighbourhood'
       ],
+      minzoom: 10,
       layout: {
         'text-field': '{name}',
         'text-font': [
-          'NotoSans-Regular'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-size': {
           base: 1.2,
           stops: [
             [
               11,
-              10
+              13
             ],
             [
               14,
-              12
+              15
             ]
           ]
         },
@@ -1793,7 +1799,7 @@ export const baseStyle = {
       paint: {
         'text-color': '#757d91',
         'text-halo-color': 'white',
-        'text-halo-width': 0.5
+        'text-halo-width': 1
       }
     },
     {
@@ -1827,7 +1833,8 @@ export const baseStyle = {
       layout: {
         'text-field': '{name}',
         'text-font': [
-          'NotoSans-Bold'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-size': [
           'step',
@@ -1837,9 +1844,9 @@ export const baseStyle = {
           ],
           0,
           1,
-          12,
+          18,
           2,
-          10
+          16
         ],
         'text-variable-anchor': [
           'bottom-left'
@@ -1865,7 +1872,8 @@ export const baseStyle = {
       layout: {
         'text-field': '{name}',
         'text-font': [
-          'NotoSans-Regular'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-size': 12,
         'text-radial-offset': 0.2,
@@ -1891,7 +1899,8 @@ export const baseStyle = {
       layout: {
         'text-field': '{name}',
         'text-font': [
-          'NotoSans-Bold'
+          'Microsoft JhengHei',
+          'STHeitiTC-Medium'
         ],
         'text-size': {
           base: 1.2,
