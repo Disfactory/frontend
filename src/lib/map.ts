@@ -62,6 +62,8 @@ const makeMapButtons = () => {
   }).reduce((acc, [key, image]) => {
     const label = document.createElement('img')
     label.setAttribute('src', image)
+    label.setAttribute('alt',
+      key === 'zoomIn' ? '放大' : '縮小')
 
     return {
       ...acc,
