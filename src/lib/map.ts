@@ -7,10 +7,12 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import { get as getProjection, transform } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
-import { Vector as VectorSource, OSM, Cluster } from 'ol/source'
+import { Vector as VectorSource, OSM } from 'ol/source'
 import { Zoom, ScaleLine, Rotate, Attribution } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
+
+import Cluster from './cluster.js'
 
 import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, FactoryDisplayStatuses } from '../types'
 import { flipArgriculturalLand } from '../lib/image'
@@ -232,7 +234,9 @@ export class MapFactoryController {
     const feature = new Feature({
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
+    console.log('should set', factory.id)
     feature.setId(factory.id)
+    console.log('feature is', feature)
     const style = this.getFactoryStyle(factory)
     feature.set('defaultStyle', style.clone())
     feature.setStyle(style)
