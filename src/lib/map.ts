@@ -160,6 +160,7 @@ export class MapFactoryController {
             return style
           } else {
             const factoryFeature = features[0]
+            ;(feature as Feature).set('factoryId', factoryFeature.get('factoryId'))
             return factoryFeature.getStyle()
           }
         }
@@ -239,9 +240,12 @@ export class MapFactoryController {
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
     feature.setId(factory.id)
+    feature.set('factoryId', factory.id)
     const style = this.getFactoryStyle(factory)
     feature.set('defaultStyle', style.clone())
     feature.setStyle(style)
+
+    this.factoryMap.set(factory.id, factory)
 
     return feature
   }

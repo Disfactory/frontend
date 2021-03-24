@@ -73,7 +73,9 @@ export default createComponent({
 
     const openFactoryDetail = (feature: Feature) => {
       if (!mapControllerRef.value) return
-      const factory = mapControllerRef.value.getFactory(feature.getId() as string)
+
+      const factoryId = feature.get('factoryId') as string
+      const factory = mapControllerRef.value.getFactory(factoryId)
 
       if (factory) {
         factory.feature = feature
@@ -109,6 +111,7 @@ export default createComponent({
         }
 
         if (feature) {
+          /*
           if ('setStyle' in feature) {
             const zoomedStyle = (feature.get('defaultStyle') as Style).clone()
             const originalImage = zoomedStyle.getImage().clone()
@@ -117,6 +120,7 @@ export default createComponent({
             zoomedStyle.setZIndex(2)
             feature.setStyle(zoomedStyle)
           }
+          */
           event('clickFactoryPin')
           openFactoryDetail(feature)
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
