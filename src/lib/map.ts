@@ -183,12 +183,22 @@ export class MapFactoryController {
 
   public addFactories (factories: FactoryData[]) {
     const createFactoryFeature = this.createFactoryFeature.bind(this)
-    const filteredFactories = factories.filter(factory => !this.factoryMap.has(factory.id))
-    const features = filteredFactories.map(createFactoryFeature)
+    const factoriesToAdd = [] as FactoryData[]
+    const factoriesToUpdate = [] as FactoryData[]
+
+    factories.forEach(factory => {
+      if (this.factoryMap.has(factory.id)) {
+        factoriesToUpdate.push(factory)
+      } else {
+        factoriesToAdd.push(factory)
+      }
+    })
+
+    const features = factoriesToAdd.map(createFactoryFeature)
 
     this.factoriesLayerSource.addFeatures(features)
 
-    filteredFactories.forEach((factory) => this.updateFactory(factory.id, factory))
+    factoriesToUpdate.forEach((factory) => this.updateFactory(factory.id, factory))
   }
 
   public hideFactories (factories: FactoryData[]) {
