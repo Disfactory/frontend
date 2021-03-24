@@ -131,31 +131,38 @@ export class MapFactoryController {
         source: clusterSource,
         zIndex: 3,
         style: function (feature) {
-          const size = feature.get('features').length
-          // @ts-ignore
-          let style = styleCache[size]
-          if (!style) {
-            style = new Style({
-              image: new Circle({
-                radius: 10,
-                stroke: new Stroke({
-                  color: '#fff'
+          const features = feature.get('features')
+          if (features.length > 1) {
+            const size = features.length
+            // @ts-ignore
+            let style = styleCache[size]
+            if (!style) {
+              style = new Style({
+                image: new Circle({
+                  radius: 10,
+                  stroke: new Stroke({
+                    color: '#fff'
+                  }),
+                  fill: new Fill({
+                    color: '#3399CC'
+                  })
                 }),
-                fill: new Fill({
-                  color: '#3399CC'
-                })
-              }),
-              text: new Text({
-                text: size.toString(),
-                fill: new Fill({
-                  color: '#fff'
+                text: new Text({
+                  text: size.toString(),
+                  fill: new Fill({
+                    color: '#fff'
+                  })
                 })
               })
-            })
-            // @ts-ignore
-            styleCache[size] = style
+              // @ts-ignore
+              styleCache[size] = style
+            }
+            return style
+          } else {
+            const factoryFeature = features[0]
+            ;(feature as Feature).set('factoryId', factoryFeature.get('factoryId'))
+            return factoryFeature.getStyle()
           }
-          return style
         }
       })
 
@@ -233,9 +240,12 @@ export class MapFactoryController {
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
     feature.setId(factory.id)
+    feature.set('factoryId', factory.id)
     const style = this.getFactoryStyle(factory)
     feature.set('defaultStyle', style.clone())
     feature.setStyle(style)
+
+    this.factoryMap.set(factory.id, factory)
 
     return feature
   }
