@@ -236,13 +236,12 @@ const getWMTSTileGrid = () => {
 
 const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
   if (type === BASE_MAP.PROTOMAP) {
-    const key = process.env.VUE_APP_PROTOMAP_API_KEY
     const taiwanExtent = transformExtent([119.90423060095736, 21.83090666506977, 122.2876172488333, 25.33409668479448], 'EPSG:4326', 'EPSG:3857')
     const layer = new VectorTileLayer({
       source: new VectorTileSource({
         attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
         format: new MVT(),
-        url: `https://api.protomaps.com/tiles/v1/{z}/{x}/{y}.pbf?key=${key}`,
+        url: 'https://staging.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
         maxZoom: 14
       }),
       opacity: 1,
