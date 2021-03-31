@@ -4,7 +4,7 @@ import IconAnchorUnits from 'ol/style/IconAnchorUnits'
 import { Point } from 'ol/geom'
 import WMTS from 'ol/source/WMTS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS'
-import { get as getProjection, transform } from 'ol/proj'
+import { get as getProjection, transform, transformExtent } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
 import { Vector as VectorSource, OSM } from 'ol/source'
@@ -237,6 +237,7 @@ const getWMTSTileGrid = () => {
 const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
   if (type === BASE_MAP.PROTOMAP) {
     const key = process.env.VUE_APP_PROTOMAP_API_KEY
+    const taiwanExtent = transformExtent([119.90423060095736, 21.83090666506977, 122.2876172488333, 25.33409668479448], 'EPSG:4326', 'EPSG:3857')
     const layer = new VectorTileLayer({
       source: new VectorTileSource({
         attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
@@ -248,9 +249,8 @@ const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
       zIndex: 1,
       renderMode: VectorTileRenderType.VECTOR
     })
-
+    layer.setExtent(taiwanExtent)
     stylefunction(layer, baseStyle, 'protomaps')
-
     return layer
   } else {
     const source = (() => {
