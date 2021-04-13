@@ -285,7 +285,7 @@ export default createComponent({
         return new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1
       }).map(record => {
         const date = new Date(record.created_at)
-        const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDay()}`
+        const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
         return {
           date: dateStr,
           others: record.others
