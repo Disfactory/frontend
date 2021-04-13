@@ -39,7 +39,7 @@
 
           <p class="caption mb-0" style="color: #A1A1A1;">
             工廠編號 {{ factoryId }} <br>
-            最後更新 2020/4/12
+            {{ lastUpdatedAt }}
           </p>
 
           <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
@@ -276,14 +276,14 @@ export default createComponent({
       if (appState.factoryData) {
         (async () => {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          reportRecords.value = await getFactoryReportRecords(appState.factoryData?.id!)
+          reportRecords.value = ((await getFactoryReportRecords(appState.factoryData?.id!)) || []).sort((a, b) => {
+            return new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1
+          })
         })()
       }
     })
     const pastDescriptions = computed(() => {
-      return reportRecords.value.sort((a, b) => {
-        return new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1
-      }).map(record => {
+      return reportRecords.value.map(record => {
         const date = new Date(record.created_at)
         const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
         return {
@@ -291,6 +291,21 @@ export default createComponent({
           others: record.others
         }
       }).filter(rec => rec.others)
+    })
+    const lastUpdatedAt = computed(() => {
+      if (!appState.factoryData || !appState.factoryData.reported_at) {
+        return null
+      }
+
+      let date
+      if (reportRecords.value.length === 0) {
+        date = new Date(appState.factoryData.reported_at)
+      } else {
+        date = new Date(reportRecords.value[0].created_at)
+      }
+      const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
+
+      return `最後更新 ${dateStr}`
     })
 
     return {
@@ -309,6 +324,7 @@ export default createComponent({
       factoryName,
       factoryAddressAndLandcode,
       pastDescriptions,
+      lastUpdatedAt,
       longitude,
       latitude,
       factoryDetailScrollerRef,
