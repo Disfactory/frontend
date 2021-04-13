@@ -58,6 +58,7 @@ async function uploadToImgur (file: File) {
 
   return {
     link: data.data.link as string,
+    deletehash: data.data.deletehash as string,
     file
   }
 }
@@ -99,9 +100,9 @@ export type UploadedImage = {
   src: string
 }
 
-async function uploadExifAndGetToken ({ link, file }: { link: string, file: File }) {
+async function uploadExifAndGetToken ({ link, file, deletehash }: { link: string, file: File, deletehash: string }) {
   const exifData = await readImageExif(file)
-  const { data }: { data: ImageResponse } = await instance.post('/images', { url: link, ...exifData })
+  const { data }: { data: ImageResponse } = await instance.post('/images', { url: link, ...exifData, deletehash })
 
   return {
     token: data.token,
@@ -119,7 +120,7 @@ export async function updateFactoryImages (factoryId: string, files: FileList, {
   return Promise.all(
     Array.from(files).map((file) => uploadToImgur(file).then((el) => (async () => {
       const exifData = await readImageExif(el.file)
-      const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images`, { url: el.link, ...exifData, nickname, contact })
+      const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images`, { url: el.link, ...exifData, nickname, contact, deletehash: el.deletehash })
       // eslint-disable-next-line @typescript-eslint/camelcase
       data.image_path = el.link
       return data
