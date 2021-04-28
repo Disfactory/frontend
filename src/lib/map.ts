@@ -329,7 +329,8 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
         '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
     }),
     opacity: 0.5,
-    zIndex: 2
+    zIndex: 2,
+    className: 'lui'
   })
 }
 
