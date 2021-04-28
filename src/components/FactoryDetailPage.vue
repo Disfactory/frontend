@@ -171,7 +171,12 @@ export default createComponent({
 
     const factoryStatusText = computed(() => {
       if (typeof factoryStatus.value !== 'undefined') {
-        return getDisplayStatusText(factoryStatus.value)
+        const factoryDisplayStatus = getDisplayStatusText(factoryStatus.value)
+        const { document_display_status: documentDisplayStatus } = appState.factoryData || {}
+        if (documentDisplayStatus) {
+          return `${factoryDisplayStatus}：${documentDisplayStatus}`
+        }
+        return factoryDisplayStatus
       } else {
         return ''
       }
