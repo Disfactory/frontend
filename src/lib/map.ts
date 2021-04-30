@@ -330,7 +330,7 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
     }),
     opacity: 0.5,
     zIndex: 2,
-    className: 'lui'
+    className: 'lui-layer'
   })
 }
 
@@ -595,20 +595,26 @@ export class OLMap {
     this._map.addLayer(this.baseLayer)
   }
 
-  public canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
+  public async canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
     return new Promise(resolve => {
-      this._map.forEachLayerAtPixel(pixel, function (_, data) {
+      let resolved = false
+      const check = this._map.forEachLayerAtPixel(pixel, function (_, data) {
         const [,,, a] = data
 
-        return resolve(a === 1)
+        resolved = true
+        resolve(a !== 128)
       }, {
-        layerFilter: function (layer) {
-          // only handle click event on LUIMAP
-          return layer.getProperties().source.layer_ === 'LUIMAP'
-        }
+        layerFilter: (layer) => layer.getClassName() === 'lui-layer'
       })
 
-      resolve(false)
+      // !Workaround #forEachLayerAtPixel would not correctly run for some browsers
+      if (!resolved) {
+        if (check === undefined) {
+          resolve(true)
+        } else {
+          resolve(check)
+        }
+      }
     })
   }
 
