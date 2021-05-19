@@ -62,13 +62,18 @@
 
         <div class="mt-4 mx-3 mb-2">
           <h3 class="mb-1">地段 / 地址</h3>
-          <p class="mb-5" style="line-height: 1.3;">{{ factoryAddressAndLandcode }}</p>
+          <p class="mb-5">{{ factoryAddressAndLandcode }}</p>
 
           <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
             <h3 class="mb-1">經緯度</h3>
             <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
             <p class="text-caption">以上經緯度版本為 WGS84</p>
           </div>
+
+          <template v-if="source">
+            <h3 class="mb-1">資料來源</h3>
+            <p class="mb-5">{{ source }}</p>
+          </template>
 
           <hr v-if="full || $vuetify.breakpoint.mdAndUp">
           <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
@@ -220,6 +225,25 @@ export default createComponent({
       }
     })
 
+    const source = computed(() => {
+      if (appState.factoryData) {
+        return appState.factoryData.source.split('')
+          .map(function getName (source) {
+            switch (source) {
+              case 'U':
+                return '本系統'
+              case 'G':
+                return '農委會'
+              case 'E':
+                return '經濟部'
+            }
+          })
+          .join('、')
+      }
+
+      return ''
+    })
+
     const full = computed(() => appState.factoryDetailsExpanded)
 
     const longitude = computed(() => appState.factoryData?.lng.toFixed(7))
@@ -328,6 +352,7 @@ export default createComponent({
       factoryType,
       factoryName,
       factoryAddressAndLandcode,
+      source,
       pastDescriptions,
       lastUpdatedAt,
       longitude,
@@ -372,6 +397,10 @@ export default createComponent({
     font-size: 16px;
     line-height: 24px;
     letter-spacing: 0.03em;
+
+    + p {
+      line-height: 1.3;
+    }
   }
 
   h2 {
