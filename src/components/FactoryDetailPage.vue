@@ -227,7 +227,7 @@ export default createComponent({
 
     const source = computed(() => {
       if (appState.factoryData) {
-        return appState.factoryData.source.split('')
+        return appState.factoryData.source?.split('')
           .map(function getName (source) {
             switch (source) {
               case 'U':
