@@ -15,62 +15,50 @@ export const FACTORY_TYPE = [
 ] as const
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
-export type FactoryDisplayStatusType = 'default' | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+export type FactoryDisplayStatusType = 'default' | 0 | 1 | 2 | 3
 
 export const defaultFactoryDisplayStatuses = [
-  'default', 0, 1, 2, 3, 4, 5, 6, 7
+  'default', 0, 1, 2, 3
 ] as FactoryDisplayStatusType[]
+
+type DocumentDisplayStatus = '已檢舉' | '已排程稽查' | '陳述意見期' | '已勒令停工' | '已發函斷電' | '已排程拆除' | '已拆除' | '不再追蹤'
 
 type FactoryDisplayStatus = {
   type: FactoryDisplayStatusType,
   name: string,
+  documentDisplayStatuses: ('疑似工廠' | DocumentDisplayStatus)[],
   color: string
 }
 export const FactoryDisplayStatuses: FactoryDisplayStatus[] = [
   {
     type: 'default',
-    name: '疑似工廠',
-    color: '#D27E00'
-  },
-  {
-    type: 0,
-    name: '已檢舉',
-    color: '#697F01'
-  },
-  {
-    type: 1,
-    name: '已排程稽查',
-    color: '#C8D48D'
-  },
-  {
-    type: 2,
-    name: '陳述意見期',
-    color: '#457287'
-  },
-  {
-    type: 3,
-    name: '已勒令停工',
-    color: '#E59B9B'
-  },
-  {
-    type: 4,
-    name: '已發函斷電',
-    color: '#CF5E5D'
-  },
-  {
-    type: 5,
-    name: '已排程拆除',
+    name: '未處理',
+    documentDisplayStatuses: ['疑似工廠'],
     color: '#A22A29'
   },
   {
-    type: 6,
-    name: '已拆除',
+    type: 0,
+    name: '處理中',
+    documentDisplayStatuses: ['已檢舉', '已排程稽查', '陳述意見期', '已勒令停工'],
+    color: '#457287'
+  },
+  {
+    type: 1,
+    name: '已斷電',
+    documentDisplayStatuses: ['已發函斷電', '已排程拆除'],
     color: '#364516'
   },
   {
-    type: 7,
-    name: '不再追蹤',
+    type: 2,
+    name: '已拆除',
+    documentDisplayStatuses: ['已拆除'],
     color: '#A1A1A1'
+  },
+  {
+    type: 3,
+    name: '無法處理',
+    documentDisplayStatuses: ['不再追蹤'],
+    color: '#E0E0E0'
   }
 ]
 
@@ -107,6 +95,7 @@ export type FactoryData = {
   townname: string,
   sectname: string,
   sectcode: string,
+  source: string,
   type: FactoryType,
   images: FactoryImage[],
   // TODO: can be one of https://docs.djangoproject.com/en/2.2/ref/settings/#datetime-input-formats
@@ -114,7 +103,7 @@ export type FactoryData = {
   reported_at: null | string,
   data_complete: boolean,
   before_release: boolean,
-  document_display_status?: string,
+  document_display_status: DocumentDisplayStatus | null,
   feature?: Feature
 }
 

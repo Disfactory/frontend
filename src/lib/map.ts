@@ -4,7 +4,7 @@ import IconAnchorUnits from 'ol/style/IconAnchorUnits'
 import { Point } from 'ol/geom'
 import WMTS from 'ol/source/WMTS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS'
-import { get as getProjection, transform } from 'ol/proj'
+import { get as getProjection, transform, transformExtent } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
 import { Vector as VectorSource, OSM } from 'ol/source'
@@ -16,6 +16,12 @@ import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, F
 import { flipArgriculturalLand } from '../lib/image'
 import { MapOptions } from 'ol/PluggableMap'
 import IconOrigin from 'ol/style/IconOrigin'
+import VectorTileLayer from 'ol/layer/VectorTile'
+import VectorTileSource from 'ol/source/VectorTile'
+import MVT from 'ol/format/MVT'
+import VectorTileRenderType from 'ol/layer/VectorTileRenderType'
+import stylefunction from 'ol-mapbox-style/dist/stylefunction'
+import { baseStyle } from './layerStyle'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
@@ -24,7 +30,8 @@ export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
   if (factory.document_display_status) {
-    return FactoryDisplayStatuses.find(s => s.name === factory.document_display_status)?.type as FactoryDisplayStatusType
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return FactoryDisplayStatuses.find(s => s.documentDisplayStatuses.includes(factory.document_display_status!))?.type as FactoryDisplayStatusType
   } else {
     return FactoryDisplayStatuses[0].type
   }
@@ -33,13 +40,15 @@ export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusTyp
 export enum BASE_MAP {
   OSM,
   TAIWAN,
-  SATELITE
+  SATELITE,
+  PROTOMAP
 }
 
 export const BASE_MAP_NAME = {
   [BASE_MAP.OSM]: '簡易地圖',
   [BASE_MAP.TAIWAN]: '詳細地圖',
-  [BASE_MAP.SATELITE]: '衛星地圖'
+  [BASE_MAP.SATELITE]: '衛星地圖',
+  [BASE_MAP.PROTOMAP]: '向量地圖'
 }
 
 type ButtonElements = {
@@ -54,6 +63,8 @@ const makeMapButtons = () => {
   }).reduce((acc, [key, image]) => {
     const label = document.createElement('img')
     label.setAttribute('src', image)
+    label.setAttribute('alt',
+      key === 'zoomIn' ? '放大' : '縮小')
 
     return {
       ...acc,
@@ -91,7 +102,7 @@ const minimapPinStyle = new Style({
 
 export class MapFactoryController {
   private _map: OLMap
-  private appliedFilters: FactoryDisplayStatusType[] = []
+  private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
   private _factoriesLayerSource?: VectorSource
   private factoryMap = new Map<string, FactoryData>()
 
@@ -163,12 +174,7 @@ export class MapFactoryController {
   }
 
   private isFactoryVisible (factory: FactoryData) {
-    if (this.appliedFilters.length === 0) {
-      // always visible if no filters applied
-      return true
-    } else {
-      return this.appliedFilters.includes(getFactoryStatus(factory))
-    }
+    return this.appliedFilters.includes(getFactoryStatus(factory))
   }
 
   private getFactoryStyle (factory: FactoryData): Style {
@@ -230,55 +236,73 @@ const getWMTSTileGrid = () => {
 }
 
 const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
-  const source = (() => {
-    switch (type) {
-      case BASE_MAP.OSM:
-        return new OSM({
-          crossOrigin: 'Anonymous',
-          attributions:
-            '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
-        })
-      case BASE_MAP.TAIWAN:
-        return new WMTS({
-          matrixSet: 'EPSG:3857',
-          format: 'image/png',
-          url: 'https://wmts.nlsc.gov.tw/wmts',
-          layer: 'EMAP',
-          tileGrid: wmtsTileGrid,
-          crossOrigin: 'Anonymous',
-          style: 'default',
-          wrapX: true,
-          attributions:
-            '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
-        })
-      case BASE_MAP.SATELITE:
-        return new WMTS({
-          matrixSet: 'EPSG:3857',
-          format: 'image/png',
-          url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
-          layer: 'EMAP',
-          tileGrid: wmtsTileGrid,
-          requestEncoding: 'REST',
-          crossOrigin: 'Anonymous',
-          style: 'default',
-          wrapX: true,
-          attributions:
-            '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
-        })
-      default:
-        return new OSM({
-          crossOrigin: 'Anonymous',
-          attributions:
-            '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
-        })
-    }
-  })()
+  if (type === BASE_MAP.PROTOMAP) {
+    const taiwanExtent = transformExtent([119.90423060095736, 21.83090666506977, 122.2876172488333, 25.33409668479448], 'EPSG:4326', 'EPSG:3857')
+    const layer = new VectorTileLayer({
+      source: new VectorTileSource({
+        attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
+        format: new MVT(),
+        url: 'https://staging.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
+        maxZoom: 14
+      }),
+      opacity: 1,
+      zIndex: 1,
+      renderMode: VectorTileRenderType.VECTOR
+    })
+    layer.setExtent(taiwanExtent)
+    stylefunction(layer, baseStyle, 'protomaps')
+    return layer
+  } else {
+    const source = (() => {
+      switch (type) {
+        case BASE_MAP.OSM:
+          return new OSM({
+            crossOrigin: 'Anonymous',
+            attributions:
+              '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
+          })
+        case BASE_MAP.TAIWAN:
+          return new WMTS({
+            matrixSet: 'EPSG:3857',
+            format: 'image/png',
+            url: 'https://wmts.nlsc.gov.tw/wmts',
+            layer: 'EMAP',
+            tileGrid: wmtsTileGrid,
+            crossOrigin: 'Anonymous',
+            style: 'default',
+            wrapX: true,
+            attributions:
+              '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
+          })
+        case BASE_MAP.SATELITE:
+          return new WMTS({
+            matrixSet: 'EPSG:3857',
+            format: 'image/png',
+            url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
+            layer: 'EMAP',
+            tileGrid: wmtsTileGrid,
+            requestEncoding: 'REST',
+            crossOrigin: 'Anonymous',
+            style: 'default',
+            wrapX: true,
+            attributions:
+              '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
+          })
+        default:
+          return new OSM({
+            crossOrigin: 'Anonymous',
+            attributions:
+              '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
+          })
+      }
+    })()
 
-  return new TileLayer({
-    source,
-    opacity: 0.6,
-    zIndex: 1
-  })
+    return new TileLayer({
+      source,
+      opacity: 0.6,
+      zIndex: 1
+    })
+  }
 }
 
 const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
@@ -304,7 +328,8 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
         '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
     }),
     opacity: 0.5,
-    zIndex: 2
+    zIndex: 2,
+    className: 'lui-layer'
   })
 }
 
@@ -324,7 +349,7 @@ export class OLMap {
   private _map: OlMap
   private mapDom: HTMLElement
   private geolocation?: Geolocation
-  private baseLayer: TileLayer
+  private baseLayer: TileLayer | VectorTileLayer
   private tileGrid: WMTSTileGrid = getWMTSTileGrid()
   private minimapPinFeature?: Feature
   private hasInitialLocation = false
@@ -400,12 +425,11 @@ export class OLMap {
       }
     })
 
-    this.getLUIMAPLayer().then(layer => {
-      layer.on('change:visible', function () {
-        if (handler.onLUILayerVisibilityChange) {
-          handler.onLUILayerVisibilityChange(layer.getVisible())
-        }
-      })
+    const layer = this.getLUIMAPLayer()
+    layer.on('change:visible', function () {
+      if (handler.onLUILayerVisibilityChange) {
+        handler.onLUILayerVisibilityChange(layer.getVisible())
+      }
     })
   }
 
@@ -417,7 +441,7 @@ export class OLMap {
     view.setZoom(zoom)
   }
 
-  private instantiateOLMap (target: HTMLElement, baseLayer: TileLayer, options: OLMapOptions = {}) {
+  private instantiateOLMap (target: HTMLElement, baseLayer: TileLayer | VectorTileLayer, options: OLMapOptions = {}) {
     const tileGrid = getWMTSTileGrid()
 
     let view
@@ -449,7 +473,9 @@ export class OLMap {
       controls: [
         new Zoom({
           zoomInLabel: mapControlButtons.zoomIn,
-          zoomOutLabel: mapControlButtons.zoomOut
+          zoomOutLabel: mapControlButtons.zoomOut,
+          zoomInTipLabel: '放大',
+          zoomOutTipLabel: '縮小'
         }),
         new ScaleLine(),
         new Rotate(),
@@ -568,46 +594,51 @@ export class OLMap {
     this._map.addLayer(this.baseLayer)
   }
 
-  public canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
+  public async canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
     return new Promise(resolve => {
-      this._map.forEachLayerAtPixel(pixel, function (_, data) {
+      let resolved = false
+      const check = this._map.forEachLayerAtPixel(pixel, function (_, data) {
         const [,,, a] = data
 
-        return resolve(a === 1)
+        resolved = true
+        resolve(a !== 128)
       }, {
-        layerFilter: function (layer) {
-          // only handle click event on LUIMAP
-          return layer.getProperties().source.layer_ === 'LUIMAP'
-        }
+        layerFilter: (layer) => layer.getClassName() === 'lui-layer'
       })
 
-      resolve(false)
-    })
-  }
-
-  private getLUIMAPLayer (): Promise<Layer> {
-    return new Promise((resolve, reject) => {
-      let layer
-      this._map.getLayers().forEach(_layer => {
-        if (_layer.getProperties().source.layer_ === 'LUIMAP') {
-          layer = _layer
-          resolve(_layer as Layer)
+      // !Workaround #forEachLayerAtPixel would not correctly run for some browsers
+      if (!resolved) {
+        if (check === undefined) {
+          resolve(true)
+        } else {
+          resolve(check)
         }
-      })
-
-      if (!layer) {
-        reject(new TypeError('LUIMAP Layer not found'))
       }
     })
   }
 
-  public async setLUILayerVisible (visible: boolean) {
-    const layer = await this.getLUIMAPLayer()
+  private getLUIMAPLayer (): Layer {
+    let layer
+    this._map.getLayers().forEach(_layer => {
+      if (_layer.getProperties().source.layer_ === 'LUIMAP') {
+        layer = _layer
+      }
+    })
+
+    if (!layer) {
+      throw (new TypeError('LUIMAP Layer not found'))
+    }
+
+    return layer as Layer
+  }
+
+  public setLUILayerVisible (visible: boolean) {
+    const layer = this.getLUIMAPLayer()
     layer.setVisible(visible)
   }
 
-  public async getLUILayerVisible () {
-    const layer = await this.getLUIMAPLayer()
+  public getLUILayerVisible () {
+    const layer = this.getLUIMAPLayer()
     return layer.getVisible()
   }
 

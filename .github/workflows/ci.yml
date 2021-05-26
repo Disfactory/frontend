@@ -54,6 +54,8 @@ jobs:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/master'"
+    env:
+      VUE_APP_PROTOMAP_API_KEY: e6cfbd46818cf623
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js 10.x
@@ -63,6 +65,7 @@ jobs:
       - name: Install and Build
         run: |
           npm ci
+          echo "VUE_APP_BASE_URL=https://api.disfactory.tw/api" > .env
           npm run build
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1

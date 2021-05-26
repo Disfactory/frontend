@@ -2,9 +2,8 @@
   <v-bottom-sheet v-model="isOpen">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
-        rounded
-        color="white"
-        class="mx-2 mb-5 primary--text"
+        color="primary"
+        class="mx-2 mb-5 white--text"
         v-bind="attrs"
         v-on="on"
       >
@@ -56,8 +55,7 @@ export default createComponent({
     const isLUIMapVisable$ = ref(false)
     const isLUIMapVisable = computed({
       get: () => {
-        mapController.value?.mapInstance.getLUILayerVisible()
-          .then((el) => { isLUIMapVisable$.value = el })
+        isLUIMapVisable$.value = !!mapController.value?.mapInstance.getLUILayerVisible()
 
         return isLUIMapVisable$.value
       },

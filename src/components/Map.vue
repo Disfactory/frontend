@@ -4,19 +4,19 @@
 
     <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }" v-if="appState.isInitialPage">
       <display-setting-bottom-sheet />
-      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white">
+      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'inactive-filter': !checkActive(button.value) }" color="white" :name="button.text">
         <v-icon :color="button.color">mdi-map-marker</v-icon>
         {{ button.text }}
       </v-btn>
     </div>
 
     <div class="ol-fit-location ol-unselectable ol-control" @click="zoomToGeolocation" data-label="map-locate">
-      <button>
+      <button title="定位">
         <img src="/images/locate.svg" alt="locate">
       </button>
     </div>
 
-    <div class="center-point" v-if="appState.selectFactoryMode && !locationTooltipVisibility" />
+    <div class="center-point" v-if="appState.selectFactoryMode" />
 
     <div class="factory-button-group flex justify-center mb-5 mb-8-md" v-if="!appState.selectFactoryMode">
       <v-btn @click="onClickCreateFactoryButton" color="primary" rounded large>
@@ -197,7 +197,7 @@ export default createComponent({
       pageTransition.startCreateFactory()
     }
 
-    const appliedFilters = ref<FactoryDisplayStatusType[]>([])
+    const appliedFilters = ref<FactoryDisplayStatusType[]>(defaultFactoryDisplayStatuses)
     const checkActive = (status: FactoryDisplayStatusType) => appliedFilters.value.includes(status)
 
     const onClickFilterButton = (status: FactoryDisplayStatusType) => {
@@ -220,7 +220,8 @@ export default createComponent({
     const filterButtonsData = defaultFactoryDisplayStatuses.map(v => ({
       text: getDisplayStatusText(v),
       color: getDisplayStatusColor(v),
-      value: v
+      value: v,
+      name: v
     }))
 
     return {
@@ -336,6 +337,10 @@ export default createComponent({
   overflow-x: auto;
   max-width: 100%;
   white-space: nowrap;
+
+  .v-btn.inactive-filter {
+    opacity: 0.5;
+  }
 
   &.desktop {
     white-space: normal;
