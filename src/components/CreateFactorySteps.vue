@@ -94,7 +94,7 @@
 
                 <div class="d-block  mr-7" style="height: 36px; width: 1px; background-color: #EAF3BF;" />
 
-                <h5 class=" mr-2">精度</h5>
+                <h5 class=" mr-2">經度</h5>
 
                 <v-text-field hide-details class=" mr-7" outilned solo v-model="locationInputState.longitude" placeholder="例：121.5231872" dense />
 
@@ -129,7 +129,7 @@
                   以下經緯度版本為WGS84
                 </p>
 
-                <h3 class="mb-2">精度</h3>
+                <h3 class="mb-2">經度</h3>
 
                 <v-text-field outilned solo v-model="locationInputState.longitude" placeholder="例：121.5231872" />
 

@@ -4,7 +4,7 @@ import IconAnchorUnits from 'ol/style/IconAnchorUnits'
 import { Point } from 'ol/geom'
 import WMTS from 'ol/source/WMTS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS'
-import { get as getProjection, transform } from 'ol/proj'
+import { get as getProjection, transform, transformExtent } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
 import { Vector as VectorSource, OSM, Cluster } from 'ol/source'
@@ -30,7 +30,8 @@ export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
   if (factory.document_display_status) {
-    return FactoryDisplayStatuses.find(s => s.name === factory.document_display_status)?.type as FactoryDisplayStatusType
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return FactoryDisplayStatuses.find(s => s.documentDisplayStatuses.includes(factory.document_display_status!))?.type as FactoryDisplayStatusType
   } else {
     return FactoryDisplayStatuses[0].type
   }
@@ -101,7 +102,7 @@ const minimapPinStyle = new Style({
 
 export class MapFactoryController {
   private _map: OLMap
-  private appliedFilters: FactoryDisplayStatusType[] = []
+  private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
   private _factoriesLayerSource?: VectorSource
   private factoryMap = new Map<string, FactoryData>()
 
@@ -222,12 +223,7 @@ export class MapFactoryController {
   }
 
   private isFactoryVisible (factory: FactoryData) {
-    if (this.appliedFilters.length === 0) {
-      // always visible if no filters applied
-      return true
-    } else {
-      return this.appliedFilters.includes(getFactoryStatus(factory))
-    }
+    return this.appliedFilters.includes(getFactoryStatus(factory))
   }
 
   private getFactoryStyle (factory: FactoryData): Style {
@@ -293,21 +289,20 @@ const getWMTSTileGrid = () => {
 
 const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
   if (type === BASE_MAP.PROTOMAP) {
-    const key = process.env.VUE_APP_PROTOMAP_API_KEY
+    const taiwanExtent = transformExtent([119.90423060095736, 21.83090666506977, 122.2876172488333, 25.33409668479448], 'EPSG:4326', 'EPSG:3857')
     const layer = new VectorTileLayer({
       source: new VectorTileSource({
         attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
         format: new MVT(),
-        url: `https://api.protomaps.com/tiles/v1/{z}/{x}/{y}.pbf?key=${key}`,
+        url: 'https://staging.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
         maxZoom: 14
       }),
       opacity: 1,
       zIndex: 1,
       renderMode: VectorTileRenderType.VECTOR
     })
-
+    layer.setExtent(taiwanExtent)
     stylefunction(layer, baseStyle, 'protomaps')
-
     return layer
   } else {
     const source = (() => {
@@ -385,7 +380,8 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
         '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
     }),
     opacity: 0.5,
-    zIndex: 2
+    zIndex: 2,
+    className: 'lui-layer'
   })
 }
 
@@ -650,20 +646,26 @@ export class OLMap {
     this._map.addLayer(this.baseLayer)
   }
 
-  public canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
+  public async canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
     return new Promise(resolve => {
-      this._map.forEachLayerAtPixel(pixel, function (_, data) {
+      let resolved = false
+      const check = this._map.forEachLayerAtPixel(pixel, function (_, data) {
         const [,,, a] = data
 
-        return resolve(a === 1)
+        resolved = true
+        resolve(a !== 128)
       }, {
-        layerFilter: function (layer) {
-          // only handle click event on LUIMAP
-          return layer.getProperties().source.layer_ === 'LUIMAP'
-        }
+        layerFilter: (layer) => layer.getClassName() === 'lui-layer'
       })
 
-      resolve(false)
+      // !Workaround #forEachLayerAtPixel would not correctly run for some browsers
+      if (!resolved) {
+        if (check === undefined) {
+          resolve(true)
+        } else {
+          resolve(check)
+        }
+      }
     })
   }
 

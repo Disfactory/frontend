@@ -4,7 +4,7 @@
 
     <div class="container-fluid px-1 pt-7 pb-4 filter-buttons-container" :class="{ desktop: $vuetify.breakpoint.mdAndUp, 'sidebar-expanded': appState.factoryDetailsExpanded }" v-if="appState.isInitialPage">
       <display-setting-bottom-sheet />
-      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'v-btn--active': checkActive(button.value) }" color="white" :name="button.text">
+      <v-btn class="mx-2 mb-5 primary--text" v-for="button in filterButtonsData" :key="button.value" @click="onClickFilterButton(button.value)" rounded :class="{ 'inactive-filter': !checkActive(button.value) }" color="white" :name="button.text">
         <v-icon :color="button.color">mdi-map-marker</v-icon>
         {{ button.text }}
       </v-btn>
@@ -201,7 +201,7 @@ export default createComponent({
       pageTransition.startCreateFactory()
     }
 
-    const appliedFilters = ref<FactoryDisplayStatusType[]>([])
+    const appliedFilters = ref<FactoryDisplayStatusType[]>(defaultFactoryDisplayStatuses)
     const checkActive = (status: FactoryDisplayStatusType) => appliedFilters.value.includes(status)
 
     const onClickFilterButton = (status: FactoryDisplayStatusType) => {
@@ -341,6 +341,10 @@ export default createComponent({
   overflow-x: auto;
   max-width: 100%;
   white-space: nowrap;
+
+  .v-btn.inactive-filter {
+    opacity: 0.5;
+  }
 
   &.desktop {
     white-space: normal;

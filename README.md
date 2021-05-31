@@ -1,5 +1,8 @@
 # Disfactory frontend
 
+- Staging Server: https://dev.disfactory.tw (latest `master` branch)
+- Production server: https://disfactory.tw (`production` branch)
+
 ## Project setup
 
 ```bash

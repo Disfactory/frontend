@@ -2,9 +2,8 @@
   <v-bottom-sheet v-model="isOpen">
     <template v-slot:activator="{ on, attrs }">
       <v-btn
-        rounded
-        color="white"
-        class="mx-2 mb-5 primary--text"
+        color="primary"
+        class="mx-2 mb-5 white--text"
         v-bind="attrs"
         v-on="on"
       >
