@@ -140,19 +140,20 @@ export class MapFactoryController {
             if (!style) {
               style = new Style({
                 image: new Circle({
-                  radius: 10,
+                  radius: 20,
                   stroke: new Stroke({
                     color: '#fff'
                   }),
                   fill: new Fill({
-                    color: '#3399CC'
+                    color: '#457287'
                   })
                 }),
                 text: new Text({
                   text: size.toString(),
                   fill: new Fill({
                     color: '#fff'
-                  })
+                  }),
+                  scale: 1.8,
                 })
               })
               // @ts-ignore
