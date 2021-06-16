@@ -5,26 +5,26 @@
         <v-icon>mdi-temp</v-icon>
       </v-btn>
       <v-spacer class="d-sm-none" />
-      <v-toolbar-title>農地工廠回報</v-toolbar-title>
+      <v-toolbar-title>{{$t("農地工廠回報")}}</v-toolbar-title>
       <v-spacer />
       <div class="d-none d-sm-flex">
         <v-btn text @click="modalActions.openTutorialModal">
-          使用教學
+          {{ $t("使用教學") }}
         </v-btn>
         <v-btn text @click="modalActions.openSafetyModal">
-          安全須知
+          {{$t("安全須知")}}
         </v-btn>
         <v-btn text @click="modalActions.openContactModal">
-          聯絡我們
+          {{$t("聯絡我們")}}
         </v-btn>
         <v-btn text href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240">
-          常見問題
+          {{$t("常見問題")}}
         </v-btn>
         <v-btn text href="https://about.disfactory.tw" target="_blank">
-          關於舉報系統
+          {{$t("關於舉報系統")}}
         </v-btn>
         <v-btn text href="https://airtable.com/shrUraKakZRpH52DO" target="_blank">
-          問題回報
+          {{$t("問題回報")}}
         </v-btn>
       </div>
       <v-app-bar-nav-icon class="d-flex d-sm-none" @click="drawer = !drawer" />
@@ -38,27 +38,27 @@
           active-class="deep-purple--text text--accent-4"
         >
           <v-list-item @click="modalActions.openTutorialModal">
-            <v-list-item-title>使用教學</v-list-item-title>
+            <v-list-item-title>{{$t("使用教學")}}</v-list-item-title>
           </v-list-item>
 
           <v-list-item @click="modalActions.openSafetyModal">
-            <v-list-item-title>安全須知</v-list-item-title>
+            <v-list-item-title>{{$t("安全須知")}}</v-list-item-title>
           </v-list-item>
 
           <v-list-item @click="modalActions.openContactModal">
-            <v-list-item-title>聯絡我們</v-list-item-title>
+            <v-list-item-title>{{$t("聯絡我們")}}</v-list-item-title>
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240" target="_blank">
-            <v-list-item-title>常見問題</v-list-item-title>
+            <v-list-item-title>{{$t("常見問題")}}</v-list-item-title>
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw" target="_blank">
-            <v-list-item-title>關於舉報系統</v-list-item-title>
+            <v-list-item-title>{{$t("關於舉報系統")}}</v-list-item-title>
           </v-list-item>
 
           <v-list-item href="https://airtable.com/shrUraKakZRpH52DO" target="_blank">
-            <v-list-item-title>問題回報</v-list-item-title>
+            <v-list-item-title>{{$t("問題回報")}}</v-list-item-title>
           </v-list-item>
         </v-list-item-group>
       </v-list>
@@ -74,11 +74,11 @@
             mdi-checkbox-marked-circle
           </v-icon>
           <v-card-title class="secondary--text justify-center">
-            新增可疑工廠成功
+            {{$t("新增可疑工廠成功")}}
           </v-card-title>
           <v-card-text>
             <small>
-              3 秒後自動關閉提示訊息
+              {{$t("3 秒後自動關閉提示訊息")}}
             </small>
           </v-card-text>
         </v-card>
@@ -90,11 +90,11 @@
             mdi-checkbox-marked-circle
           </v-icon>
           <v-card-title class="secondary--text justify-center">
-            補充工廠照片成功
+            {{$t("補充工廠照片成功")}}
           </v-card-title>
           <v-card-text>
             <small>
-              3 秒後自動關閉提示訊息
+              {{$t("3 秒後自動關閉提示訊息")}}
             </small>
           </v-card-text>
         </v-card>
@@ -106,11 +106,11 @@
             mdi-checkbox-marked-circle
           </v-icon>
           <v-card-title class="secondary--text justify-center">
-            補充工廠資訊成功
+            {{$t("補充工廠資訊成功")}}
           </v-card-title>
           <v-card-text>
             <small>
-              3 秒後自動關閉提示訊息
+              {{$t("3 秒後自動關閉提示訊息")}}
             </small>
           </v-card-text>
         </v-card>
