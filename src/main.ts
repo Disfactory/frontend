@@ -21,7 +21,7 @@ Vue.use(CoolLightBox)
 Vue.use(VueParams)
 Vue.use(VueI18Next)
 
-Vue.params.i18nextLanguage = Languages.ZH_TW;
+Vue.params.i18nextLanguage = Languages.ZH_TW
 
 // See https://github.com/rse/vue-i18next
 i18next.init({
@@ -32,7 +32,7 @@ i18next.init({
       translation: zh_tw
     }
   }
-});
+})
 
 Vue.use(VueGtag, {
   config: { id: 'UA-154739393-1' },

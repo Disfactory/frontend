@@ -4,10 +4,10 @@ declare module 'vue/types/vue' {
   import Vue, { VueConstructor } from 'vue'
 
   interface Vue {
-    params: any;
+    params: any
   }
 
   interface VueConstructor {
-    params: any;
+    params: any
   }
 }
