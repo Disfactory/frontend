@@ -25,7 +25,10 @@ import { baseStyle } from './layerStyle'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
-  return FactoryDisplayStatuses.find(s => s.type === status)?.color
+  // We use == instead of === here because `type` can be either a string or number
+  // == results in a form of typecasting that works good enough for here
+  // eslint-disable-next-line
+  return FactoryDisplayStatuses.find(s => s.type == status)?.color
 }
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
@@ -104,10 +107,12 @@ export class MapFactoryController {
   private _map: OLMap
   private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
   private _factoriesLayerSource?: VectorSource
+  private _factoriesLayerStatusMap: {[key: string]: VectorSource}
   private factoryMap = new Map<string, FactoryData>()
 
   constructor (map: OLMap) {
     this._map = map
+    this._factoriesLayerStatusMap = {} as {[key: string]: VectorSource}
   }
 
   get mapInstance () {
@@ -118,15 +123,13 @@ export class MapFactoryController {
     return [...this.factoryMap.values()]
   }
 
-  get factoriesLayerSource () {
-    // create or return _factoriesLayerSource
-    if (!this._factoriesLayerSource) {
-      this._factoriesLayerSource = new VectorSource({ features: [] })
+  getFactoriesLayerForStatus (factoryStatus: FactoryDisplayStatusType) {
+    if (!this._factoriesLayerStatusMap[`_${factoryStatus}`]) {
+      this._factoriesLayerStatusMap[`_${factoryStatus}`] = new VectorSource({ features: [] })
       const clusterSource = new Cluster({
         distance: 50,
-        source: this._factoriesLayerSource
+        source: this._factoriesLayerStatusMap[`_${factoryStatus}`]
       })
-
       const styleCache = {}
       const vectorLayer = new VectorLayer({
         source: clusterSource,
@@ -135,6 +138,7 @@ export class MapFactoryController {
           const features = feature.get('features')
           if (features.length > 1) {
             const size = features.length
+            // eslint-disable-next-line
             // @ts-ignore
             let style = styleCache[size]
             if (!style) {
@@ -145,7 +149,7 @@ export class MapFactoryController {
                     color: '#fff'
                   }),
                   fill: new Fill({
-                    color: '#457287'
+                    color: getStatusBorderColor(factoryStatus)
                   })
                 }),
                 text: new Text({
@@ -153,9 +157,10 @@ export class MapFactoryController {
                   fill: new Fill({
                     color: '#fff'
                   }),
-                  scale: 1.8,
+                  scale: 1.8
                 })
               })
+              // eslint-disable-next-line
               // @ts-ignore
               styleCache[size] = style
             }
@@ -167,11 +172,9 @@ export class MapFactoryController {
           }
         }
       })
-
       this.mapInstance.map.addLayer(vectorLayer)
     }
-
-    return this._factoriesLayerSource
+    return this._factoriesLayerStatusMap[`_${factoryStatus}`]
   }
 
   public getFactory (id: string) {
@@ -182,7 +185,7 @@ export class MapFactoryController {
     this.factoryMap.set(id, factory)
 
     // Update factory feature style base on new data
-    const feature = this.factoriesLayerSource.getFeatureById(id)
+    const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(id)
     if (feature) {
       const style = this.getFactoryStyle(factory)
       feature.set('defaultStyle', style.clone())
@@ -204,15 +207,26 @@ export class MapFactoryController {
     })
 
     const features = factoriesToAdd.map(createFactoryFeature)
-
-    this.factoriesLayerSource.addFeatures(features)
+    interface FeatureFactoryStatusMap {
+      [key: string]: Feature[]
+    }
+    const featuresByFactoryStatus = {} as FeatureFactoryStatusMap
+    features.forEach((feature) => {
+      if (!featuresByFactoryStatus[feature.get('factoryStatus')]) {
+        featuresByFactoryStatus[feature.get('factoryStatus')] = []
+      }
+      featuresByFactoryStatus[feature.get('factoryStatus')].push(feature)
+    })
+    Object.entries(featuresByFactoryStatus).forEach(([factoryStatus, features]) => {
+      this.getFactoriesLayerForStatus(factoryStatus as FactoryDisplayStatusType).addFeatures(features)
+    })
 
     factoriesToUpdate.forEach((factory) => this.updateFactory(factory.id, factory))
   }
 
   public hideFactories (factories: FactoryData[]) {
     factories.forEach(factory => {
-      const feature = this.factoriesLayerSource.getFeatureById(factory.id)
+      const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factory.id)
       feature.setStyle(nullStyle)
     })
   }
@@ -238,6 +252,7 @@ export class MapFactoryController {
     })
     feature.setId(factory.id)
     feature.set('factoryId', factory.id)
+    feature.set('factoryStatus', getFactoryStatus(factory))
     const style = this.getFactoryStyle(factory)
     feature.set('defaultStyle', style.clone())
     feature.setStyle(style)
@@ -248,11 +263,13 @@ export class MapFactoryController {
   }
 
   private forEachFeatureFactory (fn: (feature: Feature, factory: FactoryData) => void) {
-    this.factoriesLayerSource.getFeatures().forEach(feature => {
-      const id = feature.getId() as string
-      const factory = this.factoryMap.get(id) as FactoryData
+    Object.entries(this._factoriesLayerStatusMap).forEach(([, layerSource]) => {
+      layerSource.getFeatures().forEach(feature => {
+        const id = feature.getId() as string
+        const factory = this.factoryMap.get(id) as FactoryData
 
-      fn(feature, factory)
+        fn(feature, factory)
+      })
     })
   }
 
@@ -382,6 +399,9 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
     }),
     opacity: 0.5,
     zIndex: 2,
+    // TS is wrong, for some reason className is a valid property
+    // eslint-disable-next-line
+    // @ts-ignore
     className: 'lui-layer'
   })
 }
@@ -656,6 +676,9 @@ export class OLMap {
         resolved = true
         resolve(a !== 128)
       }, {
+        // TS is wrong, for some reason layer does have .getClassName()
+        // eslint-disable-next-line
+        // @ts-ignore
         layerFilter: (layer) => layer.getClassName() === 'lui-layer'
       })
 

@@ -34,7 +34,7 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import AppTextField from '@/components/AppTextField.vue'
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 
-import { initializeMap, MapFactoryController } from '../lib/map'
+import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Feature, Overlay } from 'ol'
@@ -46,7 +46,6 @@ import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 import { moveToSharedFactory, permalink } from '../lib/permalink'
 import { waitNextTick } from '../lib/utils'
-import { Style } from 'ol/style'
 
 export default createComponent({
   components: {
@@ -174,9 +173,12 @@ export default createComponent({
       })
 
       moveToSharedFactory(mapController, window.location, (factoryId) => {
-        const feature = mapController.factoriesLayerSource.getFeatureById(factoryId)
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        onClickFactoryFeature([0, 0], feature as Feature)
+        const factory = mapControllerRef?.value?.getFactory(factoryId)
+        if (factory) {
+          const feature = mapController.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factoryId)
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          onClickFactoryFeature([0, 0], feature as Feature)
+        }
       })
 
       mapController.mapInstance.map.addOverlay(popupOverlay)
