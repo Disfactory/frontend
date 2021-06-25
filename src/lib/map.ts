@@ -103,6 +103,8 @@ const minimapPinStyle = new Style({
   })
 })
 
+export const featureStyleCache = new Map<string, Style>()
+
 export class MapFactoryController {
   private _map: OLMap
   private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
@@ -188,7 +190,7 @@ export class MapFactoryController {
     const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(id)
     if (feature) {
       const style = this.getFactoryStyle(factory)
-      feature.set('defaultStyle', style.clone())
+      featureStyleCache.set(id, style.clone())
       feature.setStyle(style)
     }
   }
@@ -221,7 +223,8 @@ export class MapFactoryController {
       this.getFactoriesLayerForStatus(factoryStatus as FactoryDisplayStatusType).addFeatures(features)
     })
 
-    factoriesToUpdate.forEach((factory) => this.updateFactory(factory.id, factory))
+    // ? Disable updating factory style when fetching new factories, user now should refresh the page manually to get factory status updated
+    // factoriesToUpdate.forEach((factory) => this.updateFactory(factory.id, factory))
   }
 
   public hideFactories (factories: FactoryData[]) {
@@ -254,7 +257,7 @@ export class MapFactoryController {
     feature.set('factoryId', factory.id)
     feature.set('factoryStatus', getFactoryStatus(factory))
     const style = this.getFactoryStyle(factory)
-    feature.set('defaultStyle', style.clone())
+    featureStyleCache.set(factory.id, style.clone())
     feature.setStyle(style)
 
     this.factoryMap.set(factory.id, factory)
