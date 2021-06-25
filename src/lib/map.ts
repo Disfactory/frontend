@@ -126,11 +126,11 @@ export class MapFactoryController {
   }
 
   getFactoriesLayerForStatus (factoryStatus: FactoryDisplayStatusType) {
-    if (!this._factoriesLayerStatusMap[`_${factoryStatus}`]) {
-      this._factoriesLayerStatusMap[`_${factoryStatus}`] = new VectorSource({ features: [] })
+    if (!this._factoriesLayerStatusMap[`${factoryStatus}`]) {
+      this._factoriesLayerStatusMap[`${factoryStatus}`] = new VectorSource({ features: [] })
       const clusterSource = new Cluster({
         distance: 50,
-        source: this._factoriesLayerStatusMap[`_${factoryStatus}`]
+        source: this._factoriesLayerStatusMap[`${factoryStatus}`]
       })
       const styleCache = {}
       const vectorLayer = new VectorLayer({
@@ -174,9 +174,10 @@ export class MapFactoryController {
           }
         }
       })
+      vectorLayer.setProperties({ factoryStatus })
       this.mapInstance.map.addLayer(vectorLayer)
     }
-    return this._factoriesLayerStatusMap[`_${factoryStatus}`]
+    return this._factoriesLayerStatusMap[`${factoryStatus}`]
   }
 
   public getFactory (id: string) {

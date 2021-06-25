@@ -220,7 +220,16 @@ export default createComponent({
         ]
       }
 
-      mapControllerRef.value.setFactoryStatusFilter(appliedFilters.value)
+      mapControllerRef.value.mapInstance.map.getLayers().forEach((layer) => {
+        const factoryStatus = layer.get('factoryStatus')
+        if (factoryStatus === undefined) return
+        const comparableFactoryStatus = factoryStatus === 'default' ? factoryStatus : Number(factoryStatus)
+        if (!appliedFilters.value.includes(comparableFactoryStatus)) {
+          layer.setVisible(false)
+        } else {
+          layer.setVisible(true)
+        }
+      })
     }
 
     const filterButtonsData = defaultFactoryDisplayStatuses.map(v => ({
