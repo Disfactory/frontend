@@ -38,6 +38,7 @@ import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/ma
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Feature, Overlay } from 'ol'
+import Point from 'ol/geom/Point'
 import OverlayPositioning from 'ol/OverlayPositioning'
 import { defaultFactoryDisplayStatuses, FactoryDisplayStatusType, getDisplayStatusColor, getDisplayStatusText } from '../types'
 import { useGA } from '@/lib/useGA'
@@ -110,21 +111,23 @@ export default createComponent({
         }
 
         if (feature) {
-          /*
-          if ('setStyle' in feature) {
-            const zoomedStyle = (feature.get('defaultStyle') as Style).clone()
-            const originalImage = zoomedStyle.getImage().clone()
-            originalImage.setScale(1.25)
-            zoomedStyle.setImage(originalImage)
-            zoomedStyle.setZIndex(2)
-            feature.setStyle(zoomedStyle)
-          }
-          */
           event('clickFactoryPin')
-          openFactoryDetail(feature)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
-            expandFactoryDetail()
+          if (feature.get('factoryId')) {
+            openFactoryDetail(feature)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
+              expandFactoryDetail()
+            }
+          } else {
+            // eslint-disable-next-line
+            // @ts-ignore
+            const p: Point = feature.getGeometry()
+            // eslint-disable-next-line
+            // @ts-ignore
+            const c: Coordinate = p.getCoordinates()
+            mapControllerRef?.value?.mapInstance?.map?.getView().setCenter(c)
+            const zoom = mapControllerRef?.value?.mapInstance?.map?.getView().getZoom()
+            mapControllerRef?.value?.mapInstance?.map?.getView().setZoom(zoom || 0 + 1)
           }
         } else {
           appState.factoryData = null
