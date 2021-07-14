@@ -1,6 +1,7 @@
 import { inject, provide, reactive, computed } from '@vue/composition-api'
 import { useGA } from './useGA'
 import { FactoryData } from '../types'
+import { featureStyleCache } from './map'
 
 const AppStateSymbol = Symbol('AppState')
 
@@ -208,8 +209,9 @@ const registerMutator = (appState: AppState) => {
   }
 
   function collapseFactoryDetail () {
-    if (appState.factoryData?.feature?.get('defaultStyle')) {
-      appState.factoryData?.feature?.setStyle(appState.factoryData?.feature?.get('defaultStyle'))
+    const defaultStyle = featureStyleCache.get(appState.factoryData?.id as string)
+    if (defaultStyle) {
+      appState.factoryData?.feature?.setStyle(defaultStyle)
     }
     appState.factoryDetailsExpanded = false
     appState.factoryData = null
