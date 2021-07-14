@@ -127,7 +127,7 @@ export default createComponent({
             const c: Coordinate = p.getCoordinates()
             mapControllerRef?.value?.mapInstance?.map?.getView().setCenter(c)
             const zoom = mapControllerRef?.value?.mapInstance?.map?.getView().getZoom()
-            mapControllerRef?.value?.mapInstance?.map?.getView().setZoom(zoom || 0 + 1)
+            mapControllerRef?.value?.mapInstance?.map?.getView().setZoom((zoom || 0) + 1)
           }
         } else {
           appState.factoryData = null
