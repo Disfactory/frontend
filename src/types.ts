@@ -109,6 +109,10 @@ export type FactoryData = {
 
 export type FactoriesResponse = Array<FactoryData>
 
+export interface FactoriesByStatus {
+  [key: string]: FactoryData[]
+}
+
 export type FactoryPostData = {
   name: string,
   type?: FactoryType,
