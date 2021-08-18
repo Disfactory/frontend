@@ -65,7 +65,7 @@ jobs:
       - name: Install and Build
         run: |
           npm ci
-          echo "VUE_APP_BASE_URL=https://api.disfactory.tw/api" > .env
+          echo "VUE_APP_BASE_URL=https://staging.disfactory.tw/api" > .env
           npm run build
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
