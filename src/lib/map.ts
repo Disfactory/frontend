@@ -1,5 +1,5 @@
 import { Map as OlMap, View, Feature, MapBrowserEvent } from 'ol'
-import { Style, Icon, Circle, Fill, Stroke } from 'ol/style'
+import { Style, Icon, Circle, Fill, Stroke, Text } from 'ol/style'
 import IconAnchorUnits from 'ol/style/IconAnchorUnits'
 import { Point } from 'ol/geom'
 import WMTS from 'ol/source/WMTS'
@@ -7,7 +7,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import { get as getProjection, transform, transformExtent } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
 import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
-import { Vector as VectorSource, OSM } from 'ol/source'
+import { Vector as VectorSource, OSM, Cluster } from 'ol/source'
 import { Zoom, ScaleLine, Rotate, Attribution } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
@@ -25,7 +25,10 @@ import { baseStyle } from './layerStyle'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
-  return FactoryDisplayStatuses.find(s => s.type === status)?.color
+  // We use == instead of === here because `type` can be either a string or number
+  // == results in a form of typecasting that works good enough for here
+  // eslint-disable-next-line
+  return FactoryDisplayStatuses.find(s => s.type == status)?.color
 }
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
@@ -100,14 +103,18 @@ const minimapPinStyle = new Style({
   })
 })
 
+export const featureStyleCache = new Map<string, Style>()
+
 export class MapFactoryController {
   private _map: OLMap
   private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
   private _factoriesLayerSource?: VectorSource
+  private _factoriesLayerStatusMap: {[key: string]: VectorSource}
   private factoryMap = new Map<string, FactoryData>()
 
   constructor (map: OLMap) {
     this._map = map
+    this._factoriesLayerStatusMap = {} as {[key: string]: VectorSource}
   }
 
   get mapInstance () {
@@ -118,20 +125,59 @@ export class MapFactoryController {
     return [...this.factoryMap.values()]
   }
 
-  get factoriesLayerSource () {
-    // create or return _factoriesLayerSource
-    if (!this._factoriesLayerSource) {
-      this._factoriesLayerSource = new VectorSource({ features: [] })
-
-      const vectorLayer = new VectorLayer({
-        source: this._factoriesLayerSource,
-        zIndex: 3
+  getFactoriesLayerForStatus (factoryStatus: FactoryDisplayStatusType) {
+    if (!this._factoriesLayerStatusMap[`${factoryStatus}`]) {
+      this._factoriesLayerStatusMap[`${factoryStatus}`] = new VectorSource({ features: [] })
+      const clusterSource = new Cluster({
+        distance: 50,
+        source: this._factoriesLayerStatusMap[`${factoryStatus}`]
       })
-
+      const styleCache = {}
+      const vectorLayer = new VectorLayer({
+        source: clusterSource,
+        zIndex: 3,
+        style: function (feature) {
+          const features = feature.get('features')
+          if (features.length > 1) {
+            const size = features.length
+            // eslint-disable-next-line
+            // @ts-ignore
+            let style = styleCache[size]
+            if (!style) {
+              style = new Style({
+                image: new Circle({
+                  radius: 20,
+                  stroke: new Stroke({
+                    color: '#fff'
+                  }),
+                  fill: new Fill({
+                    color: getStatusBorderColor(factoryStatus)
+                  })
+                }),
+                text: new Text({
+                  text: size.toString(),
+                  fill: new Fill({
+                    color: '#fff'
+                  }),
+                  scale: 1.8
+                })
+              })
+              // eslint-disable-next-line
+              // @ts-ignore
+              styleCache[size] = style
+            }
+            return style
+          } else {
+            const factoryFeature = features[0]
+            ;(feature as Feature).set('factoryId', factoryFeature.get('factoryId'))
+            return factoryFeature.getStyle()
+          }
+        }
+      })
+      vectorLayer.setProperties({ factoryStatus })
       this.mapInstance.map.addLayer(vectorLayer)
     }
-
-    return this._factoriesLayerSource
+    return this._factoriesLayerStatusMap[`${factoryStatus}`]
   }
 
   public getFactory (id: string) {
@@ -142,27 +188,49 @@ export class MapFactoryController {
     this.factoryMap.set(id, factory)
 
     // Update factory feature style base on new data
-    const feature = this.factoriesLayerSource.getFeatureById(id)
+    const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(id)
     if (feature) {
       const style = this.getFactoryStyle(factory)
-      feature.set('defaultStyle', style.clone())
+      featureStyleCache.set(id, style.clone())
       feature.setStyle(style)
     }
   }
 
   public addFactories (factories: FactoryData[]) {
     const createFactoryFeature = this.createFactoryFeature.bind(this)
-    const filteredFactories = factories.filter(factory => !this.factoryMap.has(factory.id))
-    const features = filteredFactories.map(createFactoryFeature)
+    const factoriesToAdd = [] as FactoryData[]
+    const factoriesToUpdate = [] as FactoryData[]
 
-    this.factoriesLayerSource.addFeatures(features)
+    factories.forEach(factory => {
+      if (this.factoryMap.has(factory.id)) {
+        factoriesToUpdate.push(factory)
+      } else {
+        factoriesToAdd.push(factory)
+      }
+    })
 
-    filteredFactories.forEach((factory) => this.updateFactory(factory.id, factory))
+    const features = factoriesToAdd.map(createFactoryFeature)
+    interface FeatureFactoryStatusMap {
+      [key: string]: Feature[]
+    }
+    const featuresByFactoryStatus = {} as FeatureFactoryStatusMap
+    features.forEach((feature) => {
+      if (!featuresByFactoryStatus[feature.get('factoryStatus')]) {
+        featuresByFactoryStatus[feature.get('factoryStatus')] = []
+      }
+      featuresByFactoryStatus[feature.get('factoryStatus')].push(feature)
+    })
+    Object.entries(featuresByFactoryStatus).forEach(([factoryStatus, features]) => {
+      this.getFactoriesLayerForStatus(factoryStatus as FactoryDisplayStatusType).addFeatures(features)
+    })
+
+    // ? Disable updating factory style when fetching new factories, user now should refresh the page manually to get factory status updated
+    // factoriesToUpdate.forEach((factory) => this.updateFactory(factory.id, factory))
   }
 
   public hideFactories (factories: FactoryData[]) {
     factories.forEach(factory => {
-      const feature = this.factoriesLayerSource.getFeatureById(factory.id)
+      const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factory.id)
       feature.setStyle(nullStyle)
     })
   }
@@ -187,19 +255,25 @@ export class MapFactoryController {
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
     feature.setId(factory.id)
+    feature.set('factoryId', factory.id)
+    feature.set('factoryStatus', getFactoryStatus(factory))
     const style = this.getFactoryStyle(factory)
-    feature.set('defaultStyle', style.clone())
+    featureStyleCache.set(factory.id, style.clone())
     feature.setStyle(style)
+
+    this.factoryMap.set(factory.id, factory)
 
     return feature
   }
 
   private forEachFeatureFactory (fn: (feature: Feature, factory: FactoryData) => void) {
-    this.factoriesLayerSource.getFeatures().forEach(feature => {
-      const id = feature.getId() as string
-      const factory = this.factoryMap.get(id) as FactoryData
+    Object.entries(this._factoriesLayerStatusMap).forEach(([, layerSource]) => {
+      layerSource.getFeatures().forEach(feature => {
+        const id = feature.getId() as string
+        const factory = this.factoryMap.get(id) as FactoryData
 
-      fn(feature, factory)
+        fn(feature, factory)
+      })
     })
   }
 
@@ -329,6 +403,9 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
     }),
     opacity: 0.5,
     zIndex: 2,
+    // TS is wrong, for some reason className is a valid property
+    // eslint-disable-next-line
+    // @ts-ignore
     className: 'lui-layer'
   })
 }
@@ -603,6 +680,9 @@ export class OLMap {
         resolved = true
         resolve(a !== 128)
       }, {
+        // TS is wrong, for some reason layer does have .getClassName()
+        // eslint-disable-next-line
+        // @ts-ignore
         layerFilter: (layer) => layer.getClassName() === 'lui-layer'
       })
 

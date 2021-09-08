@@ -34,10 +34,11 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import AppTextField from '@/components/AppTextField.vue'
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 
-import { initializeMap, MapFactoryController } from '../lib/map'
+import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Feature, Overlay } from 'ol'
+import Point from 'ol/geom/Point'
 import OverlayPositioning from 'ol/OverlayPositioning'
 import { defaultFactoryDisplayStatuses, FactoryDisplayStatusType, getDisplayStatusColor, getDisplayStatusText } from '../types'
 import { useGA } from '@/lib/useGA'
@@ -46,7 +47,6 @@ import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
 import { moveToSharedFactory, permalink } from '../lib/permalink'
 import { waitNextTick } from '../lib/utils'
-import { Style } from 'ol/style'
 
 export default createComponent({
   components: {
@@ -73,7 +73,9 @@ export default createComponent({
 
     const openFactoryDetail = (feature: Feature) => {
       if (!mapControllerRef.value) return
-      const factory = mapControllerRef.value.getFactory(feature.getId() as string)
+
+      const factoryId = feature.get('factoryId') as string
+      const factory = mapControllerRef.value.getFactory(factoryId)
 
       if (factory) {
         factory.feature = feature
@@ -109,19 +111,23 @@ export default createComponent({
         }
 
         if (feature) {
-          if ('setStyle' in feature) {
-            const zoomedStyle = (feature.get('defaultStyle') as Style).clone()
-            const originalImage = zoomedStyle.getImage().clone()
-            originalImage.setScale(1.25)
-            zoomedStyle.setImage(originalImage)
-            zoomedStyle.setZIndex(2)
-            feature.setStyle(zoomedStyle)
-          }
           event('clickFactoryPin')
-          openFactoryDetail(feature)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
-            expandFactoryDetail()
+          if (feature.get('factoryId')) {
+            openFactoryDetail(feature)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
+              expandFactoryDetail()
+            }
+          } else {
+            // eslint-disable-next-line
+            // @ts-ignore
+            const p: Point = feature.getGeometry()
+            // eslint-disable-next-line
+            // @ts-ignore
+            const c: Coordinate = p.getCoordinates()
+            mapControllerRef?.value?.mapInstance?.map?.getView().setCenter(c)
+            const zoom = mapControllerRef?.value?.mapInstance?.map?.getView().getZoom()
+            mapControllerRef?.value?.mapInstance?.map?.getView().setZoom((zoom || 0) + 1)
           }
         } else {
           appState.factoryData = null
@@ -170,9 +176,12 @@ export default createComponent({
       })
 
       moveToSharedFactory(mapController, window.location, (factoryId) => {
-        const feature = mapController.factoriesLayerSource.getFeatureById(factoryId)
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        onClickFactoryFeature([0, 0], feature as Feature)
+        const factory = mapControllerRef?.value?.getFactory(factoryId)
+        if (factory) {
+          const feature = mapController.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factoryId)
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+          onClickFactoryFeature([0, 0], feature as Feature)
+        }
       })
 
       mapController.mapInstance.map.addOverlay(popupOverlay)
@@ -214,7 +223,16 @@ export default createComponent({
         ]
       }
 
-      mapControllerRef.value.setFactoryStatusFilter(appliedFilters.value)
+      mapControllerRef.value.mapInstance.map.getLayers().forEach((layer) => {
+        const factoryStatus = layer.get('factoryStatus')
+        if (factoryStatus === undefined) return
+        const comparableFactoryStatus = factoryStatus === 'default' ? factoryStatus : Number(factoryStatus)
+        if (!appliedFilters.value.includes(comparableFactoryStatus)) {
+          layer.setVisible(false)
+        } else {
+          layer.setVisible(true)
+        }
+      })
     }
 
     const filterButtonsData = defaultFactoryDisplayStatuses.map(v => ({
