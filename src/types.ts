@@ -21,7 +21,7 @@ export const defaultFactoryDisplayStatuses = [
   'default', 0, 1, 2, 3
 ] as FactoryDisplayStatusType[]
 
-type DocumentDisplayStatus = '已檢舉' | '已排程稽查' | '陳述意見期' | '已勒令停工' | '已發函斷電' | '已排程拆除' | '已拆除' | '不再追蹤'
+type DocumentDisplayStatus = '已檢舉' | '已排程稽查' | '陳述意見期' | '已勒令停工' | '已發函斷電' | '已排程拆除' | '已拆除' | '等待新事證'
 
 type FactoryDisplayStatus = {
   type: FactoryDisplayStatusType,
@@ -57,7 +57,7 @@ export const FactoryDisplayStatuses: FactoryDisplayStatus[] = [
   {
     type: 3,
     name: '無法處理',
-    documentDisplayStatuses: ['不再追蹤'],
+    documentDisplayStatuses: ['等待新事證'],
     color: '#E0E0E0'
   }
 ]
