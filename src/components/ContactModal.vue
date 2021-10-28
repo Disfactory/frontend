@@ -5,7 +5,7 @@
         <img width="137" src="/images/cet-logo.png" alt="Citizen of the Earth Taiwan">
 
         <h3>
-          有任何舉報相關問題<br>
+          有任何回報相關問題<br>
           歡迎聯絡
         </h3>
 
