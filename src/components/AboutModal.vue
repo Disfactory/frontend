@@ -2,7 +2,7 @@
   <div class="about-dialog-container">
     <app-modal :open="open" :dismiss="dismiss">
       <div class="page">
-        <h3>關於舉報系統</h3>
+        <h3>關於回報系統</h3>
         <p>
           農地違章工廠舉報系統為協助民眾回報揭露農地違章工廠資訊，並非實際完成舉報。
         </p>
