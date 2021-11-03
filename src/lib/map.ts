@@ -532,8 +532,8 @@ export class OLMap {
       this.hasInitialLocation = true
     } else {
       view = new View({
-        center: transform([120.1, 23.234], 'EPSG:4326', 'EPSG:3857'),
-        zoom: 16
+        center: transform([120.48504632216294, 24.088258816482295], 'EPSG:4326', 'EPSG:3857'),
+        zoom: 14
       })
     }
 
