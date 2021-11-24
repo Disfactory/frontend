@@ -32,7 +32,7 @@ export default createComponent({
       { text: '安全須知', action: modalActions.openSafetyModal },
       { text: '聯絡我們', action: modalActions.openContactModal },
       { text: '常見問題', href: 'https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240' },
-      { text: '關於舉報系統', href: 'https://about.disfactory.tw' },
+      { text: '關於回報系統', href: 'https://about.disfactory.tw' },
       { text: '問題回報', href: 'https://airtable.com/shrUraKakZRpH52DO' }
     ]
     const close = () => {

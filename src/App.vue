@@ -21,7 +21,7 @@
           常見問題
         </v-btn>
         <v-btn text href="https://about.disfactory.tw" target="_blank">
-          關於舉報系統
+          關於回報系統
         </v-btn>
         <v-btn text href="https://airtable.com/shrUraKakZRpH52DO" target="_blank">
           問題回報
@@ -54,7 +54,7 @@
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw" target="_blank">
-            <v-list-item-title>關於舉報系統</v-list-item-title>
+            <v-list-item-title>關於回報系統</v-list-item-title>
           </v-list-item>
 
           <v-list-item href="https://airtable.com/shrUraKakZRpH52DO" target="_blank">
