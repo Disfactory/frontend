@@ -35,7 +35,7 @@ import AppTextField from '@/components/AppTextField.vue'
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 
 import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
-import { getFactories } from '../api'
+import { getFactories, getAllFactoryCounts } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Feature, Overlay } from 'ol'
 import Point from 'ol/geom/Point'
@@ -151,7 +151,11 @@ export default createComponent({
 
           event('moveMap')
           try {
-            const factories = await getFactories(range, longitude, latitude)
+            let factories
+            if (zoom < 11.0) {
+              factories = await getAllFactoryCounts()
+            }
+            factories = await getFactories(range, longitude, latitude)
             if (Array.isArray(factories)) {
               mapController.addFactories(factories)
             }

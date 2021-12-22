@@ -129,3 +129,20 @@ export type ReportRecord = {
   created_at: string,
   others?: string
 }
+
+interface Statistics {
+  factories: number
+  documents: number
+  report_records: number
+}
+
+interface StatisticsGrouping {
+  [name: string]: Statistics
+}
+
+export type StaticsticsResponse = {
+  factories: number,
+  documents: number,
+  report_records: number,
+  cities: StatisticsGrouping
+}
