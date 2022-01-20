@@ -1,0 +1,20 @@
+[20:18:25.424] Global cache location '/home/caleb/.cache/typescript/3.9', safe file path '/home/caleb/src/disfactory-frontend/node_modules/typescript/lib/typingSafeList.json', types map path /home/caleb/src/disfactory-frontend/node_modules/typescript/lib/typesMap.json
+[20:18:25.424] Processing cache location '/home/caleb/.cache/typescript/3.9'
+[20:18:25.425] Trying to find '/home/caleb/.cache/typescript/3.9/package.json'...
+[20:18:25.426] Loaded content of '/home/caleb/.cache/typescript/3.9/package.json': {"private":true,"dependencies":{"types-registry":"^0.1.572"},"devDependencies":{"@types/inherits":"0.0.30"}}
+[20:18:25.426] Loaded content of '/home/caleb/.cache/typescript/3.9/package-lock.json'
+[20:18:25.440] Adding entry into typings cache: 'inherits' => '/home/caleb/.cache/typescript/3.9/node_modules/@types/inherits/index.d.ts'
+[20:18:25.440] Finished processing cache location '/home/caleb/.cache/typescript/3.9'
+[20:18:25.441] Process id: 149711
+[20:18:25.441] NPM location: /usr/bin/npm (explicit '--npmLocation' not  provided)
+[20:18:25.441] validateDefaultNpmLocation: false
+[20:18:25.441] Npm config file: /home/caleb/.cache/typescript/3.9/package.json
+[20:18:25.441] Updating types-registry npm package...
+[20:18:25.441] Exec: /usr/bin/npm install --ignore-scripts types-registry@latest
+[20:18:26.873]     Succeeded. stdout:
+    + types-registry@0.1.575
+    updated 1 package and audited 3 packages in 0.574s
+found 0 vulnerabilities
+
+
+[20:18:26.873] Updated types-registry npm package

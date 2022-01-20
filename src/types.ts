@@ -140,7 +140,7 @@ interface StatisticsGrouping {
   [name: string]: Statistics
 }
 
-export type StaticsticsResponse = {
+export type StatisticsResponse = {
   factories: number,
   documents: number,
   report_records: number,

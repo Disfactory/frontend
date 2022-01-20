@@ -143,21 +143,24 @@ export default createComponent({
         onMoved: async function ([longitude, latitude, range, zoom], canPlaceFactory) {
           permalink.lat(latitude)
           permalink.lng(longitude)
+          console.log(latitude + ',' + longitude)
           permalink.zoom(zoom)
           window.location.hash = permalink.dumps()
+          console.log('call 1')
 
           appState.canPlaceFactory = canPlaceFactory
           appState.mapLngLat = [longitude, latitude]
 
           event('moveMap')
           try {
-            let factories
             if (zoom < 11.0) {
-              factories = await getAllFactoryCounts()
-            }
-            factories = await getFactories(range, longitude, latitude)
-            if (Array.isArray(factories)) {
-              mapController.addFactories(factories)
+              const stats = await getAllFactoryCounts()
+              console.log(stats)
+            } else {
+              const factories = await getFactories(range, longitude, latitude)
+              if (Array.isArray(factories)) {
+                mapController.addFactories(factories)
+              }
             }
           } catch (e) {
             // TODO: handle here
@@ -167,6 +170,7 @@ export default createComponent({
         onZoomed: function (zoom) {
           permalink.zoom(zoom)
           window.location.hash = permalink.dumps()
+          console.log('call 2')
         }
       }, {
         getInitialLocation: function () {

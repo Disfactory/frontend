@@ -42,7 +42,7 @@ export async function getFactory (factoryId: string): Promise<FactoryData> {
 
 export async function getAllFactoryCounts (): Promise<StatisticsResponse> {
   try {
-    const { data } = await instance.get('/statistics/factories?level=town/')
+    const { data } = await instance.get('/statistics/factories?level=town')
     return data
   } catch (err) {
     console.error(err)
