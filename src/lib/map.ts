@@ -473,6 +473,11 @@ export class OLMap {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     map.on('moveend', move)
 
+    // https://stackoverflow.com/a/54441119
+    // After any layer is loaded, check onMoved event for the first time.
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    map.on('rendercomplete', move)
+
     map.on('zoomend', () => {
       const view = map.getView()
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
