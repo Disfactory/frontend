@@ -28,6 +28,7 @@
 
 <script lang="ts">
 import { createComponent, onMounted, onUnmounted, ref, inject } from '@vue/composition-api'
+import debounce from 'lodash.debounce'
 
 import AppButton from '@/components/AppButton.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -138,8 +139,17 @@ export default createComponent({
         resizeMap()
       }
 
+      let mapController: MapFactoryController | null = null
+
+      const loadNewFactories = debounce(async function (range: number, longitude: number, latitude: number) {
+        const factories = await getFactories(range, longitude, latitude)
+        if (Array.isArray(factories)) {
+          mapController!.addFactories(factories)
+        }
+      }, 500)
+
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const mapController = initializeMap(root.value!, {
+      mapController = initializeMap(root.value!, {
         onMoved: async function ([longitude, latitude, range, zoom], canPlaceFactory) {
           permalink.lat(latitude)
           permalink.lng(longitude)
@@ -151,10 +161,7 @@ export default createComponent({
 
           event('moveMap')
           try {
-            const factories = await getFactories(range, longitude, latitude)
-            if (Array.isArray(factories)) {
-              mapController.addFactories(factories)
-            }
+            await loadNewFactories(range, longitude, latitude)
           } catch (e) {
             // TODO: handle here
           }
@@ -178,7 +185,7 @@ export default createComponent({
       moveToSharedFactory(mapController, window.location, (factoryId) => {
         const factory = mapControllerRef?.value?.getFactory(factoryId)
         if (factory) {
-          const feature = mapController.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factoryId)
+          const feature = mapController!.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factoryId)
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
           onClickFactoryFeature([0, 0], feature as Feature)
         }
