@@ -2,6 +2,7 @@
 
 - Staging Server: https://dev.disfactory.tw (latest `master` branch)
 - Production server: https://disfactory.tw (`production` branch)
+- [JD](./docs/JD.md)
 
 ## Project setup
 
