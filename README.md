@@ -1,8 +1,11 @@
 # Disfactory frontend
 
+## Links
+
 - Staging Server: https://dev.disfactory.tw (latest `master` branch)
 - Production server: https://disfactory.tw (`production` branch)
 - [JD](./docs/JD.md)
+- [Disfactory_UI_design - Figma](https://www.figma.com/file/nTYqE10obqYSy2x9zY6Oer/Disfactory_UI_design?node-id=244%3A648)
 
 ## Project setup
 
