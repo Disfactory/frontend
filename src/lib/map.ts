@@ -11,6 +11,7 @@ import { Vector as VectorSource, OSM, Cluster } from 'ol/source'
 import { Zoom, ScaleLine, Rotate, Attribution } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
+import TopoJSON from 'ol/format/TopoJSON'
 
 import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, FactoryDisplayStatuses } from '../types'
 import { flipArgriculturalLand } from '../lib/image'
@@ -532,6 +533,28 @@ export class OLMap {
     view.setZoom(zoom)
   }
 
+  private getChoroplethLayer () {
+    return new VectorLayer({
+      maxZoom:9,
+      source: new VectorSource({
+        url: 'datasets/districts-10t.json',
+        format: new TopoJSON({
+          layers: ['districts'], // or counties
+        }),
+        overlaps: false,
+      }),
+      style: new Style({
+        fill: new Fill({
+          color: '#A1A1A1',
+        }),
+        stroke: new Stroke({
+          color: 'white',
+          width: 1,
+        })
+      })
+    });
+  }
+
   private instantiateOLMap (target: HTMLElement, baseLayer: TileLayer | VectorTileLayer, options: OLMapOptions = {}) {
     const tileGrid = getWMTSTileGrid()
 
@@ -558,7 +581,8 @@ export class OLMap {
       target,
       layers: [
         baseLayer,
-        getLUIMapLayer(tileGrid)
+        getLUIMapLayer(tileGrid),
+        this.getChoroplethLayer()
       ],
       view,
       controls: [
