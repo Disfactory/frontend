@@ -325,7 +325,7 @@ const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
       source: new VectorTileSource({
         attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
         format: new MVT(),
-        url: 'https://staging.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
+        url: process.env.VUE_APP_PROTOMAP_SOURCE_URL || 'https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
         maxZoom: 14
       }),
       opacity: 1,
