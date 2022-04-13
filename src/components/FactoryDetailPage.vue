@@ -76,6 +76,7 @@
           </template>
 
           <hr v-if="full || $vuetify.breakpoint.mdAndUp">
+
           <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
             顯示更多資訊
             &nbsp;
@@ -105,9 +106,15 @@
               <p style="line-height: 24px;">{{ desc.others }}</p>
             </div>
 
-            <p v-for="(text, index) in factoryFollowupText" class="mt-2" :key="index">
-              {{ text }}
-            </p>
+            <h3 class="mb-1">政府回應</h3>
+
+            <div v-for="(followup, index) in factoryFollowups" class="mt-2" :key="index" style="font-size: 14px">
+              <p class="color-gray-light mb-1">
+                {{ new Date(followup.created_at).toLocaleDateString() }}
+              </p>
+
+              <p style="line-height: 24px;">{{ followup.note }}</p>
+            </div>
           </div>
         </div>
       </div>
@@ -178,11 +185,11 @@ export default createComponent({
       }
     })
 
-    const factoryFollowupText = computed(() => {
+    const factoryFollowups = computed(() => {
       if (appState.factoryData) {
         return appState.factoryData.follow_ups_for_user
       } else {
-        return ''
+        return []
       }
     })
 
@@ -323,6 +330,7 @@ export default createComponent({
         })()
       }
     })
+
     const pastDescriptions = computed(() => {
       return reportRecords.value.map(record => {
         const date = new Date(record.created_at)
@@ -364,7 +372,7 @@ export default createComponent({
       factoryType,
       factoryName,
       factoryAddressAndLandcode,
-      factoryFollowupText,
+      factoryFollowups,
       source,
       pastDescriptions,
       lastUpdatedAt,
