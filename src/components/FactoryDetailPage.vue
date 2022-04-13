@@ -104,6 +104,10 @@
               <p class="color-gray-light mb-1">{{ desc.date }}</p>
               <p style="line-height: 24px;">{{ desc.others }}</p>
             </div>
+
+            <p v-for="(text, index) in factoryFollowupText" class="mt-2" :key="index">
+              {{ text }}
+            </p>
           </div>
         </div>
       </div>
@@ -171,6 +175,14 @@ export default createComponent({
         return getFactoryStatus(appState.factoryData)
       } else {
         return undefined
+      }
+    })
+
+    const factoryFollowupText = computed(() => {
+      if (appState.factoryData) {
+        return appState.factoryData.follow_ups_for_user
+      } else {
+        return ''
       }
     })
 
@@ -352,6 +364,7 @@ export default createComponent({
       factoryType,
       factoryName,
       factoryAddressAndLandcode,
+      factoryFollowupText,
       source,
       pastDescriptions,
       lastUpdatedAt,
