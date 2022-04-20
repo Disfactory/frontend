@@ -104,7 +104,11 @@ export type FactoryData = {
   data_complete: boolean,
   before_release: boolean,
   document_display_status: DocumentDisplayStatus | null,
-  feature?: Feature
+  feature?: Feature,
+  follow_ups_for_user: {
+    note: string,
+    created_at: string
+  }[]
 }
 
 export type FactoriesResponse = Array<FactoryData>
