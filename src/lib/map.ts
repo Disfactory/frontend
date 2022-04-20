@@ -126,17 +126,26 @@ export class MapFactoryController {
   }
 
   getFactoriesLayerForStatus (factoryStatus: FactoryDisplayStatusType) {
+    let CLUSTER_DISTANCE = 50;
     if (!this._factoriesLayerStatusMap[`${factoryStatus}`]) {
       this._factoriesLayerStatusMap[`${factoryStatus}`] = new VectorSource({ features: [] })
       const clusterSource = new Cluster({
-        distance: 50,
+        distance: CLUSTER_DISTANCE,
         source: this._factoriesLayerStatusMap[`${factoryStatus}`]
       })
       const styleCache = {}
       const vectorLayer = new VectorLayer({
         source: clusterSource,
         zIndex: 3,
-        style: function (feature) {
+        style: (feature,resolution) => {
+          let zoom = this.mapInstance.map.getView().getZoom()!;
+
+          if (zoom > 16) {
+            if (clusterSource.getDistance() !== 0) clusterSource.setDistance(0);
+          } else {
+            if (clusterSource.getDistance() !== CLUSTER_DISTANCE) clusterSource.setDistance(CLUSTER_DISTANCE);
+          }
+
           const features = feature.get('features')
           if (features.length > 1) {
             const size = features.length
@@ -316,7 +325,7 @@ const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
       source: new VectorTileSource({
         attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
         format: new MVT(),
-        url: 'https://staging.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
+        url: process.env.VUE_APP_PROTOMAP_SOURCE_URL || 'https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
         maxZoom: 14
       }),
       opacity: 1,
@@ -472,6 +481,11 @@ export class OLMap {
     map.on('change:resolution', move)
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     map.on('moveend', move)
+
+    // https://stackoverflow.com/a/54441119
+    // After any layer is loaded, check onMoved event for the first time.
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    map.on('rendercomplete', move)
 
     map.on('zoomend', () => {
       const view = map.getView()
