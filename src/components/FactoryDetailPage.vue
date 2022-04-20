@@ -236,7 +236,11 @@ export default createComponent({
       if (appState.factoryData) {
         const { townname, sectname, sectcode, landcode } = appState.factoryData
         // 白鷺段（1005）817地號
-        return `${townname} ${sectname} (${sectcode}) ${landcode}地號`
+        if (townname && sectname && sectcode && landcode) {
+          return `${townname} ${sectname} (${sectcode}) ${landcode}地號`
+        } else {
+          return '擷取中'
+        }
       } else {
         return ''
       }
