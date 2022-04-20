@@ -110,10 +110,6 @@
               <h3 class="mb-1">政府回應</h3>
 
               <div v-for="(followup, index) in factoryFollowups" class="mt-2" :key="index" style="font-size: 14px">
-                <p class="color-gray-light mb-1">
-                  {{ new Date(followup.created_at).toLocaleDateString() }}
-                </p>
-
                 <p style="line-height: 24px;">{{ followup.note }}</p>
               </div>
             </template>
