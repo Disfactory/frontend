@@ -69,7 +69,7 @@
       :valid="imagesValid"
       :submit="submitImageUpload"
       :formState="imageUploadFormState"
-      submitText="確認新增照片"
+      :submitText="imageSubmitting? '照片上傳中...' : '確認新增照片'"
       disableProgressiveUpload
     />
 
@@ -295,7 +295,9 @@ export default createComponent({
       isCurrentFieldValid,
       factoryTypeItems,
 
-      submitUpdateFactory
+      submitUpdateFactory,
+
+      imageSubmitting
     }
   }
 })
