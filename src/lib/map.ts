@@ -220,7 +220,7 @@ export class MapFactoryController {
       }
     })
 
-    const features = factoriesToAdd.map(createFactoryFeature)
+    const features = factoriesToAdd.map(createFactoryFeature).filter(Boolean) as Feature[]
     interface FeatureFactoryStatusMap {
       [key: string]: Feature[]
     }
@@ -264,7 +264,7 @@ export class MapFactoryController {
   private createFactoryFeature (factory: FactoryData) {
     const existingFeature = FactoryPointCache.getFactoryCache(factory)
     if (existingFeature) {
-      return existingFeature
+      return null
     }
 
     const feature = new Feature({
