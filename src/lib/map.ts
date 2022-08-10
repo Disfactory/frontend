@@ -126,7 +126,7 @@ export class MapFactoryController {
   }
 
   getFactoriesLayerForStatus (factoryStatus: FactoryDisplayStatusType) {
-    let CLUSTER_DISTANCE = 50;
+    const CLUSTER_DISTANCE = 50
     if (!this._factoriesLayerStatusMap[`${factoryStatus}`]) {
       this._factoriesLayerStatusMap[`${factoryStatus}`] = new VectorSource({ features: [] })
       const clusterSource = new Cluster({
@@ -137,13 +137,13 @@ export class MapFactoryController {
       const vectorLayer = new VectorLayer({
         source: clusterSource,
         zIndex: 3,
-        style: (feature,resolution) => {
-          let zoom = this.mapInstance.map.getView().getZoom()!;
+        style: (feature, resolution) => {
+          const zoom = this.mapInstance.map.getView().getZoom()!
 
           if (zoom > 16) {
-            if (clusterSource.getDistance() !== 0) clusterSource.setDistance(0);
+            if (clusterSource.getDistance() !== 0) clusterSource.setDistance(0)
           } else {
-            if (clusterSource.getDistance() !== CLUSTER_DISTANCE) clusterSource.setDistance(CLUSTER_DISTANCE);
+            if (clusterSource.getDistance() !== CLUSTER_DISTANCE) clusterSource.setDistance(CLUSTER_DISTANCE)
           }
 
           const features = feature.get('features')
