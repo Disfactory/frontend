@@ -56,7 +56,7 @@
             </div>
           </v-slide-item>
           <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }" @click.native="setLightboxIndex(index)">
-            <img :src="image.url" class="factory-slide-image" />
+            <ImgurFallbackImage :src="image.url" className="factory-slide-image" />
           </v-slide-item>
         </v-slide-group>
 
@@ -145,9 +145,13 @@ import { getFactoryReportRecords } from '@/api'
 
 import { useAppState } from '../lib/appState'
 import { FactoryImage, getDisplayStatusText, ReportRecord } from '../types'
+import ImgurFallbackImage from './ImgurFallbackImage.vue'
 
 export default createComponent({
   name: 'FactoryDetailPage',
+  components: {
+    ImgurFallbackImage
+  },
   setup () {
     const [appState, { pageTransition, expandFactoryDetail, collapseFactoryDetail, toggleFactoryDetail }] = useAppState()
 
