@@ -22,6 +22,7 @@ import MVT from 'ol/format/MVT'
 import VectorTileRenderType from 'ol/layer/VectorTileRenderType'
 import stylefunction from 'ol-mapbox-style/dist/stylefunction'
 import { baseStyle } from './layerStyle'
+import FactoryPointCache from './utils/factoryPointCache'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
@@ -140,10 +141,11 @@ export class MapFactoryController {
         style: (feature, resolution) => {
           const zoom = this.mapInstance.map.getView().getZoom()!
 
+          const clusterDistance = clusterSource.getDistance()
           if (zoom > 16) {
-            if (clusterSource.getDistance() !== 0) clusterSource.setDistance(0)
+            if (clusterDistance !== 0) clusterSource.setDistance(0)
           } else {
-            if (clusterSource.getDistance() !== CLUSTER_DISTANCE) clusterSource.setDistance(CLUSTER_DISTANCE)
+            if (clusterDistance !== CLUSTER_DISTANCE) clusterSource.setDistance(CLUSTER_DISTANCE)
           }
 
           const features = feature.get('features')
@@ -218,7 +220,7 @@ export class MapFactoryController {
       }
     })
 
-    const features = factoriesToAdd.map(createFactoryFeature)
+    const features = factoriesToAdd.map(createFactoryFeature).filter(Boolean) as Feature[]
     interface FeatureFactoryStatusMap {
       [key: string]: Feature[]
     }
@@ -260,6 +262,11 @@ export class MapFactoryController {
   }
 
   private createFactoryFeature (factory: FactoryData) {
+    const existingFeature = FactoryPointCache.getFactoryCache(factory)
+    if (existingFeature) {
+      return null
+    }
+
     const feature = new Feature({
       geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
     })
@@ -271,6 +278,8 @@ export class MapFactoryController {
     feature.setStyle(style)
 
     this.factoryMap.set(factory.id, factory)
+
+    FactoryPointCache.setFactoryCache(factory, feature)
 
     return feature
   }
