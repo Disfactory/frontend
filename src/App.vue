@@ -17,7 +17,7 @@
         <v-btn text @click="modalActions.openContactModal">
           聯絡我們
         </v-btn>
-        <v-btn text href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240">
+        <v-btn text href="https://about.disfactory.tw/#question">
           常見問題
         </v-btn>
         <v-btn text href="https://about.disfactory.tw" target="_blank">
@@ -50,7 +50,7 @@
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240" target="_blank">
-            <v-list-item-title>常見問題</v-list-item-title>
+            <v-list-item-title></v-list-item-title>
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw" target="_blank">
