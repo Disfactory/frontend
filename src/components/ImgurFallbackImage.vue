@@ -43,10 +43,10 @@ export default createComponent({
       }
     })
 
-    const imageUrl = ref(fallbackUrl.value)
+    const imageUrl = ref(props.src)
 
     const onError = () => {
-      imageUrl.value = props.src
+      imageUrl.value = fallbackUrl.value
     }
 
     return {
