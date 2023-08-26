@@ -33,7 +33,9 @@ export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
 }
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
-  if (factory.document_display_status) {
+  if (factory.wont_fix) {
+    return FactoryDisplayStatuses[4].type
+  } else if (factory.document_display_status) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return FactoryDisplayStatuses.find(s => s.documentDisplayStatuses.includes(factory.document_display_status!))?.type as FactoryDisplayStatusType
   } else {
