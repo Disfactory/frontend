@@ -108,7 +108,8 @@ export type FactoryData = {
   follow_ups_for_user: {
     note: string,
     created_at: string
-  }[]
+  }[],
+  wont_fix: boolean
 }
 
 export type FactoriesResponse = Array<FactoryData>
