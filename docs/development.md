@@ -16,8 +16,6 @@ npm install
 ### Start development server
 
 ```bash
-
-```bash
 # Compiles and hot-reloads for development
 npm run serve
 ```
