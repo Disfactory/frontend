@@ -16,10 +16,10 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Run lint
         run: |
           npm ci
@@ -29,10 +29,10 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Run typecheck
         run: |
           npm ci
@@ -42,10 +42,10 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Run unit test
         run: |
           npm ci
@@ -58,10 +58,10 @@ jobs:
       VUE_APP_PROTOMAP_API_KEY: e6cfbd46818cf623
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Install and Build
         run: |
           npm ci
@@ -83,10 +83,10 @@ jobs:
     if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/production'"
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:

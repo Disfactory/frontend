@@ -29,10 +29,12 @@ export default createComponent({
     const matches = IMGUR_REGEX.exec(props.src)
 
     const imgurInfo = computed(() => {
-      return matches ? {
-        id: matches[1],
-        ext: matches[2]
-      } : null
+      return matches
+        ? {
+            id: matches[1],
+            ext: matches[2]
+          }
+        : null
     })
 
     const fallbackUrl = computed(() => {

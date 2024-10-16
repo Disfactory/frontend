@@ -3,7 +3,7 @@
 type PixelMapper = (data: Uint8ClampedArray) => void
 
 const canvas = (window.OffscreenCanvas) ? new OffscreenCanvas(500, 500) : document.createElement('canvas')
-const ctx = canvas.getContext('2d')!
+const ctx = canvas.getContext('2d')! as CanvasRenderingContext2D
 
 export const createImageProcessor = (processor: PixelMapper) => (src: string): Promise<string> => {
   return new Promise((resolve) => {

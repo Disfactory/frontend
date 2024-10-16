@@ -15,7 +15,6 @@ export function useGA () {
   }
 
   const pageview = (path: string) => {
-    // eslint-disable-next-line @typescript-eslint/camelcase
     gtag.pageview({ page_path: path })
   }
 

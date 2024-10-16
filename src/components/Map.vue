@@ -39,6 +39,7 @@ import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/ma
 import { getFactories } from '../api'
 import { MainMapControllerSymbol } from '../symbols'
 import { Feature, Overlay } from 'ol'
+import { Coordinate } from 'ol/coordinate'
 import Point from 'ol/geom/Point'
 import OverlayPositioning from 'ol/OverlayPositioning'
 import { defaultFactoryDisplayStatuses, FactoryDisplayStatusType, getDisplayStatusColor, getDisplayStatusText } from '../types'
