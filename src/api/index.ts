@@ -121,7 +121,6 @@ export async function updateFactoryImages (factoryId: string, files: FileList, {
     Array.from(files).map((file) => uploadToImgur(file).then((el) => (async () => {
       const exifData = await readImageExif(el.file)
       const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images`, { url: el.link, ...exifData, nickname, contact, deletehash: el.deletehash })
-      // eslint-disable-next-line @typescript-eslint/camelcase
       data.image_path = el.link
       return data
     })()))

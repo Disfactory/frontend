@@ -197,7 +197,6 @@ export default createComponent({
     const formState = reactive({
       others: '',
       name: appState.factoryData?.name,
-      // eslint-disable-next-line @typescript-eslint/camelcase
       factory_type: appState.factoryData?.type,
       submitting: false
     })
@@ -209,7 +208,6 @@ export default createComponent({
     const validStates = {
       others: computed(() => formState.others.length > 0 && !formState.submitting),
       name: computed(() => formState?.name?.length && formState.name?.length > 0 && !formState.submitting),
-      // eslint-disable-next-line @typescript-eslint/camelcase
       factory_type: computed(() => !!formState.factory_type && !formState.submitting)
     }
 
