@@ -9,7 +9,6 @@ module.exports = {
     '@vue/standard',
     '@vue/typescript/recommended',
     'plugin:@typescript-eslint/recommended-requiring-type-checking',
-    'plugin:testing-library/recommended',
     'plugin:testing-library/vue',
     'plugin:jest-dom/recommended'
   ],
@@ -30,6 +29,7 @@ module.exports = {
   parserOptions: {
     parser: '@typescript-eslint/parser',
     project: 'tsconfig.json',
+    tsconfigRootDir: __dirname,
     sourceType: 'module',
     extraFileExtensions: ['.vue']
   },
