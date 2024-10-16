@@ -219,7 +219,8 @@ export default createComponent({
     })
 
     const updateFormAppTitle = computed(() => {
-      return appState.isEditComment ? '補充工廠描述'
+      return appState.isEditComment
+        ? '補充工廠描述'
         : appState.isEditName ? '更改外部文字' : '更改工廠類型'
     })
 
