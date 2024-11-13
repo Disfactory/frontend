@@ -48,7 +48,7 @@
           </div>
         </v-card-text>
 
-        <v-slide-group :show-arrows="images > 0 ? 'desktop' : false" ref="slideGroup">
+        <v-slide-group :show-arrows="images.length > 0" ref="slideGroup">
           <v-slide-item>
             <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
               <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
