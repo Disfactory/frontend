@@ -10,6 +10,9 @@ on:
       - master
       - production
 
+permissions:
+  contents: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -69,14 +72,11 @@ jobs:
           echo "VUE_APP_IMGUR_FALLBACK_URL=https://staging.disfactory.tw/imgur" >> .env
           npm run build
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BASE_BRANCH: master
-          BRANCH: gh-pages
-          SINGLE_COMMIT: true
-          COMMIT_MESSAGE: Deploy [ci skip]
-          FOLDER: dist
+          single-commit: true
+          commit-message: Deploy [ci skip]
+          folder: dist
   production-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
