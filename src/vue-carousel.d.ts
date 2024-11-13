@@ -1,4 +1,3 @@
-
 declare module 'vue-carousel' {
   import { VueConstructor } from 'vue'
 

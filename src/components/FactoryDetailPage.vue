@@ -261,8 +261,10 @@ export default createComponent({
                 return '農委會'
               case 'E':
                 return '經濟部'
+              default:
+                return ''
             }
-          })
+          }).filter(Boolean)
           .join('、')
       }
 
