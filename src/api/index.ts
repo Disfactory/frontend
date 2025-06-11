@@ -46,6 +46,10 @@ export async function getFactory (factoryId: string): Promise<FactoryData> {
 }
 
 async function uploadImageDirectly (file: File): Promise<UploadedImage> {
+  // For general images, use the existing backend pattern
+  // The backend may not have a general /images/upload endpoint yet
+  // So we upload the file and let the backend handle it using the existing /images endpoint
+
   const formData = new FormData()
   formData.append('image', file)
 
@@ -62,7 +66,7 @@ async function uploadImageDirectly (file: File): Promise<UploadedImage> {
     formData.append('DateTimeOriginal', exifData.DateTimeOriginal)
   }
 
-  const { data }: { data: ImageResponse } = await instance.post('/images/upload', formData, {
+  const { data }: { data: ImageResponse } = await instance.post('/images', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
