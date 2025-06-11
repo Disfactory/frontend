@@ -15,6 +15,11 @@ type ImageResponse = {
   token: string
 }
 
+export type UploadedImage = {
+  token: string,
+  src: string
+}
+
 export type UploadedImages = {
   token: string,
   src: string // used for preview images
@@ -40,27 +45,33 @@ export async function getFactory (factoryId: string): Promise<FactoryData> {
   }
 }
 
-const IMGUR_CLIENT_ID = '39048813b021935'
-
-async function uploadToImgur (file: File) {
+async function uploadImageDirectly (file: File): Promise<UploadedImage> {
   const formData = new FormData()
   formData.append('image', file)
 
-  const { data } = await axios({
-    method: 'POST',
-    url: 'https://api.imgur.com/3/image',
-    data: formData,
+  const exifData = await readImageExif(file)
+
+  // Append EXIF data to form
+  if (exifData.Latitude) {
+    formData.append('Latitude', exifData.Latitude.toString())
+  }
+  if (exifData.Longitude) {
+    formData.append('Longitude', exifData.Longitude.toString())
+  }
+  if (exifData.DateTimeOriginal) {
+    formData.append('DateTimeOriginal', exifData.DateTimeOriginal)
+  }
+
+  const { data }: { data: ImageResponse } = await instance.post('/images/upload', formData, {
     headers: {
-      'Content-Type': 'multipart/form-data',
-      Authorization: `Client-ID ${IMGUR_CLIENT_ID}`
+      'Content-Type': 'multipart/form-data'
     }
   })
 
   return {
-    link: data.data.link as string,
-    deletehash: data.data.deletehash as string,
-    file
-  }
+    token: data.token,
+    src: URL.createObjectURL(file)
+  } as UploadedImage
 }
 
 const convertTurple2Number = (input: [number, number, number]) => input[0] + (input[1] / 60) + (input[2] / 3600)
@@ -95,35 +106,47 @@ function readImageExif (file: File): Promise<AfterExifData> {
   })
 }
 
-export type UploadedImage = {
-  token: string,
-  src: string
-}
-
-async function uploadExifAndGetToken ({ link, file, deletehash }: { link: string, file: File, deletehash: string }) {
-  const exifData = await readImageExif(file)
-  const { data }: { data: ImageResponse } = await instance.post('/images', { url: link, ...exifData, deletehash })
-
-  return {
-    token: data.token,
-    src: URL.createObjectURL(file)
-  } as UploadedImage
-}
-
 export async function uploadImages (files: FileList): Promise<UploadedImages> {
   return Promise.all(
-    Array.from(files).map((file) => uploadToImgur(file).then((el) => uploadExifAndGetToken(el)))
+    Array.from(files).map((file) => uploadImageDirectly(file))
   )
 }
 
 export async function updateFactoryImages (factoryId: string, files: FileList, { nickname, contact }: { nickname?: string, contact?: string }) {
   return Promise.all(
-    Array.from(files).map((file) => uploadToImgur(file).then((el) => (async () => {
-      const exifData = await readImageExif(el.file)
-      const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images`, { url: el.link, ...exifData, nickname, contact, deletehash: el.deletehash })
-      data.image_path = el.link
+    Array.from(files).map(async (file) => {
+      const formData = new FormData()
+      formData.append('image', file)
+
+      const exifData = await readImageExif(file)
+
+      // Append EXIF data to form
+      if (exifData.Latitude) {
+        formData.append('Latitude', exifData.Latitude.toString())
+      }
+      if (exifData.Longitude) {
+        formData.append('Longitude', exifData.Longitude.toString())
+      }
+      if (exifData.DateTimeOriginal) {
+        formData.append('DateTimeOriginal', exifData.DateTimeOriginal)
+      }
+
+      // Append contact info if provided
+      if (nickname) {
+        formData.append('nickname', nickname)
+      }
+      if (contact) {
+        formData.append('contact', contact)
+      }
+
+      const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
       return data
-    })()))
+    })
   )
 }
 
