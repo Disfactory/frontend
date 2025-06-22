@@ -35,6 +35,7 @@ export const provideModalState = () => {
     gettingStartedModalOpen: localStorage.getItem('use-app') !== 'true',
     tutorialModalOpen: false,
     supportIOSVersionModalOpen: isNotSupportedIOS(),
+    apiConfigModalOpen: false,
 
     sidebarOpen: false,
     filterModalOpen: false
@@ -65,6 +66,9 @@ type ModalActions = {
 
   openGettingStartedModal: Function,
   closeGettingStartedModal: Function,
+
+  openApiConfigModal: Function,
+  closeApiConfigModal: Function,
 
   toggleSidebar: Function,
 
@@ -124,6 +128,9 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
   const openTutorialModal = () => { modalState.tutorialModalOpen = true }
   const closeTutorialModal = () => { modalState.tutorialModalOpen = false }
 
+  const openApiConfigModal = () => { modalState.apiConfigModalOpen = true }
+  const closeApiConfigModal = () => { modalState.apiConfigModalOpen = false }
+
   const closesupportIOSVersionModal = () => { modalState.supportIOSVersionModalOpen = false }
 
   const toggleSidebar = () => {
@@ -162,6 +169,9 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
 
     openTutorialModal,
     closeTutorialModal,
+
+    openApiConfigModal,
+    closeApiConfigModal,
 
     toggleSidebar,
     openFilterModal,

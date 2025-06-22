@@ -122,6 +122,7 @@
       <safety-modal v-model="modalState.safetyModalOpen" />
       <tutorial-modal :open="modalState.tutorialModalOpen" :dismiss="modalActions.closeTutorialModal" />
       <ios-version-modal :open="modalState.supportIOSVersionModalOpen" :dismiss="modalActions.closesupportIOSVersionModal" />
+      <api-config-modal :open="modalState.apiConfigModalOpen" :dismiss="modalActions.closeApiConfigModal" />
       <!-- alert or modal -->
       <Map
         :setFactoryLocation="appActions.setFactoryLocation"
@@ -155,6 +156,7 @@ import SafetyModal from '@/components/SafetyModal.vue'
 import CreateFactorySuccessModal from '@/components/CreateFactorySuccessModal.vue'
 import UpdateFactorySuccessModal from '@/components/UpdateFactorySuccessModal.vue'
 import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
+import ApiConfigModal from '@/components/ApiConfigModal.vue'
 
 import { MapFactoryController } from './lib/map'
 import { MainMapControllerSymbol } from './symbols'
@@ -180,6 +182,7 @@ export default createComponent({
     UpdateFactorySuccessModal,
     TutorialModal,
     IosVersionModal,
+    ApiConfigModal,
     CreateFactorySteps,
     UpdateFactorySteps,
     FactoryDetailPage
@@ -198,6 +201,11 @@ export default createComponent({
 
     // register global accessible map instance
     provide(MainMapControllerSymbol, ref<MapFactoryController>(null))
+
+    // Expose API config modal to window for testing/debugging purposes
+    if (typeof window !== 'undefined') {
+      ;(window as any).openApiConfigModal = modalActions.openApiConfigModal
+    }
 
     const drawer = ref(false)
     return {
