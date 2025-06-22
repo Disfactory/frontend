@@ -1,5 +1,5 @@
 <template>
-  <img :src="imageUrl.value" :alt="alt" :class="className" @error="onError" />
+  <img :src="imageUrl" :alt="alt" :class="className" @error="onError" />
 </template>
 
 <script lang="ts">
@@ -26,9 +26,8 @@ export default defineComponent({
     }
   },
   setup (props, context) {
-    const matches = IMGUR_REGEX.exec(props.src)
-
     const imgurInfo = computed(() => {
+      const matches = IMGUR_REGEX.exec(props.src)
       return matches
         ? {
             id: matches[1],
@@ -46,6 +45,11 @@ export default defineComponent({
     })
 
     const imageUrl = ref(props.src)
+
+    // Watch for prop changes and update imageUrl
+    watch(() => props.src, (newSrc) => {
+      imageUrl.value = newSrc
+    })
 
     const onError = () => {
       imageUrl.value = fallbackUrl.value
