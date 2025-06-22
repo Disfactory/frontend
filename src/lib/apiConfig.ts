@@ -1,4 +1,4 @@
-import { ref, computed } from '@vue/composition-api'
+import { ref, computed } from 'vue'
 
 const API_BASE_URL_KEY = 'api-base-url'
 

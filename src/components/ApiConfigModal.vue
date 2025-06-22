@@ -44,7 +44,7 @@
 <script lang="ts">
 import AppModal from '@/components/AppModal.vue'
 import AppButton from '@/components/AppButton.vue'
-import { createComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed } from 'vue'
 import { 
   getDefaultBaseURL, 
   getCustomBaseURL, 
@@ -53,7 +53,7 @@ import {
   currentBaseURL 
 } from '@/lib/apiConfig'
 
-export default createComponent({
+export default defineComponent({
   name: 'ApiConfigModal',
   components: {
     AppModal,

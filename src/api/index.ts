@@ -2,7 +2,7 @@ import axios from 'axios'
 import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage, ReportRecord } from '@/types'
 import EXIF from '@disfactory/exif-js'
 import { currentBaseURL } from '@/lib/apiConfig'
-import { watch } from '@vue/composition-api'
+import { watch } from 'vue'
 
 const instance = axios.create({
   headers: {

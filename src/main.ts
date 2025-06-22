@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import App from './App.vue'
-import VueCompositionApi from '@vue/composition-api'
 import CoolLightBox from 'vue-cool-lightbox'
 
 import './registerServiceWorker'
@@ -10,7 +9,6 @@ import vuetify from './plugins/vuetify'
 import 'vue-cool-lightbox/dist/vue-cool-lightbox.min.css'
 
 Vue.config.productionTip = false
-Vue.use(VueCompositionApi)
 Vue.use(CoolLightBox)
 
 Vue.use(VueGtag, {
