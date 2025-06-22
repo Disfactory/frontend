@@ -9,6 +9,16 @@ on:
     branches:
       - master
       - production
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: 'Type of deployment to run'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
 
 permissions:
   contents: write
@@ -16,7 +26,7 @@ permissions:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js 16.x
@@ -29,7 +39,7 @@ jobs:
           npm run lint
   typecheck:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js 16.x
@@ -42,7 +52,7 @@ jobs:
           npm run typecheck
   unit-test:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js 16.x
@@ -56,7 +66,7 @@ jobs:
   dev-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/master'"
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'staging')
     env:
       VUE_APP_PROTOMAP_API_KEY: e6cfbd46818cf623
     steps:
@@ -80,7 +90,7 @@ jobs:
   production-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/production'"
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/production' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'production')
     steps:
       - uses: actions/checkout@v1
       - name: Use Node.js 16.x
