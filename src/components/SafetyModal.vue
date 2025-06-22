@@ -47,9 +47,9 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed } from '@vue/composition-api'
+import { defineComponent, computed } from 'vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'SafetyModal',
   props: {
     value: {

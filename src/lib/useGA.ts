@@ -1,25 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SetupContext, provide, inject } from '@vue/composition-api'
-
-const GASymbol = Symbol('GASymbol')
-
-export function provideGA (context: SetupContext) {
-  provide(GASymbol, (context.root as any).$gtag)
-}
+import { getCurrentInstance } from 'vue'
 
 export function useGA () {
-  const gtag: any = inject(GASymbol)
-
-  if (!gtag) {
-    throw new Error('use provideGA before useGA')
-  }
+  const instance = getCurrentInstance()
+  const gtag = (instance?.proxy as any)?.$gtag
 
   const pageview = (path: string) => {
-    gtag.pageview({ page_path: path })
+    if (gtag) {
+      gtag.pageview({ page_path: path })
+    }
   }
 
   const event = (event: string, data: any = {}) => {
-    gtag.event(event, data)
+    if (gtag) {
+      gtag.event(event, data)
+    }
   }
 
   return { pageview, event }

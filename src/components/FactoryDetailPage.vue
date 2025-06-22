@@ -136,7 +136,7 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref, onUpdated, watch } from '@vue/composition-api'
+import { defineComponent, computed, ref, onUpdated, watch } from 'vue'
 import copy from 'copy-to-clipboard'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
@@ -147,7 +147,7 @@ import { useAppState } from '../lib/appState'
 import { FactoryImage, getDisplayStatusText, ReportRecord } from '../types'
 import ImgurFallbackImage from './ImgurFallbackImage.vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'FactoryDetailPage',
   components: {
     ImgurFallbackImage

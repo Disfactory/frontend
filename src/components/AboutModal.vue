@@ -33,9 +33,9 @@
 
 <script lang="ts">
 import AppModal from '@/components/AppModal.vue'
-import { createComponent } from '@vue/composition-api'
+import { defineComponent } from 'vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'AboutModal',
   components: {
     AppModal

@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import { computed, createComponent } from '@vue/composition-api'
-export default createComponent({
+import { computed, defineComponent } from 'vue'
+export default defineComponent({
   name: 'AppTextArea',
   props: {
     value: {

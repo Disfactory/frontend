@@ -1,4 +1,4 @@
-import { inject, InjectionKey, provide, Ref, ref } from '@vue/composition-api'
+import { inject, InjectionKey, provide, Ref, ref } from 'vue'
 import { BASE_MAP } from './map'
 
 const mapModeSymbol: InjectionKey<{ currentMapMode: Ref<BASE_MAP> }> = Symbol('MapModeSymbol')

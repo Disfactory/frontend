@@ -186,7 +186,7 @@
 </template>
 
 <script lang="ts">
-import { createComponent, inject, ref, reactive } from '@vue/composition-api'
+import { defineComponent, inject, ref, reactive } from 'vue'
 
 import { useAppState } from '../lib/appState'
 import { useAlertState } from '../lib/useAlert'
@@ -204,7 +204,7 @@ import { useGA } from '../lib/useGA'
 import { useBackPressed } from '../lib/useBackPressed'
 import { useModalState } from '../lib/hooks'
 
-export default createComponent({
+export default defineComponent({
   name: 'CreateFactorySteps',
   components: {
     ImageUploadForm,

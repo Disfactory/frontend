@@ -8,9 +8,9 @@
 </template>
 
 <script>
-import { createComponent } from '@vue/composition-api'
+import { defineComponent } from 'vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'AppButton',
   props: {
     outline: {

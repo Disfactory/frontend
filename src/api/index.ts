@@ -1,15 +1,23 @@
 import axios from 'axios'
 import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage, ReportRecord } from '@/types'
 import EXIF from '@disfactory/exif-js'
-
-const baseURL = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_URL : '/server/api'
+import { currentBaseURL } from '@/lib/apiConfig'
+import { watch } from 'vue'
 
 const instance = axios.create({
-  baseURL,
   headers: {
     'Content-Type': 'application/json'
   }
 })
+
+// Update base URL whenever currentBaseURL changes
+const updateBaseURL = () => {
+  instance.defaults.baseURL = currentBaseURL.value
+}
+
+// Set initial base URL and watch for changes
+updateBaseURL()
+watch(currentBaseURL, updateBaseURL)
 
 type ImageResponse = {
   token: string

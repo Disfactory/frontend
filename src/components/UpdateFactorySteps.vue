@@ -114,7 +114,7 @@
 <script lang="ts">
 import { useUpdateFactoryImage } from '@/lib/imageUpload'
 import { updateFactoryImages, updateFactory } from '@/api'
-import { computed, createComponent, inject, reactive, ref } from '@vue/composition-api'
+import { computed, defineComponent, inject, reactive, ref } from 'vue'
 import { useGA } from '@/lib/useGA'
 import { useAppState } from '../lib/appState'
 import { useModalState } from '../lib/hooks'
@@ -123,7 +123,7 @@ import { MainMapControllerSymbol } from '@/symbols'
 import { MapFactoryController } from '@/lib/map'
 import { FACTORY_TYPE } from '@/types'
 
-export default createComponent({
+export default defineComponent({
   name: 'UpdateFactorySteps',
   components: {
     ImageUploadForm

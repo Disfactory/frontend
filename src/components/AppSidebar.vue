@@ -14,10 +14,10 @@
 </template>
 
 <script>
-import { createComponent } from '@vue/composition-api'
+import { defineComponent } from 'vue'
 import { useModalState } from '../lib/hooks'
 
-export default createComponent({
+export default defineComponent({
   name: 'AppSidebar',
   props: {
     value: {

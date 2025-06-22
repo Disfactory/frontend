@@ -1,6 +1,4 @@
-import { inject, provide, reactive } from '@vue/composition-api'
-
-const AlertStateSymbol = Symbol('AlertState')
+import { reactive } from 'vue'
 
 enum AlertLevel {
   info = 'info',
@@ -19,42 +17,40 @@ type AlertState = {
   timeout?: number
 }
 
-export const provideAlertState = () => {
-  const alertState = reactive({
-    alert: null
-  })
-
-  provide(AlertStateSymbol, alertState)
-
-  return [alertState]
-}
-
-export const alertActions = (state: AlertState) => ({
-  showAlert: function (title: string, timeouts = 3000, level: AlertLevel = AlertLevel.warn, dismissText = '此錯誤訊息將在3秒後消失。') {
-    state.alert = {
-      title,
-      level,
-      dismissText
-    }
-
-    state.timeout = window.setTimeout(() => {
-      state.alert = null
-      state.timeout = undefined
-    }, timeouts)
-  },
-
-  dismissAlert: function () {
-    state.alert = null
-
-    if (state.timeout) {
-      window.clearTimeout(state.timeout)
-      state.timeout = undefined
-    }
-  }
+// Global alert state - simple reactive object without provide/inject
+const alertState = reactive({
+  alert: null as Alert | null,
+  timeout: undefined as number | undefined
 })
 
-export const useAlertState: () => [AlertState, ReturnType<typeof alertActions>] = () => {
-  const alertState = inject(AlertStateSymbol) as AlertState
+export const useAlertState = () => {
+  const alertActions = {
+    showAlert (title: string, timeouts = 3000, level: AlertLevel = AlertLevel.warn, dismissText = '此錯誤訊息將在3秒後消失。') {
+      alertState.alert = {
+        title,
+        level,
+        dismissText
+      }
 
-  return [alertState, alertActions(alertState)]
+      if (alertState.timeout) {
+        window.clearTimeout(alertState.timeout)
+      }
+
+      alertState.timeout = window.setTimeout(() => {
+        alertState.alert = null
+        alertState.timeout = undefined
+      }, timeouts)
+    },
+
+    dismissAlert () {
+      alertState.alert = null
+
+      if (alertState.timeout) {
+        window.clearTimeout(alertState.timeout)
+        alertState.timeout = undefined
+      }
+    }
+  }
+
+  return [alertState, alertActions] as const
 }
