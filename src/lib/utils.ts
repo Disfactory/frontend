@@ -1,5 +1,5 @@
-import { SetupContext } from '@vue/composition-api'
+import { nextTick } from 'vue'
 
 export const sleep = (ms: number) => new Promise(resolve => window.setTimeout(resolve, ms))
 
-export const waitNextTick = (context: SetupContext) => new Promise(resolve => context.root.$nextTick(resolve))
+export const waitNextTick = () => nextTick()

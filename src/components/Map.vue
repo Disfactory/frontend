@@ -27,12 +27,9 @@
 </template>
 
 <script lang="ts">
-import { createComponent, onMounted, onUnmounted, ref, inject } from '@vue/composition-api'
+import { defineComponent, onMounted, onUnmounted, ref, inject, getCurrentInstance } from 'vue'
 import debounce from 'lodash.debounce'
 
-import AppButton from '@/components/AppButton.vue'
-import AppNavbar from '@/components/AppNavbar.vue'
-import AppTextField from '@/components/AppTextField.vue'
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 
 import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
@@ -50,11 +47,9 @@ import { useAlertState } from '../lib/useAlert'
 import { moveToSharedFactory, permalink } from '../lib/permalink'
 import { waitNextTick } from '../lib/utils'
 
-export default createComponent({
+export default defineComponent({
+  name: 'MapView',
   components: {
-    AppButton,
-    AppNavbar,
-    AppTextField,
     DisplaySettingBottomSheet
   },
   props: {
@@ -65,9 +60,10 @@ export default createComponent({
   },
   setup (props, context) {
     const { event } = useGA()
-    const root = ref<HTMLElement>(null)
-    const popup = ref<HTMLDivElement>(null)
+    const root = ref<HTMLElement | null>(null)
+    const popup = ref<HTMLDivElement | null>(null)
     const mapControllerRef = inject(MainMapControllerSymbol, ref<MapFactoryController>())
+    const instance = getCurrentInstance()
 
     const [, modalActions] = useModalState()
     const [appState, { openEditFactoryForm, pageTransition, expandFactoryDetail }] = useAppState()
@@ -117,7 +113,7 @@ export default createComponent({
           if (feature.get('factoryId')) {
             openFactoryDetail(feature)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            if ((context.root as any).$vuetify.breakpoint.mdAndUp) {
+            if ((instance?.proxy as any)?.$vuetify.breakpoint.mdAndUp) {
               expandFactoryDetail()
             }
           } else {
@@ -136,7 +132,7 @@ export default createComponent({
         }
 
         // Workaround map resizing issue
-        await waitNextTick(context)
+        await waitNextTick()
         resizeMap()
       }
 

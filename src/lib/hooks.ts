@@ -1,4 +1,4 @@
-import { ref, Ref, provide, inject, reactive, InjectionKey } from '@vue/composition-api'
+import { ref, Ref, reactive } from 'vue'
 import { useGA } from './useGA'
 import { isNotSupportedIOS } from './browserCheck'
 
@@ -22,67 +22,24 @@ export const useModal = (defaultOpen = false): [Ref<boolean>, { open: () => void
   ]
 }
 
-const ModalStateSymbol: InjectionKey<ModalState> = Symbol('ModalStateSymbol')
+// Global modal state - simple reactive object without provide/inject
+const modalState = reactive({
+  updateFactorySuccessModal: false,
+  updateFactoryImageSuccessModal: false,
+  createFactorySuccessModal: false,
+  aboutModalOpen: false,
+  contactModalOpen: false,
+  safetyModalOpen: false,
+  gettingStartedModalOpen: localStorage.getItem('use-app') !== 'true',
+  tutorialModalOpen: false,
+  supportIOSVersionModalOpen: isNotSupportedIOS(),
+  apiConfigModalOpen: false,
 
-export const provideModalState = () => {
-  const modalState = reactive({
-    updateFactorySuccessModal: false,
-    updateFactoryImageSuccessModal: false,
-    createFactorySuccessModal: false,
-    aboutModalOpen: false,
-    contactModalOpen: false,
-    safetyModalOpen: false,
-    gettingStartedModalOpen: localStorage.getItem('use-app') !== 'true',
-    tutorialModalOpen: false,
-    supportIOSVersionModalOpen: isNotSupportedIOS(),
+  sidebarOpen: false,
+  filterModalOpen: false
+})
 
-    sidebarOpen: false,
-    filterModalOpen: false
-  })
-
-  provide(ModalStateSymbol, modalState)
-
-  return modalState
-}
-
-type ModalState = ReturnType<typeof provideModalState>
-
-type ModalActions = {
-  openUpdateFactorySuccessModal: Function,
-  openUpdateFactoryImagesSuccessModal: Function,
-
-  openCreateFactorySuccessModal: Function,
-  closeCreateFactorySuccessModal: Function,
-
-  openAboutModal: Function,
-  closeAboutModal: Function,
-
-  openContactModal: Function,
-  closeContactModal: Function,
-
-  openSafetyModal: Function,
-  closeSafetyModal: Function,
-
-  openGettingStartedModal: Function,
-  closeGettingStartedModal: Function,
-
-  toggleSidebar: Function,
-
-  closeFilterModal: Function,
-  openFilterModal: Function,
-
-  closeTutorialModal: Function,
-  openTutorialModal: Function,
-
-  closesupportIOSVersionModal: Function
-}
-
-export const useModalState: () => [ModalState, ModalActions] = () => {
-  const modalState = inject(ModalStateSymbol)
-
-  if (!modalState) {
-    throw new Error('Use useModalState before provideModalState')
-  }
+export const useModalState = () => {
   const { event } = useGA()
 
   const openUpdateFactoryImagesSuccessModal = () => {
@@ -124,6 +81,11 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
   const openTutorialModal = () => { modalState.tutorialModalOpen = true }
   const closeTutorialModal = () => { modalState.tutorialModalOpen = false }
 
+  const openApiConfigModal = () => { modalState.apiConfigModalOpen = true }
+  // This is for testing purpose
+  (window as any).openApiConfigModal = openApiConfigModal
+  const closeApiConfigModal = () => { modalState.apiConfigModalOpen = false }
+
   const closesupportIOSVersionModal = () => { modalState.supportIOSVersionModalOpen = false }
 
   const toggleSidebar = () => {
@@ -163,6 +125,9 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
     openTutorialModal,
     closeTutorialModal,
 
+    openApiConfigModal,
+    closeApiConfigModal,
+
     toggleSidebar,
     openFilterModal,
     closeFilterModal,
@@ -170,5 +135,5 @@ export const useModalState: () => [ModalState, ModalActions] = () => {
     closesupportIOSVersionModal
   }
 
-  return [modalState, modalActions]
+  return [modalState, modalActions] as const
 }

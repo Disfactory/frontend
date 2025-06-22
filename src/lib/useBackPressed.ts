@@ -1,4 +1,4 @@
-import { onUnmounted } from '@vue/composition-api'
+import { onUnmounted } from 'vue'
 
 export function useBackPressed (onBack: () => void) {
   const hideModal = (event: PopStateEvent) => {

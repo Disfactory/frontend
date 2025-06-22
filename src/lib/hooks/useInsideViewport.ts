@@ -1,4 +1,4 @@
-import { onUnmounted, Ref, ref, watch } from '@vue/composition-api'
+import { onUnmounted, Ref, ref, watch } from 'vue'
 
 export const useInsideViewport = (scrollContainer: Ref<HTMLElement | null>, div: Ref<HTMLElement | null>, defaultValue = true) => {
   const inside = ref(defaultValue)

@@ -1,9 +1,7 @@
-import { inject, provide, reactive, computed } from '@vue/composition-api'
+import { reactive, computed } from 'vue'
 import { useGA } from './useGA'
-import { FactoryData } from '../types'
+import type { FactoryData } from '../types'
 import { featureStyleCache } from './map'
-
-const AppStateSymbol = Symbol('AppState')
 
 // A global state that can be shared across the entire application
 
@@ -27,60 +25,38 @@ const UpdateFactoryPageState = [
   PageState.UPDATE_FACTORY_MODE
 ]
 
-export const provideAppState = () => {
-  const appState: {
-    pageState: PageState,
-    factoryData: FactoryData | null,
-    factoryLocation: number[],
-    isCreateMode: boolean,
-    createStepIndex: number,
-    isEditImagesMode: boolean,
-    selectFactoryMode: boolean,
-    formPageOpen: boolean,
-    mapLngLat: number[],
-    canPlaceFactory: boolean,
-    factoryDetailsExpanded: boolean,
-    updateFactoryField: string,
-    isEditComment: boolean,
-    isEditName: boolean,
-    isEditType: boolean,
-    isInitialPage: boolean
-  } = reactive({
-    // Page state
-    pageState: PageState.INITIAL,
+// Global app state - simple reactive object without provide/inject
+const appState = reactive({
+  // Page state
+  pageState: PageState.INITIAL,
 
-    factoryData: null,
-    factoryLocation: [] as number[],
+  factoryData: null as FactoryData | null,
+  factoryLocation: [] as number[],
 
-    isCreateMode: computed(() => CreateFactoryPageState.includes(appState.pageState)),
-    createStepIndex: computed(() => CreateFactoryPageState.indexOf(appState.pageState) + 1),
+  get isCreateMode () { return CreateFactoryPageState.includes(appState.pageState) },
+  get createStepIndex () { return CreateFactoryPageState.indexOf(appState.pageState) + 1 },
 
-    isEditImagesMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
-    isEditFactoryMode: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE),
-    updateFactoryField: 'others',
-    isEditComment: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'others'),
-    isEditName: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'name'),
-    isEditType: computed(() => appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'factory_type'),
+  get isEditImagesMode () { return appState.pageState === PageState.UPDATE_FACTORY_IMAGES },
+  get isEditFactoryMode () { return appState.pageState === PageState.UPDATE_FACTORY_MODE },
+  updateFactoryField: 'others',
+  get isEditComment () { return appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'others' },
+  get isEditName () { return appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'name' },
+  get isEditType () { return appState.pageState === PageState.UPDATE_FACTORY_MODE && appState.updateFactoryField === 'factory_type' },
 
-    isEditMode: computed(() => UpdateFactoryPageState.includes(appState.pageState)),
-    isInitialState: computed(() => appState.pageState === PageState.INITIAL),
+  get isEditMode () { return UpdateFactoryPageState.includes(appState.pageState) },
+  get isInitialState () { return appState.pageState === PageState.INITIAL },
 
-    selectFactoryMode: computed(() => appState.pageState === PageState.CREATE_FACTORY_1),
-    formPageOpen: computed(() => CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY_IMAGES),
-    isInitialPage: computed(() => appState.pageState === PageState.INITIAL),
+  get selectFactoryMode () { return appState.pageState === PageState.CREATE_FACTORY_1 },
+  get formPageOpen () { return CreateFactoryPageState.includes(appState.pageState) || appState.pageState === PageState.UPDATE_FACTORY_IMAGES },
+  get isInitialPage () { return appState.pageState === PageState.INITIAL },
 
-    // map states
-    mapLngLat: [] as number[],
-    canPlaceFactory: false,
-    factoryDetailsExpanded: false
-  })
+  // map states
+  mapLngLat: [] as number[],
+  canPlaceFactory: false,
+  factoryDetailsExpanded: false
+})
 
-  provide(AppStateSymbol, appState)
-
-  return [appState]
-}
-
-const registerMutator = (appState: AppState) => {
+export const useAppState = () => {
   const { event, pageview } = useGA()
 
   // page transition methods
@@ -221,34 +197,22 @@ const registerMutator = (appState: AppState) => {
     appState.factoryDetailsExpanded = !appState.factoryDetailsExpanded
   }
 
-  return {
+  const appActions = {
     pageTransition,
-
     updateFactoryData,
-
     openEditFactoryForm (factory: FactoryData) {
       updateFactoryData(factory)
       pageTransition.startUpdateFactoryImages()
-
       pageview('/edit')
     },
-
     setFactoryLocation (value: [number, number]) {
       appState.factoryLocation = value
       event('setFactoryLocation')
     },
-
     expandFactoryDetail,
     collapseFactoryDetail,
     toggleFactoryDetail
   }
-}
 
-type AppState = ReturnType<typeof provideAppState>[0]
-type AppAction = ReturnType<typeof registerMutator>
-
-export const useAppState: () => [AppState, AppAction] = () => {
-  const appState = inject(AppStateSymbol) as AppState
-
-  return [appState, registerMutator(appState)]
+  return [appState, appActions] as const
 }

@@ -37,7 +37,7 @@
 import AppModal from '@/components/AppModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import AppTextField from '@/components/AppTextField.vue'
-import { createComponent, computed, reactive } from '@vue/composition-api'
+import { defineComponent, computed, reactive } from 'vue'
 import { uploadImages, updateFactoryImages } from '../api'
 import { useGA } from '../lib/useGA'
 
@@ -53,7 +53,7 @@ const mapFileUrl = (file: File) => {
   return URL.createObjectURL(file)
 }
 
-export default createComponent({
+export default defineComponent({
   name: 'FilterModal',
   components: {
     AppModal,

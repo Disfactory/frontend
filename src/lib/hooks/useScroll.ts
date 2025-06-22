@@ -1,4 +1,4 @@
-import { onUnmounted, Ref, ref, watch } from '@vue/composition-api'
+import { onUnmounted, Ref, ref, watch } from 'vue'
 
 export const useScroll = (scrollContainer: Ref<HTMLElement | null>) => {
   const scrollTop = ref(0)
