@@ -124,7 +124,7 @@
       <ios-version-modal :open="modalState.supportIOSVersionModalOpen" :dismiss="modalActions.closesupportIOSVersionModal" />
       <api-config-modal :open="modalState.apiConfigModalOpen" :dismiss="modalActions.closeApiConfigModal" />
       <!-- alert or modal -->
-      <Map
+      <MapView
         :setFactoryLocation="appActions.setFactoryLocation"
       />
 
@@ -139,7 +139,7 @@
 <script lang="ts">
 import { defineComponent, ref, provide } from 'vue'
 
-import Map from '@/components/Map.vue'
+import MapView from '@/components/Map.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
 import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
@@ -162,7 +162,7 @@ import { useAlertState } from './lib/useAlert'
 export default defineComponent({
   name: 'App',
   components: {
-    Map,
+    MapView,
     AppAlert,
     AboutModal,
     ContactModal,

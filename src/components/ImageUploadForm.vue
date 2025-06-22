@@ -45,7 +45,8 @@
       <v-text-field
         outlined
         placeholder="例：林先生、林小姐"
-        v-model="formState.nickname"
+        :value="formState.nickname"
+        @input="$emit('update:formState', { ...formState, nickname: $event })"
       ></v-text-field>
 
       <h3 class="primary--text mt-7 mb-2">聯絡方式 (email或電話)</h3>
@@ -53,7 +54,8 @@
       <v-text-field
         outlined
         placeholder="例：abc@email.com、0920-123456"
-        v-model="formState.contact"
+        :value="formState.contact"
+        @input="$emit('update:formState', { ...formState, contact: $event })"
       ></v-text-field>
 
       <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
@@ -72,7 +74,7 @@ export default defineComponent({
   props: {
     previewImages: {
       type: Array,
-      default: []
+      default: () => []
     },
     uploading: {
       default: false

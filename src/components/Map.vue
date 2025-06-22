@@ -30,9 +30,6 @@
 import { defineComponent, onMounted, onUnmounted, ref, inject, getCurrentInstance } from 'vue'
 import debounce from 'lodash.debounce'
 
-import AppButton from '@/components/AppButton.vue'
-import AppNavbar from '@/components/AppNavbar.vue'
-import AppTextField from '@/components/AppTextField.vue'
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 
 import { initializeMap, MapFactoryController, getFactoryStatus } from '../lib/map'
@@ -51,10 +48,8 @@ import { moveToSharedFactory, permalink } from '../lib/permalink'
 import { waitNextTick } from '../lib/utils'
 
 export default defineComponent({
+  name: 'MapView',
   components: {
-    AppButton,
-    AppNavbar,
-    AppTextField,
     DisplaySettingBottomSheet
   },
   props: {

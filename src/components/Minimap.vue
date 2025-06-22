@@ -11,18 +11,18 @@ export default defineComponent({
   props: {
     initialLocation: {
       type: Array,
-      default: []
+      default: () => []
     },
     pinLocation: {
       type: Array,
-      default: []
+      default: () => []
     },
     initialFactories: {
       type: Array,
-      default: []
+      default: () => []
     }
   },
-  name: 'Minimap',
+  name: 'MinimapView',
   setup (props) {
     const minimap = ref<HTMLElement | null>(null)
 

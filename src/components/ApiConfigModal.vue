@@ -3,7 +3,7 @@
     <app-modal :open="open" :dismiss="dismiss">
       <div class="page">
         <h2>API 設定</h2>
-        
+
         <div class="form-section">
           <label for="api-url-input">API 基礎網址</label>
           <input
@@ -23,8 +23,8 @@
           <app-button @click="saveConfiguration" data-testid="save-button">
             儲存設定
           </app-button>
-          <app-button 
-            @click="resetToDefault" 
+          <app-button
+            @click="resetToDefault"
             :outline="true"
             data-testid="reset-button"
           >
@@ -45,12 +45,12 @@
 import AppModal from '@/components/AppModal.vue'
 import AppButton from '@/components/AppButton.vue'
 import { defineComponent, ref, computed } from 'vue'
-import { 
-  getDefaultBaseURL, 
-  getCustomBaseURL, 
-  setCustomBaseURL, 
-  resetToDefaultBaseURL, 
-  currentBaseURL 
+import {
+  getDefaultBaseURL,
+  getCustomBaseURL,
+  setCustomBaseURL,
+  resetToDefaultBaseURL,
+  currentBaseURL
 } from '@/lib/apiConfig'
 
 export default defineComponent({
@@ -80,7 +80,7 @@ export default defineComponent({
       } else {
         resetToDefaultBaseURL()
       }
-      
+
       if (props.dismiss) {
         props.dismiss()
       }
@@ -89,7 +89,7 @@ export default defineComponent({
     const resetToDefault = () => {
       apiUrl.value = ''
       resetToDefaultBaseURL()
-      
+
       if (props.dismiss) {
         props.dismiss()
       }
@@ -113,7 +113,7 @@ export default defineComponent({
 .api-config-modal-container .app-modal {
   max-width: 500px;
   width: 90%;
-  
+
   .page {
     h2 {
       color: $primary-color;
@@ -137,7 +137,7 @@ export default defineComponent({
         border: 2px solid $gray-light-color;
         border-radius: 4px;
         font-size: 16px;
-        
+
         &:focus {
           outline: none;
           border-color: $primary-color;

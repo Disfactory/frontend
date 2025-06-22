@@ -62,15 +62,15 @@
 
       <h3 class="mt-5 mb-2 primary--text">工廠描述</h3>
 
-      <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" />
+      <v-textarea outlined solo :value="formState.others" @input="$emit('update:formState', { ...formState, others: $event })" placeholder="例：常常散發異味" />
 
       <h3 class="mt-5 mb-2 primary--text">工廠外部文字</h3>
 
-      <v-text-field outlined v-model="formState.name" placeholder="例：小明化工廠" color="primary" />
+      <v-text-field outlined :value="formState.name" @input="$emit('update:formState', { ...formState, name: $event })" placeholder="例：小明化工廠" color="primary" />
 
       <h3 class="mt-5 mb-2 primary--text">工廠類型</h3>
 
-      <v-select :items="factoryTypeItems" v-model="formState.type" solo outlined placeholder="未選擇" />
+      <v-select :items="factoryTypeItems" :value="formState.type" @input="$emit('update:formState', { ...formState, type: $event })" solo outlined placeholder="未選擇" />
 
       <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
         <v-btn x-large rounded @click="submit" style="width: 100%; max-width: 345px;" v-bind="attrs" v-on="on" color="primary">
@@ -99,16 +99,17 @@ export default defineComponent({
   props: {
     formState: {
       type: Object,
-      default: {}
+      default: () => ({})
     },
     previewImages: {
       type: Array,
-      default: []
+      default: () => []
     },
     submit: {
       type: Function
     }
   },
+  emits: ['update:formState'],
   setup () {
     const mapController = inject(MainMapControllerSymbol, ref<MapFactoryController>())
     const [appState, { pageTransition }] = useAppState()
