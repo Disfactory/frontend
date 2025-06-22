@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { SetupContext, provide, inject } from '@vue/composition-api'
+import { provide, inject } from 'vue'
 
 const GASymbol = Symbol('GASymbol')
 
-export function provideGA (context: SetupContext) {
+export function provideGA (context: any) {
   provide(GASymbol, (context.root as any).$gtag)
 }
 

@@ -137,7 +137,7 @@
 </template>
 
 <script lang="ts">
-import { createComponent, ref, provide } from '@vue/composition-api'
+import { defineComponent, ref, provide } from 'vue'
 
 import Map from '@/components/Map.vue'
 import AppNavbar from '@/components/AppNavbar.vue'
@@ -166,7 +166,7 @@ import { provideAppState, useAppState } from './lib/appState'
 import { provideAlertState, useAlertState } from './lib/useAlert'
 import { provideMapMode } from './lib/useMapMode'
 
-export default createComponent({
+export default defineComponent({
   name: 'App',
   components: {
     Map,
@@ -200,7 +200,7 @@ export default createComponent({
     const [alertState, alertActions] = useAlertState()
 
     // register global accessible map instance
-    provide(MainMapControllerSymbol, ref<MapFactoryController>(null))
+    provide(MainMapControllerSymbol, ref<MapFactoryController | null>(null))
 
     // Expose API config modal to window for testing/debugging purposes
     if (typeof window !== 'undefined') {
