@@ -3,11 +3,11 @@
 </template>
 
 <script lang="ts">
-import { createComponent, onMounted, ref } from '@vue/composition-api'
+import { defineComponent, onMounted, ref } from 'vue'
 import { initializeMinimap } from '../lib/map'
 import { FactoryData } from '../types'
 
-export default createComponent({
+export default defineComponent({
   props: {
     initialLocation: {
       type: Array,
@@ -24,7 +24,7 @@ export default createComponent({
   },
   name: 'Minimap',
   setup (props) {
-    const minimap = ref<HTMLElement>(null)
+    const minimap = ref<HTMLElement | null>(null)
 
     onMounted(() => {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

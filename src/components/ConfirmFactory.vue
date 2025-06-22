@@ -82,7 +82,7 @@
 </template>
 
 <script lang="ts">
-import { createComponent, inject, ref } from '@vue/composition-api'
+import { defineComponent, inject, ref } from 'vue'
 
 import { MainMapControllerSymbol } from '../symbols'
 import { MapFactoryController } from '../lib/map'
@@ -91,7 +91,7 @@ import { FACTORY_TYPE } from '../types'
 
 import Minimap from './Minimap.vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'ConfirmFactory',
   components: {
     Minimap

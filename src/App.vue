@@ -140,9 +140,6 @@
 import { defineComponent, ref, provide } from 'vue'
 
 import Map from '@/components/Map.vue'
-import AppNavbar from '@/components/AppNavbar.vue'
-import AppButton from '@/components/AppButton.vue'
-import AppSidebar from './components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
 import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
@@ -153,33 +150,24 @@ import ContactModal from '@/components/ContactModal.vue'
 import GettingStartedModal from '@/components/GettingStartedModal.vue'
 import TutorialModal from '@/components/TutorialModal.vue'
 import SafetyModal from '@/components/SafetyModal.vue'
-import CreateFactorySuccessModal from '@/components/CreateFactorySuccessModal.vue'
-import UpdateFactorySuccessModal from '@/components/UpdateFactorySuccessModal.vue'
 import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
 import ApiConfigModal from '@/components/ApiConfigModal.vue'
 
 import { MapFactoryController } from './lib/map'
 import { MainMapControllerSymbol } from './symbols'
-import { provideModalState, useModalState } from './lib/hooks'
-import { provideGA } from './lib/useGA'
-import { provideAppState, useAppState } from './lib/appState'
-import { provideAlertState, useAlertState } from './lib/useAlert'
-import { provideMapMode } from './lib/useMapMode'
+import { useModalState } from './lib/hooks'
+import { useAppState } from './lib/appState'
+import { useAlertState } from './lib/useAlert'
 
 export default defineComponent({
   name: 'App',
   components: {
     Map,
     AppAlert,
-    AppButton,
-    AppNavbar,
-    AppSidebar,
     AboutModal,
     ContactModal,
     GettingStartedModal,
     SafetyModal,
-    CreateFactorySuccessModal,
-    UpdateFactorySuccessModal,
     TutorialModal,
     IosVersionModal,
     ApiConfigModal,
@@ -187,14 +175,7 @@ export default defineComponent({
     UpdateFactorySteps,
     FactoryDetailPage
   },
-  setup (_, context) {
-    provideGA(context)
-
-    provideModalState()
-    provideAppState()
-    provideAlertState()
-    provideMapMode()
-
+  setup () {
     const [modalState, modalActions] = useModalState()
     const [appState, appActions] = useAppState()
     const [alertState, alertActions] = useAlertState()
@@ -202,10 +183,7 @@ export default defineComponent({
     // register global accessible map instance
     provide(MainMapControllerSymbol, ref<MapFactoryController | null>(null))
 
-    // Expose API config modal to window for testing/debugging purposes
-    if (typeof window !== 'undefined') {
-      ;(window as any).openApiConfigModal = modalActions.openApiConfigModal
-    }
+    // Note: API config modal functionality removed for simplification
 
     const drawer = ref(false)
     return {

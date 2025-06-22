@@ -1,5 +1,5 @@
 import { UploadedImage, uploadImages } from '@/api'
-import { computed, reactive, ref, watch } from '@vue/composition-api'
+import { computed, reactive, ref, watch } from 'vue'
 
 export const useImageUpload = () => {
   const uploadedImages = ref<UploadedImage[]>([])
@@ -8,7 +8,7 @@ export const useImageUpload = () => {
     uploading: false
   })
 
-  const selectedImages = ref<FileList>(null)
+  const selectedImages = ref<FileList | null>(null)
   watch(selectedImages, () => {
     imageUploadState.error = null
 
@@ -53,13 +53,13 @@ export const useUpdateFactoryImage = () => {
     uploading: false
   }
 
-  const selectedImages = ref<FileList>(null)
+  const selectedImages = ref<FileList | null>(null)
   watch(selectedImages, () => {
     if (!selectedImages.value) {
       return
     }
 
-    const images = Array.from(selectedImages.value).map(f => URL.createObjectURL(f)).map(v => ({
+    const images = Array.from(selectedImages.value).map((f: File) => URL.createObjectURL(f)).map(v => ({
       src: v,
       token: v
     }))

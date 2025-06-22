@@ -3,13 +3,13 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref, onUpdated, watch } from '@vue/composition-api'
+import { defineComponent, computed, ref, onUpdated, watch } from 'vue'
 
 const IMGUR_REGEX = /i\.imgur\.com\/([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)(\?.*)?$/
 
 const imgurFallbackBaseUrl = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_IMGUR_FALLBACK_URL : '/server/imgur'
 
-export default createComponent({
+export default defineComponent({
   name: 'ImgurFallbackImage',
   props: {
     src: {

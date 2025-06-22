@@ -92,13 +92,13 @@
 </template>
 
 <script lang="ts">
-import { createComponent, ref, inject, computed } from '@vue/composition-api'
+import { defineComponent, ref, inject, computed } from 'vue'
 import { MainMapControllerSymbol } from '@/symbols'
 import { MapFactoryController } from '@/lib/map'
 
 import SwitchMapModeButton from '@/components/SwitchMapModeButton.vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'DisplaySettingBottomSheet',
   components: {
     SwitchMapModeButton

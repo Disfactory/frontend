@@ -66,9 +66,9 @@
 </template>
 
 <script lang="ts">
-import { createComponent } from '@vue/composition-api'
+import { defineComponent } from 'vue'
 import { UploadedImage } from '../api'
-export default createComponent({
+export default defineComponent({
   props: {
     previewImages: {
       type: Array,
