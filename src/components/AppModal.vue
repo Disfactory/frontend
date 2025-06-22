@@ -1,6 +1,7 @@
 <template>
   <div class="app-modal-component"
     :class="{ open }"
+    data-testid="modal-container"
   >
     <div class="app-modal-backdrop" @click="dismiss" data-label="modal-backdrop" />
     <div class="app-modal">
