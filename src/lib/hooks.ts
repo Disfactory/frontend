@@ -82,6 +82,8 @@ export const useModalState = () => {
   const closeTutorialModal = () => { modalState.tutorialModalOpen = false }
 
   const openApiConfigModal = () => { modalState.apiConfigModalOpen = true }
+  // This is for testing purpose
+  (window as any).openApiConfigModal = openApiConfigModal
   const closeApiConfigModal = () => { modalState.apiConfigModalOpen = false }
 
   const closesupportIOSVersionModal = () => { modalState.supportIOSVersionModalOpen = false }
