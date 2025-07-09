@@ -1,5 +1,8 @@
 <template>
   <div class="image-upload-form w-100">
+    <v-alert type="warning" prominent color="warning" class="mb-4">
+      目前上傳圖片功能受限，暫時停止回報功能，敬請見諒！
+    </v-alert>
     <v-container style="max-width: 630px; position: relative;" class="pt-3 pt-md-12 pb-md-8">
       <h2 class="mb-4 secondary--text">上傳工廠照片</h2>
 

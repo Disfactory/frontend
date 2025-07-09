@@ -132,8 +132,8 @@
       <update-factory-steps v-if="appState.isEditMode" />
     </v-main>
 
-    <factory-detail-page />
-    <maintenance-modal :open="maintenanceModalOpen" :dismiss="dismissMaintenanceModal" />
+  <factory-detail-page />
+  <maintenance-modal :open="maintenanceModalOpen" :dismiss="dismissMaintenanceModal" />
   </v-app>
 </template>
 
