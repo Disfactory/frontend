@@ -16,9 +16,9 @@
 </template>
 
 <script lang="ts">
-import { createComponent, PropType, computed } from '@vue/composition-api'
+import { defineComponent, PropType, computed } from 'vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'AppSelect',
   props: {
     value: {

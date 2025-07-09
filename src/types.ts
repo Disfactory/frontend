@@ -1,4 +1,5 @@
-import Feature from 'ol/Feature'
+import type { Feature } from 'ol'
+import type { Geometry } from 'ol/geom'
 
 /* eslint-disable quote-props */
 export const FACTORY_TYPE = [
@@ -104,11 +105,12 @@ export type FactoryData = {
   data_complete: boolean,
   before_release: boolean,
   document_display_status: DocumentDisplayStatus | null,
-  feature?: Feature,
+  feature?: any,
   follow_ups_for_user: {
     note: string,
     created_at: string
-  }[]
+  }[],
+  wont_fix: boolean
 }
 
 export type FactoriesResponse = Array<FactoryData>

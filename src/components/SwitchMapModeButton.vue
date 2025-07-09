@@ -27,12 +27,12 @@
 </template>
 
 <script lang="ts">
-import { createComponent, ref, inject, computed } from '@vue/composition-api'
+import { defineComponent, ref, inject, computed } from 'vue'
 import { BASE_MAP, BASE_MAP_NAME, MapFactoryController } from '@/lib/map'
 import { MainMapControllerSymbol } from '@/symbols'
 import { useMapMode } from '@/lib/useMapMode'
 
-export default createComponent({
+export default defineComponent({
   name: 'SwitchMapModeButton',
   props: {
     isInSheet: {

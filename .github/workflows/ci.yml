@@ -9,43 +9,56 @@ on:
     branches:
       - master
       - production
+  workflow_dispatch:
+    inputs:
+      deployment_type:
+        description: 'Type of deployment to run'
+        required: false
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+permissions:
+  contents: write
 
 jobs:
   lint:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Run lint
         run: |
           npm ci
           npm run lint
   typecheck:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Run typecheck
         run: |
           npm ci
           npm run typecheck
   unit-test:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Run unit test
         run: |
           npm ci
@@ -53,15 +66,15 @@ jobs:
   dev-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/master'"
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'staging')
     env:
       VUE_APP_PROTOMAP_API_KEY: e6cfbd46818cf623
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Install and Build
         run: |
           npm ci
@@ -69,24 +82,21 @@ jobs:
           echo "VUE_APP_IMGUR_FALLBACK_URL=https://staging.disfactory.tw/imgur" >> .env
           npm run build
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BASE_BRANCH: master
-          BRANCH: gh-pages
-          SINGLE_COMMIT: true
-          COMMIT_MESSAGE: Deploy [ci skip]
-          FOLDER: dist
+          single-commit: true
+          commit-message: Deploy [ci skip]
+          folder: dist
   production-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.event_name == 'push' && github.ref == 'refs/heads/production'"
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/production' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'production')
     steps:
       - uses: actions/checkout@v1
-      - name: Use Node.js 10.x
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v1
         with:
-          node-version: 10.x
+          node-version: 16.x
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:

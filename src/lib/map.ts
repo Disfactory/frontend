@@ -33,7 +33,9 @@ export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
 }
 
 export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
-  if (factory.document_display_status) {
+  if (factory.wont_fix) {
+    return FactoryDisplayStatuses[4].type
+  } else if (factory.document_display_status) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return FactoryDisplayStatuses.find(s => s.documentDisplayStatuses.includes(factory.document_display_status!))?.type as FactoryDisplayStatusType
   } else {
@@ -322,8 +324,8 @@ const getWMTSTileGrid = () => {
 
   return new WMTSTileGrid({
     origin: getTopLeft(projectionExtent),
-    resolutions: resolutions,
-    matrixIds: matrixIds
+    resolutions,
+    matrixIds
   })
 }
 
@@ -620,20 +622,22 @@ export class OLMap {
   private setupGeolocationLayer (geolocation: Geolocation) {
     const positionFeature = new Feature()
     const getPositionStyles = (heading: number) =>
-      (!Number.isNaN(heading)) ? new Style({
-        image: new Icon({
-          anchor: [0.5, 0.5],
-          src: '/images/now.svg',
-          rotation: heading,
-          rotateWithView: true
+      (!Number.isNaN(heading))
+        ? new Style({
+          image: new Icon({
+            anchor: [0.5, 0.5],
+            src: '/images/now.svg',
+            rotation: heading,
+            rotateWithView: true
+          })
         })
-      }) : new Style({
-        image: new Circle({
-          fill: new Fill({ color: '#0099ff' }),
-          stroke: new Stroke({ color: '#fff', width: 3 }),
-          radius: 15
+        : new Style({
+          image: new Circle({
+            fill: new Fill({ color: '#0099ff' }),
+            stroke: new Stroke({ color: '#fff', width: 3 }),
+            radius: 15
+          })
         })
-      })
 
     positionFeature.setStyle(getPositionStyles(NaN))
     geolocation.on('change:position', function () {

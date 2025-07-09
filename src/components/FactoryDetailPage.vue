@@ -48,7 +48,7 @@
           </div>
         </v-card-text>
 
-        <v-slide-group :show-arrows="images > 0 ? 'desktop' : false" ref="slideGroup">
+        <v-slide-group :show-arrows="images.length > 0" ref="slideGroup">
           <v-slide-item>
             <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
               <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
@@ -136,7 +136,7 @@
 </template>
 
 <script lang="ts">
-import { createComponent, computed, ref, onUpdated, watch } from '@vue/composition-api'
+import { defineComponent, computed, ref, onUpdated, watch } from 'vue'
 import copy from 'copy-to-clipboard'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
@@ -147,7 +147,7 @@ import { useAppState } from '../lib/appState'
 import { FactoryImage, getDisplayStatusText, ReportRecord } from '../types'
 import ImgurFallbackImage from './ImgurFallbackImage.vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'FactoryDetailPage',
   components: {
     ImgurFallbackImage
@@ -261,8 +261,10 @@ export default createComponent({
                 return '農委會'
               case 'E':
                 return '經濟部'
+              default:
+                return ''
             }
-          })
+          }).filter(Boolean)
           .join('、')
       }
 

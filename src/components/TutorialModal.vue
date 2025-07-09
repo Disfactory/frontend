@@ -46,10 +46,10 @@
 
 <script lang="ts">
 import AppModal from '@/components/AppModal.vue'
-import { createComponent, ref, computed } from '@vue/composition-api'
+import { defineComponent, ref, computed } from 'vue'
 import { Carousel, Slide } from 'vue-carousel'
 
-export default createComponent({
+export default defineComponent({
   name: 'TutorialModal',
   components: {
     AppModal,
@@ -72,8 +72,8 @@ export default createComponent({
     const isAdd = computed(() => page.value === 'add')
     const isUpdate = computed(() => page.value === 'update')
 
-    const createCarousel = ref<HTMLElement>(null)
-    const updateCarousel = ref<HTMLElement>(null)
+    const createCarousel = ref<HTMLElement | null>(null)
+    const updateCarousel = ref<HTMLElement | null>(null)
 
     const openHome = () => { page.value = 'home' }
     const openAdd = () => {

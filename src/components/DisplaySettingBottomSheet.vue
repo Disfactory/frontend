@@ -92,13 +92,13 @@
 </template>
 
 <script lang="ts">
-import { createComponent, ref, inject, computed } from '@vue/composition-api'
+import { defineComponent, ref, inject, computed } from 'vue'
 import { MainMapControllerSymbol } from '@/symbols'
 import { MapFactoryController } from '@/lib/map'
 
 import SwitchMapModeButton from '@/components/SwitchMapModeButton.vue'
 
-export default createComponent({
+export default defineComponent({
   name: 'DisplaySettingBottomSheet',
   components: {
     SwitchMapModeButton
@@ -113,9 +113,7 @@ export default createComponent({
     const isLUIMapVisable$ = ref(false)
     const isLUIMapVisable = computed({
       get: () => {
-        isLUIMapVisable$.value = !!mapController.value?.mapInstance.getLUILayerVisible()
-
-        return isLUIMapVisable$.value
+        return !!mapController.value?.mapInstance.getLUILayerVisible()
       },
       set: value => {
         mapController.value?.mapInstance.setLUILayerVisible(value)

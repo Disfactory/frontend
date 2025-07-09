@@ -17,7 +17,7 @@
         <v-btn text @click="modalActions.openContactModal">
           聯絡我們
         </v-btn>
-        <v-btn text href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240">
+        <v-btn text href="https://about.disfactory.tw/#question">
           常見問題
         </v-btn>
         <v-btn text href="https://about.disfactory.tw" target="_blank">
@@ -50,7 +50,7 @@
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240" target="_blank">
-            <v-list-item-title>常見問題</v-list-item-title>
+            <v-list-item-title></v-list-item-title>
           </v-list-item>
 
           <v-list-item href="https://about.disfactory.tw" target="_blank">
@@ -122,8 +122,9 @@
       <safety-modal v-model="modalState.safetyModalOpen" />
       <tutorial-modal :open="modalState.tutorialModalOpen" :dismiss="modalActions.closeTutorialModal" />
       <ios-version-modal :open="modalState.supportIOSVersionModalOpen" :dismiss="modalActions.closesupportIOSVersionModal" />
+      <api-config-modal :open="modalState.apiConfigModalOpen" :dismiss="modalActions.closeApiConfigModal" />
       <!-- alert or modal -->
-      <Map
+      <MapView
         :setFactoryLocation="appActions.setFactoryLocation"
       />
 
@@ -131,17 +132,15 @@
       <update-factory-steps v-if="appState.isEditMode" />
     </v-main>
 
-    <factory-detail-page />
+  <factory-detail-page />
+  <maintenance-modal :open="maintenanceModalOpen" :dismiss="dismissMaintenanceModal" />
   </v-app>
 </template>
 
 <script lang="ts">
-import { createComponent, ref, provide } from '@vue/composition-api'
+import { defineComponent, ref, provide } from 'vue'
 
-import Map from '@/components/Map.vue'
-import AppNavbar from '@/components/AppNavbar.vue'
-import AppButton from '@/components/AppButton.vue'
-import AppSidebar from './components/AppSidebar.vue'
+import MapView from '@/components/Map.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
 import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
@@ -152,54 +151,51 @@ import ContactModal from '@/components/ContactModal.vue'
 import GettingStartedModal from '@/components/GettingStartedModal.vue'
 import TutorialModal from '@/components/TutorialModal.vue'
 import SafetyModal from '@/components/SafetyModal.vue'
-import CreateFactorySuccessModal from '@/components/CreateFactorySuccessModal.vue'
-import UpdateFactorySuccessModal from '@/components/UpdateFactorySuccessModal.vue'
 import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
+import ApiConfigModal from '@/components/ApiConfigModal.vue'
 
 import { MapFactoryController } from './lib/map'
 import { MainMapControllerSymbol } from './symbols'
-import { provideModalState, useModalState } from './lib/hooks'
-import { provideGA } from './lib/useGA'
-import { provideAppState, useAppState } from './lib/appState'
-import { provideAlertState, useAlertState } from './lib/useAlert'
-import { provideMapMode } from './lib/useMapMode'
+import { useModalState } from './lib/hooks'
+import { useAppState } from './lib/appState'
+import { useAlertState } from './lib/useAlert'
 
-export default createComponent({
+import MaintenanceModal from './components/MaintenanceModal.vue'
+
+export default defineComponent({
   name: 'App',
   components: {
-    Map,
+    MapView,
     AppAlert,
-    AppButton,
-    AppNavbar,
-    AppSidebar,
     AboutModal,
     ContactModal,
     GettingStartedModal,
     SafetyModal,
-    CreateFactorySuccessModal,
-    UpdateFactorySuccessModal,
     TutorialModal,
     IosVersionModal,
+    ApiConfigModal,
     CreateFactorySteps,
     UpdateFactorySteps,
-    FactoryDetailPage
+    FactoryDetailPage,
+    MaintenanceModal
   },
-  setup (_, context) {
-    provideGA(context)
-
-    provideModalState()
-    provideAppState()
-    provideAlertState()
-    provideMapMode()
-
+  setup () {
     const [modalState, modalActions] = useModalState()
     const [appState, appActions] = useAppState()
     const [alertState, alertActions] = useAlertState()
 
     // register global accessible map instance
-    provide(MainMapControllerSymbol, ref<MapFactoryController>(null))
+    provide(MainMapControllerSymbol, ref<MapFactoryController | null>(null))
+
+    // Note: API config modal functionality removed for simplification
 
     const drawer = ref(false)
+
+    // Show maintenance modal on app start, allow closing
+    const maintenanceModalOpen = ref(true)
+    const dismissMaintenanceModal = () => {
+      maintenanceModalOpen.value = false
+    }
     return {
       appState,
       alertState,
@@ -207,7 +203,9 @@ export default createComponent({
       appActions,
       modalState,
       modalActions,
-      drawer
+      drawer,
+      maintenanceModalOpen,
+      dismissMaintenanceModal
     }
   }
 })

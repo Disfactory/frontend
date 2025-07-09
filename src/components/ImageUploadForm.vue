@@ -1,5 +1,8 @@
 <template>
   <div class="image-upload-form w-100">
+    <v-alert type="warning" prominent color="warning" class="mb-4">
+      目前上傳圖片功能受限，暫時停止回報功能，敬請見諒！
+    </v-alert>
     <v-container style="max-width: 630px; position: relative;" class="pt-3 pt-md-12 pb-md-8">
       <h2 class="mb-4 secondary--text">上傳工廠照片</h2>
 
@@ -45,7 +48,8 @@
       <v-text-field
         outlined
         placeholder="例：林先生、林小姐"
-        v-model="formState.nickname"
+        :value="formState.nickname"
+        @input="$emit('update:formState', { ...formState, nickname: $event })"
       ></v-text-field>
 
       <h3 class="primary--text mt-7 mb-2">聯絡方式 (email或電話)</h3>
@@ -53,7 +57,8 @@
       <v-text-field
         outlined
         placeholder="例：abc@email.com、0920-123456"
-        v-model="formState.contact"
+        :value="formState.contact"
+        @input="$emit('update:formState', { ...formState, contact: $event })"
       ></v-text-field>
 
       <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
@@ -66,13 +71,13 @@
 </template>
 
 <script lang="ts">
-import { createComponent } from '@vue/composition-api'
+import { defineComponent } from 'vue'
 import { UploadedImage } from '../api'
-export default createComponent({
+export default defineComponent({
   props: {
     previewImages: {
       type: Array,
-      default: []
+      default: () => []
     },
     uploading: {
       default: false
