@@ -11,9 +11,9 @@
             目前上傳圖片功能受限，暫時停止回報功能，敬請見諒！
           </p>
           <p class="detail-message">
-            各位使用 disfactory.tw 的朋友們好，我們近期接獲多位使用者反映，在檢舉違章工廠時無法成功上傳圖片。<br>
-            經確認原因為目前使用的圖片託管平台，自 2025 年 5 月中起限制上傳，導致我們的網站無法順利將民眾上傳的照片轉存，因此現在暫時停止回報的功能。<br>
-            目前我們正在嘗試修復此問題，並會盡快更新系統，恢復回報功能。<br>
+            各位使用 disfactory.tw 的朋友們好，我們近期接獲多位使用者反映，在檢舉違章工廠時無法成功上傳圖片。<br><br>
+            經確認原因為目前使用的圖片託管平台，自 2025 年 5 月中起限制上傳，導致我們的網站無法順利將民眾上傳的照片轉存，因此現在暫時停止回報的功能。<br><br>
+            目前我們正在嘗試修復此問題，並會盡快更新系統，恢復回報功能。<br><br>
             感謝大家的理解！
           </p>
         </div>
@@ -52,9 +52,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/styles/variables';
 
-.maintenance-modal-container .app-modal {
-  max-width: 500px;
-  width: 90%;
+.maintenance-modal-container :deep(.app-modal) {
+  top: 25px;
+  max-height: calc(100% - 50px);
+  max-width: 600px;
+  width: calc(100% - 40px);
 
   .page {
     h2 {
@@ -71,19 +73,18 @@ export default defineComponent({
 
     .message-section {
       margin-bottom: 20px;
-      text-align: center;
 
       .main-message {
         font-weight: bold;
         color: #222 !important;
-        margin-bottom: 10px;
+        margin-bottom: 16px;
         font-size: 18px;
       }
 
       .detail-message {
         color: #333 !important;
         font-size: 15px;
-        line-height: 1.6;
+        line-height: 1.8;
       }
     }
 
