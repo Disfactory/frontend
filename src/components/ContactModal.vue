@@ -1,6 +1,6 @@
 <template>
-  <div class="contact-modal-container">
-    <app-modal :open="open" :dismiss="dismiss">
+  <v-dialog v-model="contactModalState" v-bind="$attrs" max-width="350">
+    <div class="contact-modal">
       <div class="page">
         <img width="137" src="/images/cet-logo.png" alt="Citizen of the Earth Taiwan">
 
@@ -15,26 +15,29 @@
           Email: <a href="mailto:cet@cet-taiwan.org">cet@cet-taiwan.org</a><br>
         </p>
       </div>
-    </app-modal>
-  </div>
+    </div>
+  </v-dialog>
 </template>
 
 <script lang="ts">
-import AppModal from '@/components/AppModal.vue'
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
 
 export default defineComponent({
   name: 'ContactModal',
-  components: {
-    AppModal
-  },
   props: {
-    open: {
-      type: Boolean,
-      default: false
-    },
-    dismiss: {
-      type: Function
+    value: {
+      required: true,
+      type: Boolean
+    }
+  },
+  setup (props, context) {
+    const contactModalState = computed({
+      get: () => props.value,
+      set: (value) => context.emit('input', value)
+    })
+
+    return {
+      contactModalState
     }
   }
 })
@@ -44,19 +47,14 @@ export default defineComponent({
 @import '@/styles/page';
 @import '@/styles/variables';
 
-.contact-modal-container .app-modal {
-  top: 25px;
-  max-height: calc(100% - 50px);
-  max-width: calc(100% - 20px);
-  padding-top: 60px;
+.contact-modal {
+  background-color: white;
+  padding: 12px;
+  text-align: center;
 
-  .page {
-    text-align: center;
-
-    h3 {
-      color: $primary-color;
-      line-height: 1.5em;
-    }
+  .page h3 {
+    color: $primary-color;
+    line-height: 1.5em;
   }
 }
 </style>

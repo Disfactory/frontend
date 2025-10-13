@@ -117,10 +117,10 @@
       </v-dialog>
 
       <about-modal :open="modalState.aboutModalOpen" :dismiss="modalActions.closeAboutModal" />
-      <contact-modal :open="modalState.contactModalOpen" :dismiss="modalActions.closeContactModal" />
+      <contact-modal v-model="modalState.contactModalOpen" />
       <getting-started-modal :open="modalState.gettingStartedModalOpen" :dismiss="modalActions.closeGettingStartedModal" />
       <safety-modal v-model="modalState.safetyModalOpen" />
-      <tutorial-modal :open="modalState.tutorialModalOpen" :dismiss="modalActions.closeTutorialModal" />
+      <tutorial-modal v-model:open="modalState.tutorialModalOpen" />
       <ios-version-modal :open="modalState.supportIOSVersionModalOpen" :dismiss="modalActions.closesupportIOSVersionModal" />
       <api-config-modal :open="modalState.apiConfigModalOpen" :dismiss="modalActions.closeApiConfigModal" />
       <!-- alert or modal -->
@@ -133,7 +133,7 @@
     </v-main>
 
   <factory-detail-page />
-  <maintenance-modal :open="maintenanceModalOpen" :dismiss="dismissMaintenanceModal" />
+  <maintenance-modal v-model="maintenanceModalOpen" />
   </v-app>
 </template>
 
@@ -154,13 +154,13 @@ import SafetyModal from '@/components/SafetyModal.vue'
 import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
 import ApiConfigModal from '@/components/ApiConfigModal.vue'
 
-import { MapFactoryController } from './lib/map'
-import { MainMapControllerSymbol } from './symbols'
-import { useModalState } from './lib/hooks'
-import { useAppState } from './lib/appState'
-import { useAlertState } from './lib/useAlert'
+import { MapFactoryController } from '@/lib/map'
+import { MainMapControllerSymbol } from '@/symbols'
+import { useModalState } from '@/lib/hooks'
+import { useAppState } from '@/lib/appState'
+import { useAlertState } from '@/lib/useAlert'
 
-import MaintenanceModal from './components/MaintenanceModal.vue'
+import MaintenanceModal from '@/components/MaintenanceModal.vue'
 
 export default defineComponent({
   name: 'App',
