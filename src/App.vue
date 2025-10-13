@@ -117,7 +117,7 @@
       </v-dialog>
 
       <about-modal :open="modalState.aboutModalOpen" :dismiss="modalActions.closeAboutModal" />
-      <contact-modal :open="modalState.contactModalOpen" :dismiss="modalActions.closeContactModal" />
+      <contact-modal v-model="modalState.contactModalOpen" />
       <getting-started-modal :open="modalState.gettingStartedModalOpen" :dismiss="modalActions.closeGettingStartedModal" />
       <safety-modal v-model="modalState.safetyModalOpen" />
       <tutorial-modal v-model:open="modalState.tutorialModalOpen" />
