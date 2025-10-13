@@ -133,7 +133,7 @@
     </v-main>
 
   <factory-detail-page />
-  <maintenance-modal :open="maintenanceModalOpen" :dismiss="dismissMaintenanceModal" />
+  <maintenance-modal v-model="maintenanceModalOpen" />
   </v-app>
 </template>
 
@@ -154,13 +154,13 @@ import SafetyModal from '@/components/SafetyModal.vue'
 import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
 import ApiConfigModal from '@/components/ApiConfigModal.vue'
 
-import { MapFactoryController } from './lib/map'
-import { MainMapControllerSymbol } from './symbols'
-import { useModalState } from './lib/hooks'
-import { useAppState } from './lib/appState'
-import { useAlertState } from './lib/useAlert'
+import { MapFactoryController } from '@/lib/map'
+import { MainMapControllerSymbol } from '@/symbols'
+import { useModalState } from '@/lib/hooks'
+import { useAppState } from '@/lib/appState'
+import { useAlertState } from '@/lib/useAlert'
 
-import MaintenanceModal from './components/MaintenanceModal.vue'
+import MaintenanceModal from '@/components/MaintenanceModal.vue'
 
 export default defineComponent({
   name: 'App',

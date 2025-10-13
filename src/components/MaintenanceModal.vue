@@ -1,6 +1,6 @@
 <template>
-  <div class="maintenance-modal-container">
-    <app-modal :open="open" :dismiss="dismiss">
+  <v-dialog v-model="maintenanceModalState" v-bind="$attrs" max-width="600">
+    <div class="maintenance-modal">
       <div class="page">
         <h2>🔧【系統維修中！】</h2>
         <div class="icon-section">
@@ -23,27 +23,37 @@
           </app-button>
         </div>
       </div>
-    </app-modal>
-  </div>
+    </div>
+  </v-dialog>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import AppModal from './AppModal.vue'
+import { defineComponent, computed } from 'vue'
 import AppButton from './AppButton.vue'
 import { VIcon } from 'vuetify/lib/components'
 
 export default defineComponent({
   name: 'MaintenanceModal',
-  components: { AppModal, AppButton, VIcon },
+  components: { AppButton, VIcon },
   props: {
-    open: {
-      type: Boolean,
-      required: true
-    },
-    dismiss: {
-      type: Function,
-      required: true
+    value: {
+      required: true,
+      type: Boolean
+    }
+  },
+  setup (props, context) {
+    const maintenanceModalState = computed({
+      get: () => props.value,
+      set: (value) => context.emit('input', value)
+    })
+
+    const dismiss = () => {
+      maintenanceModalState.value = false
+    }
+
+    return {
+      maintenanceModalState,
+      dismiss
     }
   }
 })
@@ -52,48 +62,23 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '@/styles/variables';
 
-.maintenance-modal-container :deep(.app-modal) {
-  top: 25px;
-  max-height: calc(100% - 50px);
-  max-width: 600px;
-  width: calc(100% - 40px);
+.maintenance-modal {
+  padding: 27px 22px;
+  background-color: white;
 
   .page {
     h2 {
-      color: $primary-color;
+      line-height: normal;
       margin-bottom: 20px;
-      text-align: center;
     }
 
     .icon-section {
-      display: flex;
-      justify-content: center;
+      text-align: center;
       margin-bottom: 16px;
     }
 
     .message-section {
       margin-bottom: 20px;
-
-      .main-message {
-        font-weight: bold;
-        color: #222 !important;
-        margin-bottom: 16px;
-        font-size: 18px;
-      }
-
-      .detail-message {
-        color: #333 !important;
-        font-size: 15px;
-        line-height: 1.8;
-      }
-    }
-
-    .button-section {
-      display: flex;
-      justify-content: center;
-      .app-button {
-        min-width: 120px;
-      }
     }
   }
 }
