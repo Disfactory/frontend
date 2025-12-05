@@ -28,6 +28,11 @@ export type UploadedImages = {
   src: string // used for preview images
 }[]
 
+// Image upload provider configuration
+type ImageUploadProvider = 'imgur' | 'backend'
+const IMAGE_UPLOAD_PROVIDER: ImageUploadProvider = (process.env.VUE_APP_IMAGE_UPLOAD_PROVIDER as ImageUploadProvider) || 'imgur'
+const IMAGE_UPLOAD_URL = process.env.VUE_APP_IMAGE_UPLOAD_URL || ''
+
 export async function getFactories (range: number, lng: number, lat: number): Promise<FactoriesResponse> {
   try {
     const { data } = await instance.get(`/factories?range=${range}&lng=${lng}&lat=${lat}`)
@@ -50,7 +55,13 @@ export async function getFactory (factoryId: string): Promise<FactoryData> {
 
 const IMGUR_CLIENT_ID = '39048813b021935'
 
-async function uploadToImgur (file: File) {
+type ImageUploadResult = {
+  link: string,
+  deletehash: string,
+  file: File
+}
+
+async function uploadToImgur (file: File): Promise<ImageUploadResult> {
   const formData = new FormData()
   formData.append('image', file)
 
@@ -69,6 +80,42 @@ async function uploadToImgur (file: File) {
     deletehash: data.data.deletehash as string,
     file
   }
+}
+
+async function uploadToBackend (file: File): Promise<ImageUploadResult> {
+  const formData = new FormData()
+  formData.append('image', file)
+
+  // Use the configured backend upload URL, or construct from current base URL
+  const uploadUrl = IMAGE_UPLOAD_URL || `${currentBaseURL.value}/upload`
+
+  const { data } = await axios({
+    method: 'POST',
+    url: uploadUrl,
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+
+  // Backend returns Imgur-compatible response format
+  if (!data.success) {
+    throw new Error(data.data?.error || 'Image upload failed')
+  }
+
+  return {
+    link: data.data.link as string,
+    deletehash: data.data.deletehash as string,
+    file
+  }
+}
+
+// Upload image using configured provider
+async function uploadImage (file: File): Promise<ImageUploadResult> {
+  if (IMAGE_UPLOAD_PROVIDER === 'backend') {
+    return uploadToBackend(file)
+  }
+  return uploadToImgur(file)
 }
 
 const convertTurple2Number = (input: [number, number, number]) => input[0] + (input[1] / 60) + (input[2] / 3600)
@@ -120,13 +167,13 @@ async function uploadExifAndGetToken ({ link, file, deletehash }: { link: string
 
 export async function uploadImages (files: FileList): Promise<UploadedImages> {
   return Promise.all(
-    Array.from(files).map((file) => uploadToImgur(file).then((el) => uploadExifAndGetToken(el)))
+    Array.from(files).map((file) => uploadImage(file).then((el) => uploadExifAndGetToken(el)))
   )
 }
 
 export async function updateFactoryImages (factoryId: string, files: FileList, { nickname, contact }: { nickname?: string, contact?: string }) {
   return Promise.all(
-    Array.from(files).map((file) => uploadToImgur(file).then((el) => (async () => {
+    Array.from(files).map((file) => uploadImage(file).then((el) => (async () => {
       const exifData = await readImageExif(el.file)
       const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images`, { url: el.link, ...exifData, nickname, contact, deletehash: el.deletehash })
       data.image_path = el.link

@@ -80,6 +80,8 @@ jobs:
           npm ci
           echo "VUE_APP_BASE_URL=https://staging.disfactory.tw/api" > .env
           echo "VUE_APP_IMGUR_FALLBACK_URL=https://staging.disfactory.tw/imgur" >> .env
+          echo "VUE_APP_IMAGE_UPLOAD_PROVIDER=backend" >> .env
+          echo "VUE_APP_IMAGE_UPLOAD_URL=https://staging.disfactory.tw/api/upload" >> .env
           npm run build
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
@@ -107,6 +109,8 @@ jobs:
           npm ci
           echo "VUE_APP_BASE_URL=https://api.disfactory.tw/api" > .env.production
           echo "VUE_APP_IMGUR_FALLBACK_URL=https://api.disfactory.tw/imgur" >> .env.production
+          echo "VUE_APP_IMAGE_UPLOAD_PROVIDER=backend" >> .env.production
+          echo "VUE_APP_IMAGE_UPLOAD_URL=https://api.disfactory.tw/api/upload" >> .env.production
           npm run build
           echo "disfactory.tw" > dist/CNAME
       - name: Deploy to GitHub Pages
