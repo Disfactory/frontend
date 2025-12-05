@@ -133,7 +133,6 @@
     </v-main>
 
   <factory-detail-page />
-  <maintenance-modal :open="maintenanceModalOpen" :dismiss="dismissMaintenanceModal" />
   </v-app>
 </template>
 
@@ -160,8 +159,6 @@ import { useModalState } from './lib/hooks'
 import { useAppState } from './lib/appState'
 import { useAlertState } from './lib/useAlert'
 
-import MaintenanceModal from './components/MaintenanceModal.vue'
-
 export default defineComponent({
   name: 'App',
   components: {
@@ -176,8 +173,7 @@ export default defineComponent({
     ApiConfigModal,
     CreateFactorySteps,
     UpdateFactorySteps,
-    FactoryDetailPage,
-    MaintenanceModal
+    FactoryDetailPage
   },
   setup () {
     const [modalState, modalActions] = useModalState()
@@ -191,11 +187,6 @@ export default defineComponent({
 
     const drawer = ref(false)
 
-    // Show maintenance modal on app start, allow closing
-    const maintenanceModalOpen = ref(true)
-    const dismissMaintenanceModal = () => {
-      maintenanceModalOpen.value = false
-    }
     return {
       appState,
       alertState,
@@ -203,9 +194,7 @@ export default defineComponent({
       appActions,
       modalState,
       modalActions,
-      drawer,
-      maintenanceModalOpen,
-      dismissMaintenanceModal
+      drawer
     }
   }
 })
