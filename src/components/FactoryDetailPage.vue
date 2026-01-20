@@ -77,7 +77,7 @@
 
           <hr v-if="full || $vuetify.breakpoint.mdAndUp">
 
-          <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
+          <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain show-more-btn" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
             顯示更多資訊
             &nbsp;
             <v-icon>mdi-menu-down</v-icon>
@@ -175,7 +175,7 @@ export default defineComponent({
       }
     })
     const lightboxIndex = ref<number|null>(null)
-    const setLightboxIndex = (i: number) => {
+    const setLightboxIndex = (i: number|null) => {
       lightboxIndex.value = i
     }
 
@@ -497,6 +497,16 @@ export default defineComponent({
 
     .copied-message {
       display: none;
+    }
+
+    .show-more-btn {
+      position: sticky;
+      bottom: env(safe-area-inset-bottom, 0);
+      background: white;
+      width: 100%;
+      // padding: 0px 0 !important;
+      margin-bottom: 0 !important;
+      z-index: 1;
     }
   }
 
