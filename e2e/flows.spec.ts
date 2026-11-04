@@ -45,6 +45,19 @@ test('keeps the create form open and shows an error when the POST fails', async 
   await expect(page.getByRole('heading', { name: '新增可疑工廠成功', level: 3 })).toHaveCount(0)
 })
 
+test('can cancel the create flow from the visible cancel control', async ({ page }) => {
+  await mockApi(page)
+  await page.goto('/')
+  await hideDevTools(page)
+  await dismissIntro(page)
+  await page.getByText('我想新增可疑工廠').click()
+
+  await page.getByTestId('create-cancel').click()
+  await page.getByRole('button', { name: '放棄新增' }).click()
+
+  await expect(page.getByText('我想新增可疑工廠')).toBeVisible()
+})
+
 test('uploads every selected photo batch on update', async ({ page }) => {
   await openSharedFactory(page)
   await page.getByRole('button', { name: '補充照片' }).click()
@@ -100,7 +113,12 @@ test.describe('mobile coordinate search', () => {
 
     await expect(page.getByText('以下經緯度版本為WGS84')).toHaveCount(0)
 
-    await page.getByRole('button', { name: '顯示經緯度' }).click()
+    const toolbarButton = page.getByRole('button', { name: '顯示經緯度' })
+    const toolbarBox = await toolbarButton.boundingBox()
+    expect(toolbarBox).not.toBeNull()
+    expect(toolbarBox!.y).toBeLessThan(150)
+
+    await toolbarButton.click()
     await expect(page.getByText('以下經緯度版本為WGS84')).toBeVisible()
 
     await page.getByRole('button', { name: '搜尋經緯度' }).filter({ visible: true }).click()

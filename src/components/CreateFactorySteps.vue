@@ -171,7 +171,8 @@ const submitFactory = async () => {
     </header>
 
     <template v-if="appStore.createStepIndex === 1">
-      <div v-if="showLongLat" class="pointer-events-auto absolute inset-x-0 top-14 bg-brand px-4 py-3 text-white md:px-10">
+      <div class="pointer-events-auto absolute inset-x-0 top-14 z-10">
+        <div v-if="showLongLat" class="bg-brand px-4 py-3 text-white md:px-10">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div class="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
             <p class="text-xs md:text-sm">以下經緯度版本為WGS84</p>
@@ -227,28 +228,30 @@ const submitFactory = async () => {
             定位
           </button>
         </div>
-      </div>
-
-      <div class="pointer-events-auto absolute inset-x-0 bottom-0 bg-white/95 px-3 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-        <div class="mb-2 flex justify-center md:hidden">
-          <AppButton class="max-w-[345px]" color="dark-green" @click="chooseLocation">選擇此地點</AppButton>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
+
+        <div class="flex flex-wrap items-center gap-2 px-5 py-4">
           <button
             type="button"
-            class="rounded-full bg-white px-3 py-2 text-sm font-medium text-brand shadow"
+            class="min-w-[110px] rounded-full bg-white px-4 py-2 text-sm font-medium text-brand shadow"
             @click="showLongLat = !showLongLat"
           >
             {{ showLongLat ? '隱藏經緯度' : '顯示經緯度' }}
           </button>
           <SwitchMapModeButton />
-          <div class="hidden flex-1 justify-center md:flex">
-            <AppButton class="max-w-[345px]" color="dark-green" @click="chooseLocation">選擇此地點</AppButton>
-          </div>
+          <button
+            type="button"
+            data-testid="create-cancel"
+            class="ml-auto rounded-full bg-white px-4 py-2 text-sm font-medium text-brand shadow"
+            @click="discardDialog = true"
+          >
+            取消
+          </button>
         </div>
-        <p v-if="showLongLat" class="mt-1 text-xs text-brand-gray">
-          經度：{{ appStore.mapLngLat[0]?.toFixed(7) }} / 緯度：{{ appStore.mapLngLat[1]?.toFixed(7) }}
-        </p>
+      </div>
+
+      <div class="pointer-events-auto absolute inset-x-0 bottom-[50px] flex justify-center px-3">
+        <AppButton auto class="min-w-[135px]" color="dark-green" @click="chooseLocation">選擇此地點</AppButton>
       </div>
     </template>
 

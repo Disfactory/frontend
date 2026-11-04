@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { ArrowLeft, ChevronLeft, ChevronRight } from '@lucide/vue'
 import AppModal from './AppModal.vue'
+import { useCarouselSwipe } from '@/lib/useCarouselSwipe'
 
 const props = defineProps<{
   open: boolean
@@ -30,6 +31,15 @@ const openUpdate = () => {
   updateIndex.value = 0
   page.value = 'update'
 }
+
+const addSwipe = useCarouselSwipe(
+  () => { addIndex.value = (addIndex.value + 1) % addImages.length },
+  () => { addIndex.value = (addIndex.value - 1 + addImages.length) % addImages.length },
+)
+const updateSwipe = useCarouselSwipe(
+  () => { updateIndex.value = (updateIndex.value + 1) % updateImages.length },
+  () => { updateIndex.value = (updateIndex.value - 1 + updateImages.length) % updateImages.length },
+)
 
 const onDismiss = () => {
   openHome()
@@ -69,12 +79,19 @@ const onDismiss = () => {
         </button>
       </div>
 
-      <div v-if="isAdd" class="relative">
+      <div
+        v-if="isAdd"
+        class="relative touch-pan-y select-none"
+        @pointerdown="addSwipe.onPointerDown"
+        @pointerup="addSwipe.onPointerUp"
+        @pointercancel="addSwipe.onPointerCancel"
+      >
         <h2 class="text-center !text-brand">新增違章工廠 ({{ addIndex + 1 }}/7)</h2>
         <img
           :src="addImages[addIndex]"
           :alt="`新增步驟 ${addIndex + 1}`"
           class="mx-auto max-h-[65vh] object-contain"
+          draggable="false"
         />
         <button
           type="button"
@@ -105,12 +122,19 @@ const onDismiss = () => {
         </div>
       </div>
 
-      <div v-if="isUpdate" class="relative">
+      <div
+        v-if="isUpdate"
+        class="relative touch-pan-y select-none"
+        @pointerdown="updateSwipe.onPointerDown"
+        @pointerup="updateSwipe.onPointerUp"
+        @pointercancel="updateSwipe.onPointerCancel"
+      >
         <h2 class="text-center !text-brand">補充工廠資訊 ({{ updateIndex + 1 }}/4)</h2>
         <img
           :src="updateImages[updateIndex]"
           :alt="`補充步驟 ${updateIndex + 1}`"
           class="mx-auto max-h-[65vh] object-contain"
+          draggable="false"
         />
         <button
           type="button"

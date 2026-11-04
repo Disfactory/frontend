@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useDebounceFn, useMediaQuery } from '@vueuse/core'
 import type Feature from 'ol/Feature'
-import { MapPin } from '@lucide/vue'
+import MapMarkerIcon from '@/components/MapMarkerIcon.vue'
 
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 import { getFactories } from '@/api'
@@ -168,18 +168,18 @@ onUnmounted(() => {
       class="absolute inset-x-0 top-0 z-10 px-3 pt-3 pb-2"
       :class="appStore.factoryDetailsExpanded ? 'md:pr-[410px]' : ''"
     >
-      <div class="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
+      <div class="flex gap-4 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
         <DisplaySettingBottomSheet />
         <button
           v-for="button in filterButtonsData"
           :key="String(button.value)"
           type="button"
-          class="flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-2 text-sm font-medium text-brand shadow-md transition hover:bg-white/90"
+          class="flex shrink-0 items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-brand shadow-md transition hover:bg-white/90"
           :class="checkActive(button.value) ? '' : 'opacity-50'"
           :name="button.text"
           @click="onClickFilterButton(button.value)"
         >
-          <MapPin class="size-4" :style="{ color: button.color }" />
+          <MapMarkerIcon class="size-6" :style="{ color: button.color }" />
           {{ button.text }}
         </button>
       </div>

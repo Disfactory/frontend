@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import AppModal from './AppModal.vue'
+import { useCarouselSwipe } from '@/lib/useCarouselSwipe'
 
 defineProps<{
   open: boolean
@@ -25,11 +26,18 @@ const next = () => {
 const prev = () => {
   index.value = (index.value - 1 + slides.length) % slides.length
 }
+const swipe = useCarouselSwipe(next, prev)
 </script>
 
 <template>
   <AppModal :open="open" :dismiss="dismiss" title="安全須知" centered class="max-w-[390px]">
-    <div class="page-prose relative">
+    <div
+      class="page-prose relative touch-pan-y select-none"
+      data-testid="safety-carousel"
+      @pointerdown="swipe.onPointerDown"
+      @pointerup="swipe.onPointerUp"
+      @pointercancel="swipe.onPointerCancel"
+    >
       <div class="min-h-[380px] pb-10">
         <h1 class="!mb-4 !border-none text-xl !text-brand">{{ current.title }}</h1>
         <img
@@ -37,6 +45,7 @@ const prev = () => {
           :src="current.image"
           :alt="current.title"
           class="mx-auto mb-4 max-h-[45vh] object-contain"
+          draggable="false"
         />
         <p class="text-center leading-relaxed">{{ current.text }}</p>
       </div>

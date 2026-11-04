@@ -24,6 +24,20 @@ test.describe('mobile UI', () => {
 
     await drawer.getByRole('button', { name: '安全須知' }).click()
     await expect(page.getByText('請參考以下建議')).toBeVisible()
+
+    const carousel = page.getByTestId('safety-carousel')
+    const carouselBox = await carousel.boundingBox()
+    expect(carouselBox).not.toBeNull()
+    await page.mouse.move(
+      carouselBox!.x + carouselBox!.width - 50,
+      carouselBox!.y + carouselBox!.height / 2,
+    )
+    await page.mouse.down()
+    await page.mouse.move(carouselBox!.x + 50, carouselBox!.y + carouselBox!.height / 2, {
+      steps: 5,
+    })
+    await page.mouse.up()
+    await expect(page.getByRole('heading', { name: '場勘' })).toBeVisible()
   })
 
   test('opens display settings as a bottom sheet', async ({ page }) => {
@@ -39,9 +53,17 @@ test.describe('mobile UI', () => {
     await expect(sheet.getByText('地圖顯示設定')).toBeVisible()
     await expect(sheet.getByText('農地範圍 •')).toBeVisible()
 
-    const box = await sheet.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box!.y + box!.height).toBe(844)
+    await expect
+      .poll(async () => {
+        const box = await sheet.boundingBox()
+        return box ? Math.round(box.y + box.height) : null
+      })
+      .toBe(844)
+
+    await sheet.getByRole('button', { name: '切換地圖模式 •' }).click()
+    await expect(page.getByRole('button', { name: '衛星地圖' })).toBeVisible()
+    await page.getByRole('button', { name: '簡易地圖' }).click()
+    await expect(page.getByRole('button', { name: '衛星地圖' })).toBeHidden()
   })
 
   test('uses a full-screen page for mobile factory edits', async ({ page }) => {

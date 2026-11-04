@@ -53,6 +53,12 @@ test.describe('overlays on desktop', () => {
     expect(contactBox!.width).toBeLessThanOrEqual(341)
     await page.keyboard.press('Escape')
 
+    const pendingPill = page.getByRole('button', { name: '未處理' })
+    const pillBox = await pendingPill.boundingBox()
+    expect(pillBox).not.toBeNull()
+    expect(pillBox!.width).toBeGreaterThan(105)
+    expect(await pendingPill.locator('svg').evaluate((el) => getComputedStyle(el).width)).toBe('24px')
+
     await page.getByRole('button', { name: '顯示設定' }).click()
     await expect(page.getByText('農地範圍 •')).toBeVisible()
     await page.keyboard.press('Escape')
