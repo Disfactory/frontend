@@ -1,224 +1,70 @@
-<template>
-  <v-app>
-    <v-app-bar app color="primary" dark clipped-right v-show="appState.isInitialState || (appState.isEditFactoryMode && $vuetify.breakpoint.mdAndUp)">
-      <v-btn icon class="d-sm-none" style="visibility: hidden;">
-        <v-icon>mdi-temp</v-icon>
-      </v-btn>
-      <v-spacer class="d-sm-none" />
-      <v-toolbar-title>農地工廠回報</v-toolbar-title>
-      <v-spacer />
-      <div class="d-none d-sm-flex">
-        <v-btn text @click="modalActions.openTutorialModal">
-          使用教學
-        </v-btn>
-        <v-btn text @click="modalActions.openSafetyModal">
-          安全須知
-        </v-btn>
-        <v-btn text @click="modalActions.openContactModal">
-          聯絡我們
-        </v-btn>
-        <v-btn text href="https://about.disfactory.tw/#question">
-          常見問題
-        </v-btn>
-        <v-btn text href="https://about.disfactory.tw" target="_blank">
-          關於回報系統
-        </v-btn>
-        <v-btn text href="https://airtable.com/shrUraKakZRpH52DO" target="_blank">
-          問題回報
-        </v-btn>
-      </div>
-      <v-app-bar-nav-icon class="d-flex d-sm-none" @click="drawer = !drawer" />
-    </v-app-bar>
-    <v-navigation-drawer v-model="drawer" app right temporary class="app-sidebar">
-      <v-list
-        nav
-        dense
-      >
-        <v-list-item-group
-          active-class="deep-purple--text text--accent-4"
-        >
-          <v-list-item @click="modalActions.openTutorialModal">
-            <v-list-item-title>使用教學</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item @click="modalActions.openSafetyModal">
-            <v-list-item-title>安全須知</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item @click="modalActions.openContactModal">
-            <v-list-item-title>聯絡我們</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item href="https://about.disfactory.tw/#section-f_c360c8de-447e-4c0a-a856-4af18b9a5240" target="_blank">
-            <v-list-item-title></v-list-item-title>
-          </v-list-item>
-
-          <v-list-item href="https://about.disfactory.tw" target="_blank">
-            <v-list-item-title>關於回報系統</v-list-item-title>
-          </v-list-item>
-
-          <v-list-item href="https://airtable.com/shrUraKakZRpH52DO" target="_blank">
-            <v-list-item-title>問題回報</v-list-item-title>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
-
-    <v-main style="max-height: 100%; height: 100%;">
-      <!-- alert or modal -->
-      <app-alert :alert="alertState.alert" :dismiss="alertActions.dismissAlert" />
-
-      <v-dialog v-model="modalState.createFactorySuccessModal" max-width="305">
-        <v-card class="text-center pt-5">
-          <v-icon color="primary" style="font-size: 80px;">
-            mdi-checkbox-marked-circle
-          </v-icon>
-          <v-card-title class="secondary--text justify-center">
-            新增可疑工廠成功
-          </v-card-title>
-          <v-card-text>
-            <small>
-              3 秒後自動關閉提示訊息
-            </small>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <v-dialog v-model="modalState.updateFactoryImageSuccessModal" max-width="305">
-        <v-card class="text-center pt-5">
-          <v-icon color="primary" style="font-size: 80px;">
-            mdi-checkbox-marked-circle
-          </v-icon>
-          <v-card-title class="secondary--text justify-center">
-            補充工廠照片成功
-          </v-card-title>
-          <v-card-text>
-            <small>
-              3 秒後自動關閉提示訊息
-            </small>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <v-dialog v-model="modalState.updateFactorySuccessModal" max-width="305">
-        <v-card class="text-center pt-5">
-          <v-icon color="primary" style="font-size: 80px;">
-            mdi-checkbox-marked-circle
-          </v-icon>
-          <v-card-title class="secondary--text justify-center">
-            補充工廠資訊成功
-          </v-card-title>
-          <v-card-text>
-            <small>
-              3 秒後自動關閉提示訊息
-            </small>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <about-modal :open="modalState.aboutModalOpen" :dismiss="modalActions.closeAboutModal" />
-      <contact-modal :open="modalState.contactModalOpen" :dismiss="modalActions.closeContactModal" />
-      <getting-started-modal :open="modalState.gettingStartedModalOpen" :dismiss="modalActions.closeGettingStartedModal" />
-      <safety-modal v-model="modalState.safetyModalOpen" />
-      <tutorial-modal :open="modalState.tutorialModalOpen" :dismiss="modalActions.closeTutorialModal" />
-      <ios-version-modal :open="modalState.supportIOSVersionModalOpen" :dismiss="modalActions.closesupportIOSVersionModal" />
-      <api-config-modal :open="modalState.apiConfigModalOpen" :dismiss="modalActions.closeApiConfigModal" />
-      <!-- alert or modal -->
-      <MapView
-        :setFactoryLocation="appActions.setFactoryLocation"
-      />
-
-      <create-factory-steps v-if="appState.isCreateMode" />
-      <update-factory-steps v-if="appState.isEditMode" />
-    </v-main>
-
-  <factory-detail-page />
-  </v-app>
-</template>
-
-<script lang="ts">
-import { defineComponent, ref, provide } from 'vue'
-
-import MapView from '@/components/Map.vue'
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
+import AppHeader from '@/components/AppHeader.vue'
+import AppSidebar from '@/components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
+import MapView from '@/components/MapView.vue'
+import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
 import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
-import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
-
 import AboutModal from '@/components/AboutModal.vue'
 import ContactModal from '@/components/ContactModal.vue'
 import GettingStartedModal from '@/components/GettingStartedModal.vue'
-import TutorialModal from '@/components/TutorialModal.vue'
 import SafetyModal from '@/components/SafetyModal.vue'
-import IosVersionModal from '@/components/IOSVersionAlertModal.vue'
+import TutorialModal from '@/components/TutorialModal.vue'
+import IOSVersionAlertModal from '@/components/IOSVersionAlertModal.vue'
 import ApiConfigModal from '@/components/ApiConfigModal.vue'
+import SuccessModal from '@/components/SuccessModal.vue'
+import { useAppStore } from '@/stores/app'
+import { useAlertStore } from '@/stores/alerts'
+import { useModalStore } from '@/stores/modals'
 
-import { MapFactoryController } from './lib/map'
-import { MainMapControllerSymbol } from './symbols'
-import { useModalState } from './lib/hooks'
-import { useAppState } from './lib/appState'
-import { useAlertState } from './lib/useAlert'
+const appStore = useAppStore()
+const modalStore = useModalStore()
+const alertStore = useAlertStore()
 
-export default defineComponent({
-  name: 'App',
-  components: {
-    MapView,
-    AppAlert,
-    AboutModal,
-    ContactModal,
-    GettingStartedModal,
-    SafetyModal,
-    TutorialModal,
-    IosVersionModal,
-    ApiConfigModal,
-    CreateFactorySteps,
-    UpdateFactorySteps,
-    FactoryDetailPage
-  },
-  setup () {
-    const [modalState, modalActions] = useModalState()
-    const [appState, appActions] = useAppState()
-    const [alertState, alertActions] = useAlertState()
+if (typeof window !== 'undefined') {
+  ;(window as unknown as { openApiConfigModal?: () => void }).openApiConfigModal =
+    modalStore.openApiConfigModal
+}
 
-    // register global accessible map instance
-    provide(MainMapControllerSymbol, ref<MapFactoryController | null>(null))
-
-    // Note: API config modal functionality removed for simplification
-
-    const drawer = ref(false)
-
-    return {
-      appState,
-      alertState,
-      alertActions,
-      appActions,
-      modalState,
-      modalActions,
-      drawer
-    }
-  }
-})
+const isDesktop = useMediaQuery('(min-width: 960px)')
+const showHeader = computed(
+  () => appStore.isInitialState || (appStore.isEditFactoryMode && isDesktop.value),
+)
 </script>
 
-<style lang="scss">
-@import '~@/styles/index';
+<template>
+  <div class="flex h-full flex-col overflow-hidden">
+    <AppHeader v-if="showHeader" @open-menu="modalStore.toggleSidebar()" />
 
-@supports (-webkit-touch-callout: none) {
-  .v-application {
-    height: -webkit-fill-available;
-    overflow: hidden;
-  }
+    <main class="relative min-h-0 flex-1">
+      <MapView />
+      <CreateFactorySteps v-if="appStore.isCreateMode" />
+      <UpdateFactorySteps v-if="appStore.isEditMode" />
+      <FactoryDetailPage />
+    </main>
 
-  .v-application--wrap {
-    min-height: unset !important;
-    max-height: 100%;
-  }
-}
+    <AppAlert :alert="alertStore.alert" :dismiss="alertStore.dismissAlert" />
+    <AppSidebar :open="modalStore.sidebarOpen" @close="modalStore.closeSidebar()" />
 
-.app-sidebar {
-  .v-list-item--dense .v-list-item__title, .v-list-item--dense .v-list-item__subtitle, .v-list--dense .v-list-item .v-list-item__title, .v-list--dense .v-list-item .v-list-item__subtitle {
-    font-size: 16px;
-  }
-}
+    <AboutModal :open="modalStore.aboutModalOpen" :dismiss="modalStore.closeAboutModal" />
+    <ContactModal :open="modalStore.contactModalOpen" :dismiss="modalStore.closeContactModal" />
+    <GettingStartedModal
+      :open="modalStore.gettingStartedModalOpen"
+      :dismiss="modalStore.closeGettingStartedModal"
+    />
+    <SafetyModal :open="modalStore.safetyModalOpen" :dismiss="modalStore.closeSafetyModal" />
+    <TutorialModal :open="modalStore.tutorialModalOpen" :dismiss="modalStore.closeTutorialModal" />
+    <IOSVersionAlertModal
+      :open="modalStore.supportIOSVersionModalOpen"
+      :dismiss="modalStore.closesupportIOSVersionModal"
+    />
+    <ApiConfigModal :open="modalStore.apiConfigModalOpen" :dismiss="modalStore.closeApiConfigModal" />
 
-</style>
+    <SuccessModal :open="modalStore.createFactorySuccessModal" title="新增可疑工廠成功" />
+    <SuccessModal :open="modalStore.updateFactoryImageSuccessModal" title="補充工廠照片成功" />
+    <SuccessModal :open="modalStore.updateFactorySuccessModal" title="補充工廠資訊成功" />
+  </div>
+</template>

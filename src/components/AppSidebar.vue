@@ -1,151 +1,72 @@
-<template>
-  <div :class="{ base: true, open: value }" @click="close" data-label="sidebar-close">
-    <div :class="{ sidebar: true, open: value }">
-      <div class="close" @click="close" data-label="sidebar-close" />
-      <h1>主選單</h1>
-      <hr />
-      <ul>
-        <li v-for="(link,index) in links" :key="index">
-          <a @click.stop="onClick(link)" :data-label="`sidebar-${link.text}`" :href="getHref(link)" :target="getTarget(link)">{{ link.text }}</a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</template>
+<script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+import { useModalStore } from '@/stores/modals'
 
-<script>
-import { defineComponent } from 'vue'
-import { useModalState } from '../lib/hooks'
+const props = defineProps<{ open: boolean }>()
+const emit = defineEmits<{ close: [] }>()
 
-export default defineComponent({
-  name: 'AppSidebar',
-  props: {
-    value: {
-      type: Boolean,
-      required: true
-    }
-  },
-  setup (_, context) {
-    const [, modalActions] = useModalState()
-    const links = [
-      { text: '使用說明', action: modalActions.openTutorialModal },
-      { text: '安全須知', action: modalActions.openSafetyModal },
-      { text: '聯絡我們', action: modalActions.openContactModal },
-      { text: '常見問題', href: 'https://about.disfactory.tw/#question' },
-      { text: '關於回報系統', href: 'https://about.disfactory.tw' },
-      { text: '問題回報', href: 'https://airtable.com/shrUraKakZRpH52DO' }
-    ]
-    const close = () => {
-      context.emit('input', false)
-    }
+const modalStore = useModalStore()
 
-    return {
-      links,
-      close,
-      onClick: (link) => {
-        if (typeof link.action === 'function') {
-          link.action()
-        }
-      },
-      getHref: (link) => {
-        return link.href
-      },
-      getTarget: (link) => {
-        if (typeof link.href === 'string') {
-          return '_blank'
-        } else {
-          return null
-        }
-      }
-    }
-  }
-})
+type Item =
+  | { text: string; action: () => void }
+  | { text: string; href: string }
+  | { spacer: true }
+
+const items: Item[] = [
+  { text: '使用教學', action: modalStore.openTutorialModal },
+  { text: '安全須知', action: modalStore.openSafetyModal },
+  { text: '聯絡我們', action: modalStore.openContactModal },
+  { spacer: true },
+  { text: '關於回報系統', href: 'https://about.disfactory.tw' },
+  { text: '問題回報', href: 'https://airtable.com/shrUraKakZRpH52DO' },
+]
+
+const onKeydown = (event: KeyboardEvent) => {
+  if (props.open && event.key === 'Escape') emit('close')
+}
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onUnmounted(() => window.removeEventListener('keydown', onKeydown))
+
+const onClick = (item: Extract<Item, { action: () => void }>) => {
+  item.action()
+  emit('close')
+}
 </script>
 
-<style lang="scss" scoped>
-@import '~@/styles/utils';
+<template>
+  <div
+    class="fixed inset-0 z-[70] transition-opacity duration-300"
+    :class="open ? 'opacity-100' : 'pointer-events-none opacity-0'"
+  >
+    <div class="absolute inset-0 bg-black/45" @click="emit('close')" />
 
-.base {
-  position: fixed;
-  -webkit-overflow-scrolling: touch;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 9;
-  background-color: rgba(#000000, 0.4);
-  visibility: hidden;
-  opacity: 0;
-  transition: all 0.5s cubic-bezier(.4,0,.2,1);
-
-  .sidebar {
-    position: fixed;
-    -webkit-overflow-scrolling: touch;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 90%;
-    z-index: 10;
-    max-width: 400px;
-    color: #fff;
-    background-color: #6d8538;
-    padding: 60px 30px 20px 30px;
-    transform: translateX(100%);
-    opacity: 0;
-    transition: all 0.5s cubic-bezier(.4,0,.2,1);
-
-    > * {
-      margin: 16px 0;
-    }
-
-    .close {
-      @include close-button;
-      right: unset;
-      left: 30px;
-
-      &::before, &::after {
-        z-index: 11;
-        background: #fff;
-      }
-    }
-
-    h1 {
-      font-size: 36px;
-      line-height: 1.3;
-    }
-
-    hr {
-      border: none;
-      width: 60%;
-      height: 1px;
-      background-color: #ffffff;
-    }
-
-    ul {
-      padding: 0;
-      list-style: none;
-
-      li {
-        a {
-          color: #fff;
-          font-size: 24px;
-          line-height: 2;
-          text-decoration: none;
-          cursor: pointer;
-          user-select: none;
-        }
-      }
-    }
-  }
-
-  .sidebar.open {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.base.open {
-  visibility: visible;
-  opacity: 1;
-}
-</style>
+    <aside
+      class="absolute top-0 right-0 bottom-0 w-64 overflow-y-auto bg-white pt-[env(safe-area-inset-top)] shadow-xl transition-transform duration-300"
+      :class="open ? 'translate-x-0' : 'translate-x-full'"
+      aria-label="主選單"
+    >
+      <ul class="pt-2">
+        <li v-for="(item, index) in items" :key="index">
+          <div v-if="'spacer' in item" class="mx-4 my-2 border-t border-neutral-200" role="separator" />
+          <button
+            v-else-if="'action' in item"
+            type="button"
+            class="block w-full px-4 py-2.5 text-left text-base text-black transition hover:bg-black/5"
+            @click="onClick(item)"
+          >
+            {{ item.text }}
+          </button>
+          <a
+            v-else
+            :href="item.href"
+            target="_blank"
+            rel="noreferrer"
+            class="block w-full px-4 py-2.5 text-left text-base text-black transition hover:bg-black/5"
+          >
+            {{ item.text }}
+          </a>
+        </li>
+      </ul>
+    </aside>
+  </div>
+</template>
