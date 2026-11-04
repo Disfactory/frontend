@@ -1,22 +1,14 @@
-import Vue from 'vue'
+import './assets/main.css'
+
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
 import App from './App.vue'
-import CoolLightBox from 'vue-cool-lightbox'
+import router from './router'
 
-import './registerServiceWorker'
-import VueGtag from 'vue-gtag'
-import vuetify from './plugins/vuetify'
+const app = createApp(App)
 
-import 'vue-cool-lightbox/dist/vue-cool-lightbox.min.css'
+app.use(createPinia())
+app.use(router)
 
-Vue.config.productionTip = false
-Vue.use(CoolLightBox)
-
-Vue.use(VueGtag, {
-  config: { id: 'UA-154739393-1' },
-  enabled: process.env.NODE_ENV === 'production'
-})
-
-new Vue({
-  vuetify,
-  render: (h) => h(App)
-}).$mount('#app')
+app.mount('#app')
