@@ -1,6 +1,8 @@
 import { expect, type Page } from '@playwright/test'
 
-export const factory = {
+import type { FactoryData, ReportRecord } from '@/types'
+
+export const factory: FactoryData = {
   id: 'f1',
   display_number: 'A-001',
   lat: 24.09,
@@ -21,18 +23,23 @@ export const factory = {
   wont_fix: false,
 }
 
-export const records = Array.from({ length: 14 }, (_, index) => ({
+export const records: ReportRecord[] = Array.from({ length: 14 }, (_, index) => ({
   id: `record-${index}`,
   created_at: `2026-01-${String(index + 1).padStart(2, '0')}T00:00:00Z`,
   others: `第 ${index + 1} 筆工廠描述：這是一段用來讓詳細面板超出版面、驗證捲動行為的測試文字。`,
 }))
 
-export async function mockApi(page: Page) {
+export async function mockApi(
+  page: Page,
+  options: { factory?: FactoryData; records?: ReportRecord[] } = {},
+) {
+  const currentFactory = options.factory ?? factory
+  const currentRecords = options.records ?? records
   await page.route('**/server/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname
 
-    if (path.endsWith('/factories')) return route.fulfill({ json: [factory] })
-    if (path.endsWith('/factories/f1/report_records')) return route.fulfill({ json: records })
+    if (path.endsWith('/factories')) return route.fulfill({ json: [currentFactory] })
+    if (path.endsWith('/factories/f1/report_records')) return route.fulfill({ json: currentRecords })
     if (path.endsWith('/factories/f1/images')) {
       return route.fulfill({
         json: {
@@ -42,7 +49,7 @@ export async function mockApi(page: Page) {
         },
       })
     }
-    if (path.endsWith('/factories/f1')) return route.fulfill({ json: factory })
+    if (path.endsWith('/factories/f1')) return route.fulfill({ json: currentFactory })
     if (path.endsWith('/images')) return route.fulfill({ json: { token: 'token-1' } })
     if (path.endsWith('/upload')) {
       return route.fulfill({
@@ -72,8 +79,11 @@ export async function dismissIntro(page: Page) {
   await page.getByRole('button', { name: '我同意加入回報' }).click()
 }
 
-export async function openSharedFactory(page: Page) {
-  await mockApi(page)
+export async function openSharedFactory(
+  page: Page,
+  options: { factory?: FactoryData; records?: ReportRecord[] } = {},
+) {
+  await mockApi(page, options)
   await page.goto('/#map=16/120.48/24.09&factoryId=f1')
   await hideDevTools(page)
   await dismissIntro(page)

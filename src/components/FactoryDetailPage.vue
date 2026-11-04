@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { Camera, ChevronDown, ChevronLeft, ChevronRight, MapPin, Share2, X } from '@lucide/vue'
 import AppModal from './AppModal.vue'
@@ -14,6 +14,26 @@ const appStore = useAppStore()
 const isDesktop = useMediaQuery('(min-width: 960px)')
 
 const images = computed<FactoryImage[]>(() => appStore.factoryData?.images ?? [])
+const imageCarousel = ref<HTMLElement | null>(null)
+const canScrollCarouselLeft = ref(false)
+const canScrollCarouselRight = ref(false)
+
+const updateCarouselArrows = () => {
+  const el = imageCarousel.value
+  if (!el) return
+  canScrollCarouselLeft.value = el.scrollLeft > 1
+  canScrollCarouselRight.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+}
+
+const scrollCarousel = (direction: number) => {
+  imageCarousel.value?.scrollBy({ left: direction * 136, behavior: 'smooth' })
+}
+
+onMounted(updateCarouselArrows)
+watch(images, async () => {
+  await nextTick()
+  updateCarouselArrows()
+}, { deep: true })
 const lightboxIndex = ref<number | null>(null)
 const setLightboxIndex = (index: number) => {
   lightboxIndex.value = index
@@ -205,24 +225,54 @@ const lastUpdatedAt = computed(() => {
         </p>
       </div>
 
-      <div class="mt-4 flex gap-3 overflow-x-auto px-3 pb-2">
+      <div class="relative mt-4">
         <button
+          v-if="images.length > 0"
           type="button"
-          class="flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
-          @click="appStore.startUpdateFactoryImages()"
+          class="absolute top-0 left-0 z-10 flex h-[68px] w-[52px] items-center justify-center text-brand-gray transition disabled:opacity-30"
+          :disabled="!canScrollCarouselLeft"
+          aria-label="上一張工廠照片"
+          @click="scrollCarousel(-1)"
         >
-          <Camera class="size-5" />
-          補充照片
+          <ChevronLeft class="size-6" />
         </button>
         <button
-          v-for="(image, index) in images"
-          :key="image.id"
+          v-if="images.length > 0"
           type="button"
-          class="h-[68px] w-[120px] shrink-0 overflow-hidden rounded"
-          @click="setLightboxIndex(index)"
+          class="absolute top-0 right-0 z-10 flex h-[68px] w-[52px] items-center justify-center text-brand-gray transition disabled:opacity-30"
+          :disabled="!canScrollCarouselRight"
+          aria-label="下一張工廠照片"
+          @click="scrollCarousel(1)"
         >
-          <ImgurFallbackImage :src="image.url" class="h-full w-full object-cover" />
+          <ChevronRight class="size-6" />
         </button>
+
+        <div
+          ref="imageCarousel"
+          data-testid="image-carousel"
+          class="flex gap-4 overflow-x-auto pb-2 pl-[68px]"
+          @scroll="updateCarouselArrows"
+        >
+          <button
+            type="button"
+            data-testid="update-image-button"
+            class="flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
+            @click="appStore.startUpdateFactoryImages()"
+          >
+            <Camera class="size-5" />
+            補充照片
+          </button>
+          <button
+            v-for="(image, index) in images"
+            :key="image.id"
+            type="button"
+            data-testid="carousel-image"
+            class="h-[68px] w-[120px] shrink-0 overflow-hidden"
+            @click="setLightboxIndex(index)"
+          >
+            <ImgurFallbackImage :src="image.url" class="h-full w-full object-cover" />
+          </button>
+        </div>
       </div>
 
       <div class="mx-4 mt-4 mb-2">

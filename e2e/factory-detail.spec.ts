@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-import { dismissIntro, hideDevTools, mockApi, openSharedFactory } from './helpers'
+import { dismissIntro, factory, hideDevTools, mockApi, openSharedFactory } from './helpers'
 
 test.describe('factory detail on mobile', () => {
   test.use({ viewport: { width: 390, height: 844 } })
@@ -31,6 +31,32 @@ test.describe('factory detail on mobile', () => {
     })
     expect(await scroller.evaluate((el) => el.scrollTop)).toBeGreaterThan(0)
   })
+})
+
+test('matches the staging factory image carousel', async ({ page }) => {
+  const images = [1, 2, 3].map((index) => ({
+    id: `image-${index}`,
+    image_path: `https://example.com/photo-${index}.jpg`,
+    url: `https://example.com/photo-${index}.jpg`,
+  }))
+  await openSharedFactory(page, { factory: { ...factory, images } })
+
+  const update = page.getByTestId('update-image-button')
+  const updateBox = await update.boundingBox()
+  expect(updateBox).not.toBeNull()
+  expect(updateBox!.width).toBe(100)
+  expect(updateBox!.height).toBe(68)
+
+  const image = page.getByTestId('carousel-image').first()
+  const imageBox = await image.boundingBox()
+  expect(imageBox).not.toBeNull()
+  expect(imageBox!.width).toBe(120)
+  expect(imageBox!.height).toBe(68)
+  expect(await image.evaluate((el) => getComputedStyle(el).borderRadius)).toBe('0px')
+
+  const carousel = page.getByTestId('image-carousel')
+  await page.getByRole('button', { name: '下一張工廠照片' }).click()
+  await expect.poll(() => carousel.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0)
 })
 
 test.describe('factory detail on desktop', () => {
