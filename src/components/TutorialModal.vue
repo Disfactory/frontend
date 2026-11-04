@@ -72,7 +72,7 @@ const onDismiss = () => {
     <button
       v-if="isAdd || isUpdate"
       type="button"
-      class="absolute top-5 left-5 rounded p-1 text-brand hover:bg-brand/10"
+      class="absolute top-5 left-5 z-10 rounded p-1 text-brand hover:bg-brand/10"
       aria-label="返回"
       @click="openHome"
     >
