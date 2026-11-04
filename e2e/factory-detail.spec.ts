@@ -105,7 +105,7 @@ test.describe('factory detail on mobile', () => {
 test.describe('factory detail on desktop', () => {
   test.use({ viewport: { width: 1280, height: 800 } })
 
-  test('hides the detail panel when the supplement modal opens', async ({ page }) => {
+  test('keeps the detail panel and shows the supplement modal above it', async ({ page }) => {
     await openSharedFactory(page)
     await expect(page.getByText('其他工廠資訊')).toBeVisible()
 
@@ -113,9 +113,15 @@ test.describe('factory detail on desktop', () => {
 
     const panel = page.getByTestId('update-factory-panel')
     await expect(panel).toBeVisible()
+    await expect(page.locator('aside')).toBeVisible()
     await expect(panel.getByRole('heading', { name: '工廠描述' })).toBeVisible()
-    await expect(panel.getByRole('button', { name: '新增工廠描述' })).toBeVisible()
-    await expect(page.locator('aside')).toBeHidden()
+
+    // If the detail panel were on top, this fill/click would be intercepted.
+    await panel.getByPlaceholder('例：常常散發異味').fill('補充描述')
+    await expect(panel.getByRole('button', { name: '新增工廠描述' })).toBeEnabled()
+    await panel.getByRole('button', { name: '新增工廠描述' }).click()
+
+    await expect(page.getByRole('heading', { name: '補充工廠資訊成功', level: 3 })).toBeVisible()
   })
 })
 

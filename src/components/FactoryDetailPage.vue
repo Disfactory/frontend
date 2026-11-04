@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
 import { Camera, ChevronDown, ChevronLeft, ChevronRight, MapPin, Share2, X } from '@lucide/vue'
 import AppModal from './AppModal.vue'
 import ImgurFallbackImage from './ImgurFallbackImage.vue'
@@ -10,6 +11,7 @@ import { useAppStore } from '@/stores/app'
 import { getDisplayStatusText, type FactoryImage, type ReportRecord } from '@/types'
 
 const appStore = useAppStore()
+const isDesktop = useMediaQuery('(min-width: 960px)')
 
 const images = computed<FactoryImage[]>(() => appStore.factoryData?.images ?? [])
 const lightboxIndex = ref<number | null>(null)
@@ -138,11 +140,10 @@ const lastUpdatedAt = computed(() => {
 
 <template>
   <aside
-    v-if="appStore.factoryData && !appStore.isCreateMode && !appStore.isEditMode"
-    class="fixed inset-x-0 bottom-0 z-20 flex flex-col bg-white shadow-xl transition-transform duration-200 md:top-14 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
+    v-if="appStore.factoryData && !appStore.formPageOpen"
+    class="fixed inset-x-0 bottom-0 z-20 flex max-h-[calc(100%-56px)] flex-col bg-white shadow-xl transition-transform duration-200 md:top-14 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
     :class="[
-      'inset-x-0 translate-y-0',
-      full ? 'top-14' : 'top-[45%]',
+      full ? 'top-0 z-40 max-h-none md:top-14 md:z-20' : 'top-auto',
       full ? 'md:translate-x-0' : 'md:translate-x-full',
     ]"
   >
@@ -162,21 +163,6 @@ const lastUpdatedAt = computed(() => {
       data-testid="detail-scroller"
       class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
     >
-      <div class="flex items-center justify-between bg-white px-4 pt-3 pb-2 md:hidden">
-        <div class="flex items-center gap-1 text-sm text-brand-dark">
-          <MapPin class="size-4" :style="{ color: statusColor ?? undefined }" />
-          {{ factoryStatusText }}
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" class="rounded p-2 hover:bg-black/5" aria-label="分享工廠" @click="copyToClipboard">
-            <Share2 class="size-5" />
-          </button>
-          <button type="button" class="rounded p-2 hover:bg-black/5" aria-label="關閉" @click="appStore.collapseFactoryDetail()">
-            <X class="size-5" />
-          </button>
-        </div>
-      </div>
-
       <div v-if="showCopiedMessage" class="flex h-10 items-center justify-center bg-brand text-sm text-white">
         已複製連結
       </div>
@@ -193,6 +179,19 @@ const lastUpdatedAt = computed(() => {
             <Share2 class="mr-1 inline size-4" />
             {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
           </button>
+          <span class="flex items-center gap-2 md:hidden">
+            <button type="button" class="rounded p-1 hover:bg-black/5" aria-label="分享工廠" @click="copyToClipboard">
+              <Share2 class="size-5" />
+            </button>
+            <button
+              type="button"
+              class="rounded p-1 hover:bg-black/5"
+              aria-label="關閉"
+              @click="appStore.collapseFactoryDetail()"
+            >
+              <X class="size-5" />
+            </button>
+          </span>
         </div>
 
         <p class="mb-2 text-2xl text-brand-dark">
@@ -229,7 +228,7 @@ const lastUpdatedAt = computed(() => {
         <h3 class="mb-1 text-base font-medium text-brand">地段 / 地址</h3>
         <p class="mb-5">{{ factoryAddressAndLandcode }}</p>
 
-        <div class="mb-5">
+        <div v-if="full || isDesktop" class="mb-5">
           <h3 class="mb-1 text-base font-medium text-brand">經緯度</h3>
           <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
           <p class="text-xs text-brand-gray-light">以上經緯度版本為 WGS84</p>
@@ -240,7 +239,17 @@ const lastUpdatedAt = computed(() => {
           <p class="mb-5">{{ source }}</p>
         </template>
 
-        <hr class="my-4 border-brand-line" />
+        <hr v-if="full || isDesktop" class="my-4 border-brand-line" />
+
+        <button
+          v-if="!full"
+          type="button"
+          data-testid="expand-detail"
+          class="mb-4 flex items-center gap-1 text-sm font-medium text-brand md:hidden"
+          @click="appStore.expandFactoryDetail()"
+        >
+          顯示更多資訊 <ChevronDown class="size-4" />
+        </button>
 
         <div v-if="full">
           <h2 class="mb-5 text-xl font-medium text-brand-dark">其他工廠資訊</h2>
@@ -289,15 +298,6 @@ const lastUpdatedAt = computed(() => {
       </div>
     </div>
 
-    <button
-      v-if="!full"
-      type="button"
-      data-testid="expand-detail"
-      class="shrink-0 border-t border-brand-line bg-white px-4 py-3 text-sm font-medium text-brand md:hidden"
-      @click="appStore.expandFactoryDetail()"
-    >
-      <span class="inline-flex items-center gap-1">顯示更多資訊 <ChevronDown class="size-4" /></span>
-    </button>
   </aside>
 
   <AppModal

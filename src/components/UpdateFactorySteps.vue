@@ -126,7 +126,7 @@ const factoryTypeItems: Array<{ text: string; value?: string }> = [...FACTORY_TY
 </script>
 
 <template>
-  <div class="pointer-events-none absolute inset-0 z-30">
+  <div class="pointer-events-none absolute inset-0 z-50">
     <header class="pointer-events-auto flex h-14 items-center justify-between border-b bg-white px-3 text-brand-dark">
       <div class="w-10" />
       <h1 class="text-base font-medium">{{ appStore.isEditImagesMode ? '補充照片' : updateFormAppTitle }}</h1>
@@ -154,7 +154,7 @@ const factoryTypeItems: Array<{ text: string; value?: string }> = [...FACTORY_TY
     <div
       v-else-if="appStore.isEditFactoryMode"
       data-testid="update-factory-panel"
-      class="pointer-events-auto absolute top-20 left-1/2 z-40 w-[calc(100%-2rem)] max-w-[395px] -translate-x-1/2 rounded-lg bg-white p-5 shadow-xl"
+      class="pointer-events-auto absolute top-20 left-1/2 z-50 w-[calc(100%-2rem)] max-w-[395px] -translate-x-1/2 rounded-lg bg-white p-5 shadow-xl"
     >
       <h3 class="mb-3 text-lg font-medium text-brand-dark">{{ updateFormTitle }}</h3>
 
