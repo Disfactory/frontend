@@ -231,6 +231,14 @@ export class MapFactoryController {
 
   setFactoryStatusFilter(filters: FactoryDisplayStatusType[]) {
     this.appliedFilters = filters
+
+    this.mapInstance.map.getLayers().forEach((layer) => {
+      const status = layer.get('factoryStatus') as FactoryDisplayStatusType | undefined
+      if (status === undefined) return
+      const comparable = status === 'default' ? status : (Number(status) as FactoryDisplayStatusType)
+      layer.setVisible(filters.includes(comparable))
+    })
+
     this.updateFactoriesFeatureStyle()
   }
 
