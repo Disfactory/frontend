@@ -41,8 +41,8 @@ function setApi(val: CarouselApi | undefined) {
   <AppModal :open="open" :dismiss="dismiss" title="安全須知" centered class="max-w-[390px]">
     <div class="page-prose relative select-none" data-testid="safety-carousel">
       <Carousel :opts="{ loop: true }" @init-api="setApi">
-        <CarouselContent>
-          <CarouselItem v-for="slide in slides" :key="slide.title">
+        <CarouselContent class="-ml-0">
+          <CarouselItem v-for="slide in slides" :key="slide.title" class="pl-0">
             <div class="min-h-[380px] pb-10">
               <h1 class="!mb-4 !border-none text-xl !text-brand">{{ slide.title }}</h1>
               <img

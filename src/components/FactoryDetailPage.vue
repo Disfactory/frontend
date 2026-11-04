@@ -368,8 +368,8 @@ const lastUpdatedAt = computed(() => {
   >
     <div data-testid="lightbox-content" class="relative select-none">
       <Carousel :opts="{ startIndex: lightboxIndex ?? 0, loop: true }" @init-api="setLightboxApi">
-        <CarouselContent>
-          <CarouselItem v-for="(image, i) in images" :key="image.id">
+        <CarouselContent class="-ml-0">
+          <CarouselItem v-for="(image, i) in images" :key="image.id" class="pl-0">
             <img
               :src="image.url"
               :alt="`工廠照片 ${i + 1}`"

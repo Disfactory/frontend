@@ -101,8 +101,8 @@ const onDismiss = () => {
 
       <div v-if="isAdd" class="relative select-none">
         <Carousel :opts="{ loop: true }" @init-api="setAddApi">
-          <CarouselContent>
-            <CarouselItem v-for="(image, i) in addImages" :key="image">
+          <CarouselContent class="-ml-0">
+            <CarouselItem v-for="(image, i) in addImages" :key="image" class="pl-0">
               <div>
                 <h2 class="text-center !text-brand">新增違章工廠 ({{ i + 1 }}/7)</h2>
                 <img
@@ -138,8 +138,8 @@ const onDismiss = () => {
 
       <div v-if="isUpdate" class="relative select-none">
         <Carousel :opts="{ loop: true }" @init-api="setUpdateApi">
-          <CarouselContent>
-            <CarouselItem v-for="(image, i) in updateImages" :key="image">
+          <CarouselContent class="-ml-0">
+            <CarouselItem v-for="(image, i) in updateImages" :key="image" class="pl-0">
               <div>
                 <h2 class="text-center !text-brand">補充工廠資訊 ({{ i + 1 }}/4)</h2>
                 <img
