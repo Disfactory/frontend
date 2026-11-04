@@ -3,7 +3,9 @@ import { ref, computed } from 'vue'
 const API_BASE_URL_KEY = 'api-base-url'
 
 // In development we proxy `/server` to staging via Vite.
-const defaultBaseURL = import.meta.env.DEV ? '/server/api' : import.meta.env.VITE_BASE_URL
+const defaultBaseURL = import.meta.env.DEV
+  ? '/server/api'
+  : (import.meta.env.VITE_BASE_URL || 'https://api.disfactory.tw/api')
 
 const storedBaseURL = typeof window !== 'undefined' ? (window.localStorage?.getItem(API_BASE_URL_KEY) ?? null) : null
 const customBaseURL = ref<string | null>(storedBaseURL)
