@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <AppModal :open="open" :title="title" class="max-w-[305px]" :show-close-button="false">
+  <AppModal :open="open" :title="title" centered class="max-w-[305px]" :show-close-button="false">
     <div class="flex flex-col items-center gap-3 py-4 text-center">
       <CheckCircle2 class="size-20 text-brand" />
       <h3 class="text-xl font-medium text-brand-dark">{{ title }}</h3>

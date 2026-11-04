@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="dismiss" title="關於回報系統" class="max-w-[640px]">
+  <AppModal :open="open" :dismiss="dismiss" title="關於回報系統" top="24px" class="max-w-[640px]">
     <div class="page-prose">
       <h3 class="mb-4 text-xl font-medium text-brand">關於回報系統</h3>
       <p>農地違章工廠舉報系統為協助民眾回報揭露農地違章工廠資訊，並非實際完成舉報。</p>

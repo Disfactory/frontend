@@ -38,7 +38,7 @@ const onDismiss = () => {
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="onDismiss" title="使用說明" class="max-w-[640px]">
+  <AppModal :open="open" :dismiss="onDismiss" title="使用說明" top="24px" class="max-w-[640px]">
     <button
       v-if="isAdd || isUpdate"
       type="button"
@@ -69,73 +69,75 @@ const onDismiss = () => {
         </button>
       </div>
 
-      <div v-if="isAdd">
+      <div v-if="isAdd" class="relative">
         <h2 class="text-center !text-brand">新增違章工廠 ({{ addIndex + 1 }}/7)</h2>
         <img
           :src="addImages[addIndex]"
           :alt="`新增步驟 ${addIndex + 1}`"
           class="mx-auto max-h-[65vh] object-contain"
         />
-        <div class="mt-4 flex items-center justify-between">
+        <button
+          type="button"
+          class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+          aria-label="上一張"
+          @click="addIndex = (addIndex - 1 + addImages.length) % addImages.length"
+        >
+          <ChevronLeft class="size-6" />
+        </button>
+        <button
+          type="button"
+          class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+          aria-label="下一張"
+          @click="addIndex = (addIndex + 1) % addImages.length"
+        >
+          <ChevronRight class="size-6" />
+        </button>
+        <div class="mt-4 flex justify-center gap-1.5">
           <button
+            v-for="(_, i) in addImages"
+            :key="i"
             type="button"
-            class="rounded p-2 text-brand hover:bg-brand/10"
-            @click="addIndex = (addIndex - 1 + addImages.length) % addImages.length"
-          >
-            <ChevronLeft class="size-6" />
-          </button>
-          <div class="flex gap-1.5">
-            <button
-              v-for="(_, i) in addImages"
-              :key="i"
-              type="button"
-              class="size-2 rounded-full"
-              :class="i === addIndex ? 'bg-brand' : 'bg-[#e3e3e3]'"
-              @click="addIndex = i"
-            />
-          </div>
-          <button
-            type="button"
-            class="rounded p-2 text-brand hover:bg-brand/10"
-            @click="addIndex = (addIndex + 1) % addImages.length"
-          >
-            <ChevronRight class="size-6" />
-          </button>
+            class="size-2 rounded-full"
+            :class="i === addIndex ? 'bg-brand' : 'bg-[#e3e3e3]'"
+            :aria-label="`第 ${i + 1} 頁`"
+            @click="addIndex = i"
+          />
         </div>
       </div>
 
-      <div v-if="isUpdate">
+      <div v-if="isUpdate" class="relative">
         <h2 class="text-center !text-brand">補充工廠資訊 ({{ updateIndex + 1 }}/4)</h2>
         <img
           :src="updateImages[updateIndex]"
           :alt="`補充步驟 ${updateIndex + 1}`"
           class="mx-auto max-h-[65vh] object-contain"
         />
-        <div class="mt-4 flex items-center justify-between">
+        <button
+          type="button"
+          class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+          aria-label="上一張"
+          @click="updateIndex = (updateIndex - 1 + updateImages.length) % updateImages.length"
+        >
+          <ChevronLeft class="size-6" />
+        </button>
+        <button
+          type="button"
+          class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+          aria-label="下一張"
+          @click="updateIndex = (updateIndex + 1) % updateImages.length"
+        >
+          <ChevronRight class="size-6" />
+        </button>
+        <div class="mt-4 flex justify-center gap-1.5">
           <button
+            v-for="(_, i) in updateImages"
+            :key="i"
             type="button"
-            class="rounded p-2 text-brand hover:bg-brand/10"
-            @click="updateIndex = (updateIndex - 1 + updateImages.length) % updateImages.length"
-          >
-            <ChevronLeft class="size-6" />
-          </button>
-          <div class="flex gap-1.5">
-            <button
-              v-for="(_, i) in updateImages"
-              :key="i"
-              type="button"
-              class="size-2 rounded-full"
-              :class="i === updateIndex ? 'bg-brand' : 'bg-[#e3e3e3]'"
-              @click="updateIndex = i"
-            />
-          </div>
-          <button
-            type="button"
-            class="rounded p-2 text-brand hover:bg-brand/10"
-            @click="updateIndex = (updateIndex + 1) % updateImages.length"
-          >
-            <ChevronRight class="size-6" />
-          </button>
+            class="size-2 rounded-full"
+            :class="i === updateIndex ? 'bg-brand' : 'bg-[#e3e3e3]'"
+            :aria-label="`第 ${i + 1} 頁`"
+            @click="updateIndex = i"
+          />
         </div>
       </div>
     </div>

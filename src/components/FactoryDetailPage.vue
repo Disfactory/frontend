@@ -142,9 +142,9 @@ const lastUpdatedAt = computed(() => {
   <aside
     v-if="appStore.factoryData && !appStore.formPageOpen"
     data-testid="detail-panel"
-    class="fixed inset-x-0 bottom-0 z-20 flex max-h-[calc(100%-56px)] flex-col bg-white shadow-xl transition-transform duration-200 md:top-14 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
+    class="fixed inset-x-0 bottom-0 z-20 flex max-h-[calc(100%-56px)] flex-col bg-white shadow-xl transition-transform duration-200 md:top-16 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
     :class="[
-      full ? 'top-0 z-40 max-h-none md:top-14 md:z-20' : 'top-auto',
+      full ? 'top-0 z-40 max-h-none md:top-16 md:z-20' : 'top-auto',
       full ? 'md:translate-x-0' : 'md:translate-x-full',
     ]"
   >
@@ -304,6 +304,7 @@ const lastUpdatedAt = computed(() => {
   <AppModal
     :open="lightboxIndex !== null"
     title="工廠照片"
+    centered
     :dismiss="() => (lightboxIndex = null)"
     class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
   >

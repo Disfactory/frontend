@@ -28,9 +28,9 @@ const prev = () => {
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="dismiss" title="安全須知" class="max-w-[390px]">
-    <div class="page-prose">
-      <div class="min-h-[380px]">
+  <AppModal :open="open" :dismiss="dismiss" title="安全須知" centered class="max-w-[390px]">
+    <div class="page-prose relative">
+      <div class="min-h-[380px] pb-10">
         <h1 class="!mb-4 !border-none text-xl !text-brand">{{ current.title }}</h1>
         <img
           v-if="current.image"
@@ -40,24 +40,32 @@ const prev = () => {
         />
         <p class="text-center leading-relaxed">{{ current.text }}</p>
       </div>
-      <div class="mt-4 flex items-center justify-between">
-        <button type="button" class="rounded p-2 text-brand hover:bg-brand/10" @click="prev">
-          <ChevronLeft class="size-6" />
-        </button>
-        <div class="flex gap-1.5">
-          <button
-            v-for="(_, i) in slides"
-            :key="i"
-            type="button"
-            class="size-2 rounded-full"
-            :class="i === index ? 'bg-brand' : 'bg-[#e3e3e3]'"
-            :aria-label="`第 ${i + 1} 頁`"
-            @click="index = i"
-          />
-        </div>
-        <button type="button" class="rounded p-2 text-brand hover:bg-brand/10" @click="next">
-          <ChevronRight class="size-6" />
-        </button>
+      <button
+        type="button"
+        class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+        aria-label="上一張"
+        @click="prev"
+      >
+        <ChevronLeft class="size-6" />
+      </button>
+      <button
+        type="button"
+        class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+        aria-label="下一張"
+        @click="next"
+      >
+        <ChevronRight class="size-6" />
+      </button>
+      <div class="absolute inset-x-0 bottom-0 flex justify-center gap-1.5">
+        <button
+          v-for="(_, i) in slides"
+          :key="i"
+          type="button"
+          class="size-2 rounded-full"
+          :class="i === index ? 'bg-brand' : 'bg-[#e3e3e3]'"
+          :aria-label="`第 ${i + 1} 頁`"
+          @click="index = i"
+        />
       </div>
     </div>
   </AppModal>

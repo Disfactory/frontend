@@ -14,7 +14,7 @@ const agree = () => {
 </script>
 
 <template>
-  <AppModal :open="open" :show-close-button="false" title="歡迎來到農地違章工廠回報系統" class="max-w-[640px]">
+  <AppModal :open="open" :show-close-button="false" title="歡迎來到農地違章工廠回報系統" top="24px" class="max-w-[640px]">
     <div class="page-prose">
       <h3 class="mb-6 text-center text-lg font-normal text-brand">
         歡迎來到<b>農地違章工廠回報系統！</b>

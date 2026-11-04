@@ -9,6 +9,8 @@ const props = withDefaults(
     class?: string
     title?: string
     description?: string
+    top?: string
+    centered?: boolean
   }>(),
   {
     open: false,
@@ -17,6 +19,8 @@ const props = withDefaults(
     class: '',
     title: '對話框',
     description: ' ',
+    top: '90px',
+    centered: false,
   },
 )
 
@@ -30,9 +34,13 @@ const handleOpenChange = (open: boolean) => {
     <DialogContent
       :show-close-button="showCloseButton"
       :class="[
-        'top-[90px] max-h-[calc(100dvh-120px)] w-[calc(100%-2rem)] max-w-[calc(100%-2rem)] translate-y-0 overflow-auto rounded-md border-2 border-brand bg-white p-6 sm:max-w-[calc(100%-2rem)]',
+        'max-h-[calc(100dvh-48px)] w-[calc(100%-2rem)] overflow-auto rounded-md border-2 border-brand bg-white p-6',
         props.class,
       ]"
+      :style="{
+        top: centered ? '50%' : top,
+        transform: centered ? 'translate(-50%, -50%)' : 'translate(-50%, 0)',
+      }"
     >
       <DialogTitle class="sr-only">{{ title }}</DialogTitle>
       <DialogDescription class="sr-only">{{ description }}</DialogDescription>

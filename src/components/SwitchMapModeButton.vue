@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { onClickOutside } from '@vueuse/core'
-import { ChevronDown } from '@lucide/vue'
 import { BASE_MAP, BASE_MAP_NAME } from '@/lib/map'
 import { useMapStore } from '@/stores/map'
 
@@ -15,10 +14,6 @@ const mapModes = [BASE_MAP.SATELITE, BASE_MAP.OSM, BASE_MAP.TAIWAN, BASE_MAP.PRO
   type,
   name: BASE_MAP_NAME[type],
 }))
-
-const currentMapModeName = computed(
-  () => mapModes.find((mode) => mode.type === mapStore.currentMapMode)?.name ?? mapModes[0]?.name,
-)
 
 const setMapMode = (mode: BASE_MAP) => {
   mapStore.changeBaseMap(mode)
@@ -38,14 +33,13 @@ onClickOutside(root, () => {
       :class="isInSheet ? 'p-0' : 'rounded-full bg-white px-3 py-2 shadow-md'"
       @click="isOpen = !isOpen"
     >
-      切換地圖模式 • {{ currentMapModeName }}
-      <ChevronDown class="size-4" :class="{ 'rotate-180': isOpen }" />
+      切換地圖模式 •
     </button>
 
     <div
       v-if="isOpen"
       class="mt-2 w-full rounded-lg bg-white p-2 shadow-xl"
-      :class="isInSheet ? 'border' : 'absolute top-full left-0 z-30 w-48'"
+      :class="isInSheet ? '' : 'absolute top-full left-0 z-30 w-48'"
     >
       <button
         v-for="mode in mapModes"

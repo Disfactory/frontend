@@ -60,7 +60,7 @@
 :root {
   --radius: 0.375rem;
 
-  --brand: #6e8501;
+  --brand: #697f01;
   --brand-dark: #364516;
   --brand-light: #99a639;
   --brand-line: #eaf3bf;
@@ -75,7 +75,7 @@
   --card-foreground: #000000;
   --popover: #ffffff;
   --popover-foreground: #000000;
-  --primary: #6e8501;
+  --primary: #697f01;
   --primary-foreground: #ffffff;
   --secondary: #f5f5f5;
   --secondary-foreground: #364516;
@@ -87,7 +87,7 @@
   --destructive-foreground: #ffffff;
   --border: #e5e5e5;
   --input: #99a639;
-  --ring: #6e8501;
+  --ring: #697f01;
 
   --chart-1: #6e8501;
   --chart-2: #447287;
@@ -97,7 +97,7 @@
 
   --sidebar: #ffffff;
   --sidebar-foreground: #000000;
-  --sidebar-primary: #6e8501;
+  --sidebar-primary: #697f01;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #eaf3bf;
   --sidebar-accent-foreground: #364516;

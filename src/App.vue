@@ -24,6 +24,11 @@ const appStore = useAppStore()
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
 
+if (typeof window !== 'undefined') {
+  ;(window as unknown as { openApiConfigModal?: () => void }).openApiConfigModal =
+    modalStore.openApiConfigModal
+}
+
 const isDesktop = useMediaQuery('(min-width: 960px)')
 const showHeader = computed(
   () => appStore.isInitialState || (appStore.isEditFactoryMode && isDesktop.value),
