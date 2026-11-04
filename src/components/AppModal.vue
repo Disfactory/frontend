@@ -7,6 +7,7 @@ const props = withDefaults(
     dismiss?: () => void
     showCloseButton?: boolean
     class?: string
+    overlayClass?: string
     title?: string
     description?: string
     top?: string
@@ -17,6 +18,7 @@ const props = withDefaults(
     dismiss: undefined,
     showCloseButton: true,
     class: '',
+    overlayClass: '',
     title: '對話框',
     description: ' ',
     top: '90px',
@@ -33,6 +35,7 @@ const handleOpenChange = (open: boolean) => {
   <Dialog :open="open" @update:open="handleOpenChange">
     <DialogContent
       :show-close-button="showCloseButton"
+      :overlay-class="overlayClass"
       :class="[
         'max-h-[calc(100dvh-48px)] w-[calc(100%-2rem)] overflow-auto rounded-md border-2 border-brand bg-white p-6',
         props.class,

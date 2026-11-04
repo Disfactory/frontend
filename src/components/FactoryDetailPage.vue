@@ -225,38 +225,28 @@ const lastUpdatedAt = computed(() => {
         </p>
       </div>
 
-      <div class="relative mt-4">
+      <div class="mt-4 flex">
         <button
           v-if="images.length > 0"
           type="button"
-          class="absolute top-0 left-0 z-10 flex h-[68px] w-[52px] items-center justify-center text-brand-gray transition disabled:opacity-30"
+          class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
           :disabled="!canScrollCarouselLeft"
           aria-label="上一張工廠照片"
           @click="scrollCarousel(-1)"
         >
           <ChevronLeft class="size-6" />
         </button>
-        <button
-          v-if="images.length > 0"
-          type="button"
-          class="absolute top-0 right-0 z-10 flex h-[68px] w-[52px] items-center justify-center text-brand-gray transition disabled:opacity-30"
-          :disabled="!canScrollCarouselRight"
-          aria-label="下一張工廠照片"
-          @click="scrollCarousel(1)"
-        >
-          <ChevronRight class="size-6" />
-        </button>
 
         <div
           ref="imageCarousel"
           data-testid="image-carousel"
-          class="flex gap-4 overflow-x-auto pb-2 pl-[68px]"
+          class="flex min-w-0 flex-1 gap-4 overflow-x-auto"
           @scroll="updateCarouselArrows"
         >
           <button
             type="button"
             data-testid="update-image-button"
-            class="flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
+            class="ml-4 flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
             @click="appStore.startUpdateFactoryImages()"
           >
             <Camera class="size-5" />
@@ -273,6 +263,17 @@ const lastUpdatedAt = computed(() => {
             <ImgurFallbackImage :src="image.url" class="h-full w-full object-cover" />
           </button>
         </div>
+
+        <button
+          v-if="images.length > 0"
+          type="button"
+          class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
+          :disabled="!canScrollCarouselRight"
+          aria-label="下一張工廠照片"
+          @click="scrollCarousel(1)"
+        >
+          <ChevronRight class="size-6" />
+        </button>
       </div>
 
       <div class="mx-4 mt-4 mb-2">
@@ -356,6 +357,7 @@ const lastUpdatedAt = computed(() => {
     title="工廠照片"
     centered
     :dismiss="() => (lightboxIndex = null)"
+    overlay-class="bg-[rgba(30,30,30,0.9)]"
     class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
   >
     <div class="relative">

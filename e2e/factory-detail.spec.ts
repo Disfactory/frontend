@@ -57,6 +57,13 @@ test('matches the staging factory image carousel', async ({ page }) => {
   const carousel = page.getByTestId('image-carousel')
   await page.getByRole('button', { name: '下一張工廠照片' }).click()
   await expect.poll(() => carousel.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0)
+
+  await image.click()
+  const overlay = page.locator('[data-slot="dialog-overlay"]')
+  await expect(overlay).toBeVisible()
+  expect(await overlay.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
+    'rgba(30, 30, 30, 0.9)',
+  )
 })
 
 test.describe('factory detail on desktop', () => {
