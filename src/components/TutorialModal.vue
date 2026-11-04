@@ -79,7 +79,7 @@ const onDismiss = () => {
       <ArrowLeft class="size-6" />
     </button>
 
-    <div class="page-prose">
+    <div class="page-prose min-w-0">
       <div v-show="isHome">
         <h2>使用說明</h2>
         <p>如果系統無法讀取你的位置請至手機系統設定開啟位置權限。</p>
@@ -108,7 +108,7 @@ const onDismiss = () => {
                 <img
                   :src="image"
                   :alt="`新增步驟 ${i + 1}`"
-                  class="mx-auto max-h-[65vh] object-contain"
+                  class="mx-auto max-h-[65vh] max-w-full object-contain"
                   draggable="false"
                 />
               </div>
@@ -145,7 +145,7 @@ const onDismiss = () => {
                 <img
                   :src="image"
                   :alt="`補充步驟 ${i + 1}`"
-                  class="mx-auto max-h-[65vh] object-contain"
+                  class="mx-auto max-h-[65vh] max-w-full object-contain"
                   draggable="false"
                 />
               </div>

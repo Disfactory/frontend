@@ -366,7 +366,7 @@ const lastUpdatedAt = computed(() => {
     overlay-class="bg-[rgba(30,30,30,0.9)]"
     class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
   >
-    <div data-testid="lightbox-content" class="relative select-none">
+    <div data-testid="lightbox-content" class="relative min-w-0 select-none">
       <Carousel :opts="{ startIndex: lightboxIndex ?? 0, loop: true }" @init-api="setLightboxApi">
         <CarouselContent class="-ml-0">
           <CarouselItem v-for="(image, i) in images" :key="image.id" class="pl-0">
