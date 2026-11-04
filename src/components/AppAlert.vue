@@ -10,7 +10,7 @@ defineProps<{
 <template>
   <div
     v-if="alert"
-    class="fixed inset-x-0 bottom-0 z-[80] flex items-start gap-4 bg-black/85 px-6 pt-6 pb-5 text-white"
+    class="fixed inset-x-0 bottom-0 z-[80] flex items-start gap-4 bg-black/85 px-6 pt-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-white"
   >
     <AlertCircle class="mt-0.5 size-6 shrink-0 text-white" />
     <div class="min-w-0 flex-1">

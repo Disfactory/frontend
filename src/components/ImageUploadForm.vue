@@ -128,7 +128,7 @@ const onSubmit = () => {
       <h3 class="mt-7 mb-2 text-lg font-medium text-brand">聯絡方式（email 或電話）</h3>
       <AppTextField v-model="contact" placeholder="例：abc@email.com、0920-123456" />
 
-      <div class="fixed inset-x-0 bottom-0 flex justify-center bg-white px-4 py-3">
+      <div class="fixed inset-x-0 bottom-0 flex justify-center bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <AppButton class="max-w-[345px]" :disabled="!valid" @click="onSubmit">
           {{ submitText || '下一步' }}
         </AppButton>

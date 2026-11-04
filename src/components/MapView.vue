@@ -200,7 +200,7 @@ onUnmounted(() => {
       class="pointer-events-none absolute top-1/2 left-1/2 z-10 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white bg-brand-red shadow"
     />
 
-    <div v-if="!appStore.selectFactoryMode" class="absolute inset-x-0 bottom-5 z-10 flex justify-center">
+    <div v-if="!appStore.selectFactoryMode" class="absolute inset-x-0 bottom-[calc(1.25rem+env(safe-area-inset-bottom))] z-10 flex justify-center">
       <button
         type="button"
         class="rounded-full bg-brand px-9 py-3 text-lg font-medium text-white shadow-lg transition hover:bg-brand/90"

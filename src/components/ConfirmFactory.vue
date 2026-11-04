@@ -117,7 +117,7 @@ const typeValue = computed({
       <h3 class="mt-5 mb-2 text-lg font-medium text-brand">工廠類型</h3>
       <AppSelect v-model="typeValue" :items="factoryTypeItems" placeholder="未選擇" />
 
-      <div class="fixed inset-x-0 bottom-0 flex justify-center bg-white px-4 py-3">
+      <div class="fixed inset-x-0 bottom-0 flex justify-center bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <AppButton class="max-w-[345px]" @click="submit">確認送出</AppButton>
       </div>
     </div>

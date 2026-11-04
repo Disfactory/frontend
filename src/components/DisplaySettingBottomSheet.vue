@@ -75,7 +75,7 @@ const isLUIMapVisible = computed({
       <div class="absolute inset-0 bg-black/45" @click="isOpen = false" />
       <div
         data-testid="display-settings-sheet"
-        class="absolute inset-x-0 bottom-0 bg-white px-4 pt-2 pb-6 shadow-2xl transition-transform duration-300 ease-out"
+        class="absolute inset-x-0 bottom-0 bg-white px-4 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl transition-transform duration-300 ease-out"
         :class="isOpen ? 'translate-y-0' : 'translate-y-full'"
         @click.stop
       >
