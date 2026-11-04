@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="dismiss" class="max-w-[640px]">
+  <AppModal :open="open" :dismiss="dismiss" title="iOS 版本提醒" class="max-w-[640px]">
     <div class="page-prose">
       <h3 class="text-xl leading-relaxed font-medium text-brand">
         ⚠️ 你的手機無法新增可疑工廠

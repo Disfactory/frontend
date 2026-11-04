@@ -172,7 +172,7 @@ const factoryTypeItems: Array<{ text: string; value?: string }> = [...FACTORY_TY
       </AppButton>
     </div>
 
-    <AppModal :open="discardDialog" :dismiss="() => (discardDialog = false)" class="max-w-[290px]">
+    <AppModal :open="discardDialog" :dismiss="() => (discardDialog = false)" :title="appStore.isEditImagesMode ? '放棄補充照片' : '放棄編輯'" class="max-w-[290px]">
       <template v-if="appStore.isEditImagesMode">
         <h3 class="mb-2 text-lg font-medium">補充照片尚未完成</h3>
         <p class="mb-4 text-sm">放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片。</p>

@@ -35,7 +35,7 @@ const resetToDefault = () => {
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="dismiss" class="max-w-[500px]">
+  <AppModal :open="open" :dismiss="dismiss" title="API 設定" class="max-w-[500px]">
     <div class="page-prose">
       <h3 class="text-xl font-medium text-brand">API 設定</h3>
       <label class="mt-4 mb-2 block font-bold">API 基礎網址</label>

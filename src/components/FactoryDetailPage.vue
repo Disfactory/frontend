@@ -297,6 +297,7 @@ const lastUpdatedAt = computed(() => {
 
   <AppModal
     :open="lightboxIndex !== null"
+    title="工廠照片"
     :dismiss="() => (lightboxIndex = null)"
     class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
   >

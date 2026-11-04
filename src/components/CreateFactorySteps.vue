@@ -272,7 +272,7 @@ const submitFactory = async () => {
       @update:form-state="Object.assign(formState, $event)"
     />
 
-    <AppModal :open="discardDialog" :dismiss="() => (discardDialog = false)" class="max-w-[290px]">
+    <AppModal :open="discardDialog" :dismiss="() => (discardDialog = false)" title="放棄新增可疑工廠嗎？" class="max-w-[290px]">
       <h3 class="mb-2 text-lg font-medium text-brand-dark">放棄新增可疑工廠嗎？</h3>
       <p class="mb-4 text-sm">放棄新增可疑工廠時，你將遺失所有已輸入的資料。下次需重新填寫。</p>
       <AppButton @click="discardDialog = false">繼續填寫資料</AppButton>

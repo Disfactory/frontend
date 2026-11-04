@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="dismiss" class="max-w-[640px]">
+  <AppModal :open="open" :dismiss="dismiss" title="聯絡我們" class="max-w-[640px]">
     <div class="page-prose text-center">
       <img width="137" src="/images/cet-logo.png" alt="Citizen of the Earth Taiwan" class="mx-auto" />
       <h3 class="mt-6 text-xl leading-relaxed font-medium text-brand">

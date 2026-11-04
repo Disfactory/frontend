@@ -38,7 +38,7 @@ const onDismiss = () => {
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="onDismiss" class="max-w-[640px]">
+  <AppModal :open="open" :dismiss="onDismiss" title="使用說明" class="max-w-[640px]">
     <button
       v-if="isAdd || isUpdate"
       type="button"

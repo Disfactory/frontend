@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 
 const props = withDefaults(
   defineProps<{
@@ -7,12 +7,16 @@ const props = withDefaults(
     dismiss?: () => void
     showCloseButton?: boolean
     class?: string
+    title?: string
+    description?: string
   }>(),
   {
     open: false,
     dismiss: undefined,
     showCloseButton: true,
     class: '',
+    title: '對話框',
+    description: ' ',
   },
 )
 
@@ -30,6 +34,8 @@ const handleOpenChange = (open: boolean) => {
         props.class,
       ]"
     >
+      <DialogTitle class="sr-only">{{ title }}</DialogTitle>
+      <DialogDescription class="sr-only">{{ description }}</DialogDescription>
       <slot />
     </DialogContent>
   </Dialog>

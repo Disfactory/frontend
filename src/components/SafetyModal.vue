@@ -28,7 +28,7 @@ const prev = () => {
 </script>
 
 <template>
-  <AppModal :open="open" :dismiss="dismiss" class="max-w-[390px]">
+  <AppModal :open="open" :dismiss="dismiss" title="安全須知" class="max-w-[390px]">
     <div class="page-prose">
       <div class="min-h-[380px]">
         <h1 class="!mb-4 !border-none text-xl !text-brand">{{ current.title }}</h1>
