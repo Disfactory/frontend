@@ -145,7 +145,7 @@ onMounted(() => {
       .getFactoriesLayerForStatus(getFactoryStatus(factory))
       .getFeatureById(factoryId)
     if (feature) onClickFactoryFeature([0, 0], feature as Feature)
-  })
+  }).catch((err) => console.error('Unable to open shared factory', err))
 
   window.addEventListener('resize', onResize)
 })
