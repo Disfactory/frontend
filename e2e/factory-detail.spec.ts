@@ -82,7 +82,7 @@ test('matches the staging factory image carousel', async ({ page }) => {
   await page.mouse.down()
   await page.mouse.move(centerX - 80, centerY, { steps: 5 })
   await page.mouse.up()
-  await expect.poll(() => lightbox.locator('img').getAttribute('src')).toContain('safety_notice/1.png')
+  await expect(page.getByTestId('lightbox-counter')).toHaveText('2 / 3')
 })
 
 test.describe('factory detail on desktop', () => {

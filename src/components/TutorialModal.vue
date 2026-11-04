@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { ArrowLeft, ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ArrowLeft } from '@lucide/vue'
 import AppModal from './AppModal.vue'
-import { useCarouselSwipe } from '@/lib/useCarouselSwipe'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 
 const props = defineProps<{
   open: boolean
@@ -11,8 +18,6 @@ const props = defineProps<{
 
 type Page = 'home' | 'add' | 'update'
 const page = ref<Page>('home')
-const addIndex = ref(0)
-const updateIndex = ref(0)
 const addImages = Array.from({ length: 7 }, (_, i) => `/images/tutorial/create-${i + 1}.jpg`)
 const updateImages = Array.from({ length: 4 }, (_, i) => `/images/tutorial/update-${i + 1}.jpg`)
 
@@ -20,40 +25,41 @@ const isHome = computed(() => page.value === 'home')
 const isAdd = computed(() => page.value === 'add')
 const isUpdate = computed(() => page.value === 'update')
 
+const addApi = ref<CarouselApi>()
+const addSelected = ref(0)
+function setAddApi(val: CarouselApi | undefined) {
+  if (!val) return
+  addApi.value = val
+  addSelected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    addSelected.value = val.selectedScrollSnap()
+  })
+}
+
+const updateApi = ref<CarouselApi>()
+const updateSelected = ref(0)
+function setUpdateApi(val: CarouselApi | undefined) {
+  if (!val) return
+  updateApi.value = val
+  updateSelected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    updateSelected.value = val.selectedScrollSnap()
+  })
+}
+
 const openHome = () => {
   page.value = 'home'
 }
 const openAdd = () => {
-  addIndex.value = 0
+  addSelected.value = 0
+  addApi.value?.scrollTo(0)
   page.value = 'add'
 }
 const openUpdate = () => {
-  updateIndex.value = 0
+  updateSelected.value = 0
+  updateApi.value?.scrollTo(0)
   page.value = 'update'
 }
-
-const {
-  dragX: addDragX,
-  dragging: addDragging,
-  onPointerDown: onAddPointerDown,
-  onPointerMove: onAddPointerMove,
-  onPointerUp: onAddPointerUp,
-  onPointerCancel: onAddPointerCancel,
-} = useCarouselSwipe(
-  () => { addIndex.value = (addIndex.value + 1) % addImages.length },
-  () => { addIndex.value = (addIndex.value - 1 + addImages.length) % addImages.length },
-)
-const {
-  dragX: updateDragX,
-  dragging: updateDragging,
-  onPointerDown: onUpdatePointerDown,
-  onPointerMove: onUpdatePointerMove,
-  onPointerUp: onUpdatePointerUp,
-  onPointerCancel: onUpdatePointerCancel,
-} = useCarouselSwipe(
-  () => { updateIndex.value = (updateIndex.value + 1) % updateImages.length },
-  () => { updateIndex.value = (updateIndex.value - 1 + updateImages.length) % updateImages.length },
-)
 
 const onDismiss = () => {
   openHome()
@@ -76,7 +82,7 @@ const onDismiss = () => {
     <div class="page-prose">
       <div v-show="isHome">
         <h2>使用說明</h2>
-        <p>如果系統無法讀取你的位置，請至手機系統設定開啟位置權限。</p>
+        <p>如果系統無法讀取你的位置請至手機系統設定開啟位置權限。</p>
         <button
           type="button"
           class="mb-4 w-full border border-brand px-5 py-3 text-left leading-relaxed text-brand transition hover:bg-brand hover:text-white"
@@ -93,104 +99,76 @@ const onDismiss = () => {
         </button>
       </div>
 
-      <div
-        v-if="isAdd"
-        class="relative touch-pan-y select-none"
-        @pointerdown="onAddPointerDown"
-        @pointermove="onAddPointerMove"
-        @pointerup="onAddPointerUp"
-        @pointercancel="onAddPointerCancel"
-      >
-        <div
-          :style="{
-            transform: `translateX(${addDragX}px)`,
-            transition: addDragging ? 'none' : 'transform 200ms ease',
-          }"
-        >
-          <h2 class="text-center !text-brand">新增違章工廠 ({{ addIndex + 1 }}/7)</h2>
-          <img
-            :src="addImages[addIndex]"
-            :alt="`新增步驟 ${addIndex + 1}`"
-            class="mx-auto max-h-[65vh] object-contain"
-            draggable="false"
+      <div v-if="isAdd" class="relative select-none">
+        <Carousel :opts="{ loop: true }" @init-api="setAddApi">
+          <CarouselContent>
+            <CarouselItem v-for="(image, i) in addImages" :key="image">
+              <div>
+                <h2 class="text-center !text-brand">新增違章工廠 ({{ i + 1 }}/7)</h2>
+                <img
+                  :src="image"
+                  :alt="`新增步驟 ${i + 1}`"
+                  class="mx-auto max-h-[65vh] object-contain"
+                  draggable="false"
+                />
+              </div>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious
+            class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="上一張"
           />
-        </div>
-        <button
-          type="button"
-          class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
-          aria-label="上一張"
-          @click="addIndex = (addIndex - 1 + addImages.length) % addImages.length"
-        >
-          <ChevronLeft class="size-6" />
-        </button>
-        <button
-          type="button"
-          class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
-          aria-label="下一張"
-          @click="addIndex = (addIndex + 1) % addImages.length"
-        >
-          <ChevronRight class="size-6" />
-        </button>
+          <CarouselNext
+            class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="下一張"
+          />
+        </Carousel>
         <div class="mt-4 flex justify-center gap-1.5">
           <button
             v-for="(_, i) in addImages"
             :key="i"
             type="button"
             class="size-2 rounded-full"
-            :class="i === addIndex ? 'bg-brand' : 'bg-[#e3e3e3]'"
+            :class="i === addSelected ? 'bg-brand' : 'bg-[#e3e3e3]'"
             :aria-label="`第 ${i + 1} 頁`"
-            @click="addIndex = i"
+            @click="addApi?.scrollTo(i)"
           />
         </div>
       </div>
 
-      <div
-        v-if="isUpdate"
-        class="relative touch-pan-y select-none"
-        @pointerdown="onUpdatePointerDown"
-        @pointermove="onUpdatePointerMove"
-        @pointerup="onUpdatePointerUp"
-        @pointercancel="onUpdatePointerCancel"
-      >
-        <div
-          :style="{
-            transform: `translateX(${updateDragX}px)`,
-            transition: updateDragging ? 'none' : 'transform 200ms ease',
-          }"
-        >
-          <h2 class="text-center !text-brand">補充工廠資訊 ({{ updateIndex + 1 }}/4)</h2>
-          <img
-            :src="updateImages[updateIndex]"
-            :alt="`補充步驟 ${updateIndex + 1}`"
-            class="mx-auto max-h-[65vh] object-contain"
-            draggable="false"
+      <div v-if="isUpdate" class="relative select-none">
+        <Carousel :opts="{ loop: true }" @init-api="setUpdateApi">
+          <CarouselContent>
+            <CarouselItem v-for="(image, i) in updateImages" :key="image">
+              <div>
+                <h2 class="text-center !text-brand">補充工廠資訊 ({{ i + 1 }}/4)</h2>
+                <img
+                  :src="image"
+                  :alt="`補充步驟 ${i + 1}`"
+                  class="mx-auto max-h-[65vh] object-contain"
+                  draggable="false"
+                />
+              </div>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious
+            class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="上一張"
           />
-        </div>
-        <button
-          type="button"
-          class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
-          aria-label="上一張"
-          @click="updateIndex = (updateIndex - 1 + updateImages.length) % updateImages.length"
-        >
-          <ChevronLeft class="size-6" />
-        </button>
-        <button
-          type="button"
-          class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
-          aria-label="下一張"
-          @click="updateIndex = (updateIndex + 1) % updateImages.length"
-        >
-          <ChevronRight class="size-6" />
-        </button>
+          <CarouselNext
+            class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="下一張"
+          />
+        </Carousel>
         <div class="mt-4 flex justify-center gap-1.5">
           <button
             v-for="(_, i) in updateImages"
             :key="i"
             type="button"
             class="size-2 rounded-full"
-            :class="i === updateIndex ? 'bg-brand' : 'bg-[#e3e3e3]'"
+            :class="i === updateSelected ? 'bg-brand' : 'bg-[#e3e3e3]'"
             :aria-label="`第 ${i + 1} 頁`"
-            @click="updateIndex = i"
+            @click="updateApi?.scrollTo(i)"
           />
         </div>
       </div>

@@ -7,8 +7,13 @@ import ImgurFallbackImage from './ImgurFallbackImage.vue'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
 import { getFactoryReportRecords } from '@/api'
-import { useCarouselSwipe } from '@/lib/useCarouselSwipe'
 import { useAppStore } from '@/stores/app'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 import { getDisplayStatusText, type FactoryImage, type ReportRecord } from '@/types'
 
 const appStore = useAppStore()
@@ -39,25 +44,16 @@ const lightboxIndex = ref<number | null>(null)
 const setLightboxIndex = (index: number) => {
   lightboxIndex.value = index
 }
-const currentLightboxImage = computed(() =>
-  lightboxIndex.value === null ? null : (images.value[lightboxIndex.value] ?? null),
-)
-const nextLightbox = () => {
-  if (lightboxIndex.value === null || images.value.length === 0) return
-  lightboxIndex.value = (lightboxIndex.value + 1) % images.value.length
+const lightboxApi = ref<CarouselApi>()
+const lightboxSelected = ref(0)
+const setLightboxApi = (val: CarouselApi | undefined) => {
+  if (!val) return
+  lightboxApi.value = val
+  lightboxSelected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    lightboxSelected.value = val.selectedScrollSnap()
+  })
 }
-const prevLightbox = () => {
-  if (lightboxIndex.value === null || images.value.length === 0) return
-  lightboxIndex.value = (lightboxIndex.value - 1 + images.value.length) % images.value.length
-}
-const {
-  dragX: lightboxDragX,
-  dragging: lightboxDragging,
-  onPointerDown: onLightboxPointerDown,
-  onPointerMove: onLightboxPointerMove,
-  onPointerUp: onLightboxPointerUp,
-  onPointerCancel: onLightboxPointerCancel,
-} = useCarouselSwipe(nextLightbox, prevLightbox)
 
 const factoryStatus = computed(() =>
   appStore.factoryData ? getFactoryStatus(appStore.factoryData) : undefined,
@@ -370,30 +366,24 @@ const lastUpdatedAt = computed(() => {
     overlay-class="bg-[rgba(30,30,30,0.9)]"
     class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
   >
-    <div
-      data-testid="lightbox-content"
-      class="relative touch-pan-y select-none"
-      :style="{
-        transform: `translateX(${lightboxDragX}px)`,
-        transition: lightboxDragging ? 'none' : 'transform 200ms ease',
-      }"
-      @pointerdown="onLightboxPointerDown"
-      @pointermove="onLightboxPointerMove"
-      @pointerup="onLightboxPointerUp"
-      @pointercancel="onLightboxPointerCancel"
-    >
-      <img
-        v-if="currentLightboxImage"
-        :src="currentLightboxImage.url"
-        alt=""
-        class="max-h-[80vh] w-full object-contain"
-        draggable="false"
-      />
+    <div data-testid="lightbox-content" class="relative select-none">
+      <Carousel :opts="{ startIndex: lightboxIndex ?? 0, loop: true }" @init-api="setLightboxApi">
+        <CarouselContent>
+          <CarouselItem v-for="(image, i) in images" :key="image.id">
+            <img
+              :src="image.url"
+              :alt="`工廠照片 ${i + 1}`"
+              class="max-h-[80vh] w-full object-contain"
+              draggable="false"
+            />
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
       <button
         type="button"
         class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white"
         aria-label="上一張"
-        @click="prevLightbox"
+        @click="lightboxApi?.scrollPrev()"
       >
         <ChevronLeft class="size-6" />
       </button>
@@ -401,10 +391,13 @@ const lastUpdatedAt = computed(() => {
         type="button"
         class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white"
         aria-label="下一張"
-        @click="nextLightbox"
+        @click="lightboxApi?.scrollNext()"
       >
         <ChevronRight class="size-6" />
       </button>
+      <span data-testid="lightbox-counter" class="sr-only" aria-live="polite">
+        {{ lightboxSelected + 1 }} / {{ images.length }}
+      </span>
     </div>
   </AppModal>
 </template>

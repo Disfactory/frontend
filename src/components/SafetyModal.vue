@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ref } from 'vue'
 import AppModal from './AppModal.vue'
-import { useCarouselSwipe } from '@/lib/useCarouselSwipe'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 
 defineProps<{
   open: boolean
@@ -18,76 +24,56 @@ const slides = [
   { image: '/images/safety_notice/5.png', title: '應變', text: '假如有人上前問話，請表現得「充滿好奇心」，試著跟對方聊天（例如：好奇水電師傅的施工技術），再伺機離開。' },
 ]
 
-const index = ref(0)
-const current = computed(() => slides[index.value]!)
-const next = () => {
-  index.value = (index.value + 1) % slides.length
+const api = ref<CarouselApi>()
+const selected = ref(0)
+
+function setApi(val: CarouselApi | undefined) {
+  if (!val) return
+  api.value = val
+  selected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    selected.value = val.selectedScrollSnap()
+  })
 }
-const prev = () => {
-  index.value = (index.value - 1 + slides.length) % slides.length
-}
-const {
-  dragX: safetyDragX,
-  dragging: safetyDragging,
-  onPointerDown: onSafetyPointerDown,
-  onPointerMove: onSafetyPointerMove,
-  onPointerUp: onSafetyPointerUp,
-  onPointerCancel: onSafetyPointerCancel,
-} = useCarouselSwipe(next, prev)
 </script>
 
 <template>
   <AppModal :open="open" :dismiss="dismiss" title="安全須知" centered class="max-w-[390px]">
-    <div
-      class="page-prose relative touch-pan-y select-none"
-      data-testid="safety-carousel"
-      @pointerdown="onSafetyPointerDown"
-      @pointermove="onSafetyPointerMove"
-      @pointerup="onSafetyPointerUp"
-      @pointercancel="onSafetyPointerCancel"
-    >
-      <div
-        class="min-h-[380px] pb-10"
-        :style="{
-          transform: `translateX(${safetyDragX}px)`,
-          transition: safetyDragging ? 'none' : 'transform 200ms ease',
-        }"
-      >
-        <h1 class="!mb-4 !border-none text-xl !text-brand">{{ current.title }}</h1>
-        <img
-          v-if="current.image"
-          :src="current.image"
-          :alt="current.title"
-          class="mx-auto mb-4 max-h-[45vh] object-contain"
-          draggable="false"
+    <div class="page-prose relative select-none" data-testid="safety-carousel">
+      <Carousel :opts="{ loop: true }" @init-api="setApi">
+        <CarouselContent>
+          <CarouselItem v-for="slide in slides" :key="slide.title">
+            <div class="min-h-[380px] pb-10">
+              <h1 class="!mb-4 !border-none text-xl !text-brand">{{ slide.title }}</h1>
+              <img
+                v-if="slide.image"
+                :src="slide.image"
+                :alt="slide.title"
+                class="mx-auto mb-4 max-h-[45vh] object-contain"
+                draggable="false"
+              />
+              <p class="text-center leading-relaxed">{{ slide.text }}</p>
+            </div>
+          </CarouselItem>
+        </CarouselContent>
+        <CarouselPrevious
+          class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+          aria-label="上一張"
         />
-        <p class="text-center leading-relaxed">{{ current.text }}</p>
-      </div>
-      <button
-        type="button"
-        class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
-        aria-label="上一張"
-        @click="prev"
-      >
-        <ChevronLeft class="size-6" />
-      </button>
-      <button
-        type="button"
-        class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
-        aria-label="下一張"
-        @click="next"
-      >
-        <ChevronRight class="size-6" />
-      </button>
+        <CarouselNext
+          class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+          aria-label="下一張"
+        />
+      </Carousel>
       <div class="absolute inset-x-0 bottom-0 flex justify-center gap-1.5">
         <button
           v-for="(_, i) in slides"
           :key="i"
           type="button"
           class="size-2 rounded-full"
-          :class="i === index ? 'bg-brand' : 'bg-[#e3e3e3]'"
+          :class="i === selected ? 'bg-brand' : 'bg-[#e3e3e3]'"
           :aria-label="`第 ${i + 1} 頁`"
-          @click="index = i"
+          @click="api?.scrollTo(i)"
         />
       </div>
     </div>
