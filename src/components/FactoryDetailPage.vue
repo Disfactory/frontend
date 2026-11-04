@@ -174,7 +174,7 @@ const lastUpdatedAt = computed(() => {
           <button
             type="button"
             class="hidden rounded-full border px-4 py-2 text-sm md:block"
-            :class="showCopiedMessage ? 'border-brand bg-brand text-white' : 'border-white bg-white text-brand'"
+            :class="showCopiedMessage ? 'border-brand bg-brand text-white' : 'border-brand-line bg-white text-brand shadow-sm'"
             @click="copyToClipboard"
           >
             <Share2 class="mr-1 inline size-4" />

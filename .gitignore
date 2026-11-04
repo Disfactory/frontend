@@ -45,3 +45,6 @@ __screenshots__/
 
 test-results/
 playwright-report/
+
+# Temporary Playwright/e2e scripts
+*.tmp.mjs
