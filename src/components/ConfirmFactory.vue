@@ -56,7 +56,10 @@ const typeValue = computed({
 </script>
 
 <template>
-  <div class="absolute inset-0 z-10 overflow-y-auto bg-white">
+  <div
+    data-testid="confirm-factory"
+    class="absolute inset-x-0 top-14 bottom-0 z-10 overflow-y-auto bg-white"
+  >
     <div class="mx-auto w-full max-w-[630px] px-4 pt-4 pb-24 md:pt-12">
       <h2 class="mt-2 mb-2 text-2xl font-medium text-brand-dark">確認及補充工廠資訊</h2>
       <p class="mb-4">請確認工廠地點及照片，並補充工廠資訊。</p>

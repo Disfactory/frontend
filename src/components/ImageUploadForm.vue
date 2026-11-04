@@ -60,7 +60,10 @@ const onSubmit = () => {
 </script>
 
 <template>
-  <div class="absolute inset-0 z-10 overflow-y-auto bg-white">
+  <div
+    data-testid="image-upload-form"
+    class="absolute inset-x-0 top-14 bottom-0 z-10 overflow-y-auto bg-white"
+  >
     <div class="mx-auto w-full max-w-[630px] px-4 pt-4 pb-24 md:pt-12">
       <h2 class="mb-4 text-xl font-medium text-brand-dark">上傳工廠照片</h2>
       <p class="mb-6 text-brand-dark">請至少上傳一張工廠照片。</p>

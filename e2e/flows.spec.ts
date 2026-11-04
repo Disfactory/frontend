@@ -32,10 +32,21 @@ test('keeps the create form open and shows an error when the POST fails', async 
   })
 
   await startCreateFlow(page)
+
+  const headerBox = await page.locator('header').first().boundingBox()
+  const formBox = await page.getByTestId('image-upload-form').boundingBox()
+  expect(headerBox).not.toBeNull()
+  expect(formBox).not.toBeNull()
+  expect(formBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height)
+
   await page.locator('input[type=file]').setInputFiles(png)
   await expect(page.getByText('上傳成功')).toBeVisible()
   await page.getByRole('button', { name: '下一步' }).click()
   await expect(page.getByRole('heading', { name: '確認及補充工廠資訊' })).toBeVisible()
+
+  const confirmBox = await page.getByTestId('confirm-factory').boundingBox()
+  expect(confirmBox).not.toBeNull()
+  expect(confirmBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height)
 
   await page.getByPlaceholder('例：小明化工廠').fill('測試工廠')
   await page.getByRole('button', { name: '確認送出' }).click()

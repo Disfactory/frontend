@@ -124,7 +124,7 @@ const submitFactory = async () => {
 
 <template>
   <div class="pointer-events-none absolute inset-0 z-20">
-    <header class="pointer-events-auto flex h-14 items-center justify-between border-b bg-white px-3 text-brand-dark">
+    <header class="pointer-events-auto relative z-20 flex h-14 items-center justify-between border-b bg-white px-3 text-brand-dark">
       <button
         type="button"
         class="rounded p-2 hover:bg-black/5"
