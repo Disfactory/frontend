@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
-import { X } from '@lucide/vue'
 import { useModalStore } from '@/stores/modals'
 
 const props = defineProps<{ open: boolean }>()
 const emit = defineEmits<{ close: [] }>()
 
 const modalStore = useModalStore()
-const links = [
-  { text: '使用說明', action: modalStore.openTutorialModal },
+
+type Item =
+  | { text: string; action: () => void }
+  | { text: string; href: string }
+  | { spacer: true }
+
+const items: Item[] = [
+  { text: '使用教學', action: modalStore.openTutorialModal },
   { text: '安全須知', action: modalStore.openSafetyModal },
   { text: '聯絡我們', action: modalStore.openContactModal },
-  { text: '常見問題', href: 'https://about.disfactory.tw/#question' },
+  { spacer: true },
   { text: '關於回報系統', href: 'https://about.disfactory.tw' },
   { text: '問題回報', href: 'https://airtable.com/shrUraKakZRpH52DO' },
 ]
@@ -22,46 +27,43 @@ const onKeydown = (event: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKeydown))
 onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 
-const onClick = (link: { action?: () => void }) => {
-  if (link.action) link.action()
+const onClick = (item: Extract<Item, { action: () => void }>) => {
+  item.action()
   emit('close')
 }
 </script>
 
 <template>
-  <div v-if="open" class="fixed inset-0 z-[70] bg-black/40" @click="emit('close')">
+  <div
+    class="fixed inset-0 z-[70] transition-opacity duration-300"
+    :class="open ? 'opacity-100' : 'pointer-events-none opacity-0'"
+  >
+    <div class="absolute inset-0 bg-black/45" @click="emit('close')" />
+
     <aside
-      class="absolute top-0 right-0 bottom-0 w-[90%] max-w-[400px] bg-[#6d8538] px-8 pt-14 pb-5 text-white"
-      @click.stop
+      class="absolute top-0 right-0 bottom-0 w-64 overflow-y-auto bg-white shadow-xl transition-transform duration-300"
+      :class="open ? 'translate-x-0' : 'translate-x-full'"
+      aria-label="主選單"
     >
-      <button
-        type="button"
-        class="absolute top-5 left-7 rounded p-1 text-white hover:bg-white/10"
-        aria-label="關閉主選單"
-        @click="emit('close')"
-      >
-        <X class="size-6" />
-      </button>
-      <h1 class="mb-4 text-4xl leading-tight">主選單</h1>
-      <hr class="mb-6 w-3/5 border-white/80" />
-      <ul class="space-y-1">
-        <li v-for="link in links" :key="link.text">
+      <ul class="pt-2">
+        <li v-for="(item, index) in items" :key="index">
+          <div v-if="'spacer' in item" class="h-12" aria-hidden="true" />
           <button
-            v-if="link.action"
+            v-else-if="'action' in item"
             type="button"
-            class="block w-full py-1 text-left text-2xl leading-loose hover:underline"
-            @click="onClick(link)"
+            class="block w-full px-4 py-2.5 text-left text-base text-black transition hover:bg-black/5"
+            @click="onClick(item)"
           >
-            {{ link.text }}
+            {{ item.text }}
           </button>
           <a
             v-else
-            :href="link.href"
+            :href="item.href"
             target="_blank"
             rel="noreferrer"
-            class="block w-full py-1 text-left text-2xl leading-loose hover:underline"
+            class="block w-full px-4 py-2.5 text-left text-base text-black transition hover:bg-black/5"
           >
-            {{ link.text }}
+            {{ item.text }}
           </a>
         </li>
       </ul>

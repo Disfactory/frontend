@@ -42,7 +42,11 @@ onClickOutside(root, () => {
       <ChevronDown class="size-4" :class="{ 'rotate-180': isOpen }" />
     </button>
 
-    <div v-if="isOpen" class="absolute top-full left-0 z-30 mt-2 w-48 rounded-lg bg-white p-2 shadow-xl">
+    <div
+      v-if="isOpen"
+      class="mt-2 w-full rounded-lg bg-white p-2 shadow-xl"
+      :class="isInSheet ? 'border' : 'absolute top-full left-0 z-30 w-48'"
+    >
       <button
         v-for="mode in mapModes"
         :key="mode.type"

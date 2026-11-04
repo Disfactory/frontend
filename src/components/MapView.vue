@@ -168,7 +168,7 @@ onUnmounted(() => {
       class="absolute inset-x-0 top-0 z-10 px-3 pt-3 pb-2"
       :class="appStore.factoryDetailsExpanded ? 'md:pr-[410px]' : ''"
     >
-      <div class="flex flex-wrap gap-2">
+      <div class="flex gap-2 overflow-x-auto pb-1 md:flex-wrap md:overflow-visible">
         <DisplaySettingBottomSheet />
         <button
           v-for="button in filterButtonsData"

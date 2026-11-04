@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
 import { X } from '@lucide/vue'
 import AppButton from './AppButton.vue'
 import AppModal from './AppModal.vue'
@@ -16,6 +17,7 @@ import { updateFactory, updateFactoryImages } from '@/api'
 import { FACTORY_TYPE, type FactoryType } from '@/types'
 
 const appStore = useAppStore()
+const isDesktop = useMediaQuery('(min-width: 960px)')
 const modalStore = useModalStore()
 const mapStore = useMapStore()
 const { event } = useGA()
@@ -152,11 +154,16 @@ const factoryTypeItems: Array<{ text: string; value?: string }> = [...FACTORY_TY
     />
 
     <div
-      v-else-if="appStore.isEditFactoryMode"
+      v-else-if="appStore.isEditFactoryMode && isDesktop"
       data-testid="update-factory-panel"
       class="pointer-events-auto absolute top-20 left-1/2 z-50 w-[calc(100%-2rem)] max-w-[395px] -translate-x-1/2 rounded-lg bg-white p-5 shadow-xl"
     >
-      <h3 class="mb-3 text-lg font-medium text-brand-dark">{{ updateFormTitle }}</h3>
+      <div class="mb-3 flex items-start justify-between">
+        <h3 class="text-lg font-medium text-brand-dark">{{ updateFormTitle }}</h3>
+        <button type="button" class="rounded p-1 hover:bg-black/5" aria-label="關閉" @click="discardDialog = true">
+          <X class="size-5" />
+        </button>
+      </div>
 
       <AppTextArea v-if="appStore.isEditComment" v-model="formState.others" placeholder="例：常常散發異味" />
       <AppTextField v-if="appStore.isEditName" v-model="formState.name" placeholder="例：小明化工廠" />
@@ -171,6 +178,40 @@ const factoryTypeItems: Array<{ text: string; value?: string }> = [...FACTORY_TY
       <AppButton class="mt-5" :disabled="!isCurrentFieldValid" @click="submitUpdateFactory">
         {{ updateFormButton }}
       </AppButton>
+    </div>
+
+    <div
+      v-else-if="appStore.isEditFactoryMode"
+      data-testid="update-factory-panel"
+      class="pointer-events-auto fixed inset-0 z-50 flex flex-col bg-white"
+    >
+      <header class="flex h-14 shrink-0 items-center justify-between border-b px-3">
+        <div class="w-8" />
+        <h1 class="text-base font-medium text-brand-dark">{{ updateFormAppTitle }}</h1>
+        <button type="button" class="rounded p-2 hover:bg-black/5" aria-label="關閉" @click="discardDialog = true">
+          <X class="size-5" />
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-4">
+        <h3 class="mb-2 text-base font-medium text-brand">{{ updateFormTitle }}</h3>
+
+        <AppTextArea v-if="appStore.isEditComment" v-model="formState.others" placeholder="例：常常散發異味" />
+        <AppTextField v-if="appStore.isEditName" v-model="formState.name" placeholder="例：小明化工廠" />
+        <AppSelect
+          v-if="appStore.isEditType"
+          :model-value="typeValue"
+          :items="factoryTypeItems"
+          placeholder="未選擇"
+          @update:model-value="setType"
+        />
+      </div>
+
+      <div class="shrink-0 border-t p-4">
+        <AppButton :disabled="!isCurrentFieldValid" @click="submitUpdateFactory">
+          {{ updateFormButton }}
+        </AppButton>
+      </div>
     </div>
 
     <AppModal :open="discardDialog" :dismiss="() => (discardDialog = false)" :title="appStore.isEditImagesMode ? '放棄補充照片' : '放棄編輯'" class="max-w-[290px]">

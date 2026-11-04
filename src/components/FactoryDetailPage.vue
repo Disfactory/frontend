@@ -141,6 +141,7 @@ const lastUpdatedAt = computed(() => {
 <template>
   <aside
     v-if="appStore.factoryData && !appStore.formPageOpen"
+    data-testid="detail-panel"
     class="fixed inset-x-0 bottom-0 z-20 flex max-h-[calc(100%-56px)] flex-col bg-white shadow-xl transition-transform duration-200 md:top-14 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
     :class="[
       full ? 'top-0 z-40 max-h-none md:top-14 md:z-20' : 'top-auto',
@@ -245,7 +246,7 @@ const lastUpdatedAt = computed(() => {
           v-if="!full"
           type="button"
           data-testid="expand-detail"
-          class="mb-4 flex items-center gap-1 text-sm font-medium text-brand md:hidden"
+          class="sticky bottom-0 z-[1] flex w-full items-center gap-1 bg-white py-3 text-left text-sm font-medium text-brand md:hidden"
           @click="appStore.expandFactoryDetail()"
         >
           顯示更多資訊 <ChevronDown class="size-4" />
