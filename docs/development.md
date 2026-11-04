@@ -47,6 +47,6 @@ pnpm format
 - Vite 8 (Rolldown)
 - Tailwind CSS 4 + shadcn-vue (Reka UI)
 - Pinia 4
-- Vue Router 5
 - OpenLayers 10
 - Vitest 4 + Playwright
+- vite-plugin-pwa
