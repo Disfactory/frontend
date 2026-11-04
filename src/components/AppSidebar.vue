@@ -41,7 +41,7 @@ const onClick = (item: Extract<Item, { action: () => void }>) => {
     <div class="absolute inset-0 bg-black/45" @click="emit('close')" />
 
     <aside
-      class="absolute top-0 right-0 bottom-0 w-64 overflow-y-auto bg-white shadow-xl transition-transform duration-300"
+      class="absolute top-0 right-0 bottom-0 w-64 overflow-y-auto bg-white pt-[env(safe-area-inset-top)] shadow-xl transition-transform duration-300"
       :class="open ? 'translate-x-0' : 'translate-x-full'"
       aria-label="主選單"
     >

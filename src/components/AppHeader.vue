@@ -16,7 +16,7 @@ const links = [
 </script>
 
 <template>
-  <header class="z-30 flex h-14 shrink-0 items-center justify-between bg-brand px-3 text-white shadow-md md:h-16">
+  <header class="z-30 flex h-14 shrink-0 items-center justify-between bg-brand px-3 pt-[env(safe-area-inset-top)] text-white shadow-md md:h-16">
     <div class="w-10 md:hidden" />
     <h1 class="text-lg font-medium tracking-wide">農地工廠回報</h1>
 
