@@ -47,7 +47,7 @@ const onClick = (item: Extract<Item, { action: () => void }>) => {
     >
       <ul class="pt-2">
         <li v-for="(item, index) in items" :key="index">
-          <div v-if="'spacer' in item" class="h-12" aria-hidden="true" />
+          <div v-if="'spacer' in item" class="mx-4 my-2 border-t border-neutral-200" role="separator" />
           <button
             v-else-if="'action' in item"
             type="button"
