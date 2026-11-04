@@ -7,6 +7,7 @@ import ImgurFallbackImage from './ImgurFallbackImage.vue'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
 import { getFactoryReportRecords } from '@/api'
+import { useCarouselSwipe } from '@/lib/useCarouselSwipe'
 import { useAppStore } from '@/stores/app'
 import { getDisplayStatusText, type FactoryImage, type ReportRecord } from '@/types'
 
@@ -49,6 +50,14 @@ const prevLightbox = () => {
   if (lightboxIndex.value === null || images.value.length === 0) return
   lightboxIndex.value = (lightboxIndex.value - 1 + images.value.length) % images.value.length
 }
+const {
+  dragX: lightboxDragX,
+  dragging: lightboxDragging,
+  onPointerDown: onLightboxPointerDown,
+  onPointerMove: onLightboxPointerMove,
+  onPointerUp: onLightboxPointerUp,
+  onPointerCancel: onLightboxPointerCancel,
+} = useCarouselSwipe(nextLightbox, prevLightbox)
 
 const factoryStatus = computed(() =>
   appStore.factoryData ? getFactoryStatus(appStore.factoryData) : undefined,
@@ -240,7 +249,8 @@ const lastUpdatedAt = computed(() => {
         <div
           ref="imageCarousel"
           data-testid="image-carousel"
-          class="flex min-w-0 flex-1 gap-4 overflow-x-auto"
+          class="flex min-w-0 flex-1 touch-auto gap-4 overflow-x-auto overscroll-x-contain"
+          style="-webkit-overflow-scrolling: touch"
           @scroll="updateCarouselArrows"
         >
           <button
@@ -360,12 +370,24 @@ const lastUpdatedAt = computed(() => {
     overlay-class="bg-[rgba(30,30,30,0.9)]"
     class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
   >
-    <div class="relative">
+    <div
+      data-testid="lightbox-content"
+      class="relative touch-pan-y select-none"
+      :style="{
+        transform: `translateX(${lightboxDragX}px)`,
+        transition: lightboxDragging ? 'none' : 'transform 200ms ease',
+      }"
+      @pointerdown="onLightboxPointerDown"
+      @pointermove="onLightboxPointerMove"
+      @pointerup="onLightboxPointerUp"
+      @pointercancel="onLightboxPointerCancel"
+    >
       <img
         v-if="currentLightboxImage"
         :src="currentLightboxImage.url"
         alt=""
         class="max-h-[80vh] w-full object-contain"
+        draggable="false"
       />
       <button
         type="button"

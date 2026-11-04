@@ -32,11 +32,25 @@ const openUpdate = () => {
   page.value = 'update'
 }
 
-const addSwipe = useCarouselSwipe(
+const {
+  dragX: addDragX,
+  dragging: addDragging,
+  onPointerDown: onAddPointerDown,
+  onPointerMove: onAddPointerMove,
+  onPointerUp: onAddPointerUp,
+  onPointerCancel: onAddPointerCancel,
+} = useCarouselSwipe(
   () => { addIndex.value = (addIndex.value + 1) % addImages.length },
   () => { addIndex.value = (addIndex.value - 1 + addImages.length) % addImages.length },
 )
-const updateSwipe = useCarouselSwipe(
+const {
+  dragX: updateDragX,
+  dragging: updateDragging,
+  onPointerDown: onUpdatePointerDown,
+  onPointerMove: onUpdatePointerMove,
+  onPointerUp: onUpdatePointerUp,
+  onPointerCancel: onUpdatePointerCancel,
+} = useCarouselSwipe(
   () => { updateIndex.value = (updateIndex.value + 1) % updateImages.length },
   () => { updateIndex.value = (updateIndex.value - 1 + updateImages.length) % updateImages.length },
 )
@@ -82,17 +96,25 @@ const onDismiss = () => {
       <div
         v-if="isAdd"
         class="relative touch-pan-y select-none"
-        @pointerdown="addSwipe.onPointerDown"
-        @pointerup="addSwipe.onPointerUp"
-        @pointercancel="addSwipe.onPointerCancel"
+        @pointerdown="onAddPointerDown"
+        @pointermove="onAddPointerMove"
+        @pointerup="onAddPointerUp"
+        @pointercancel="onAddPointerCancel"
       >
-        <h2 class="text-center !text-brand">新增違章工廠 ({{ addIndex + 1 }}/7)</h2>
-        <img
-          :src="addImages[addIndex]"
-          :alt="`新增步驟 ${addIndex + 1}`"
-          class="mx-auto max-h-[65vh] object-contain"
-          draggable="false"
-        />
+        <div
+          :style="{
+            transform: `translateX(${addDragX}px)`,
+            transition: addDragging ? 'none' : 'transform 200ms ease',
+          }"
+        >
+          <h2 class="text-center !text-brand">新增違章工廠 ({{ addIndex + 1 }}/7)</h2>
+          <img
+            :src="addImages[addIndex]"
+            :alt="`新增步驟 ${addIndex + 1}`"
+            class="mx-auto max-h-[65vh] object-contain"
+            draggable="false"
+          />
+        </div>
         <button
           type="button"
           class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
@@ -125,17 +147,25 @@ const onDismiss = () => {
       <div
         v-if="isUpdate"
         class="relative touch-pan-y select-none"
-        @pointerdown="updateSwipe.onPointerDown"
-        @pointerup="updateSwipe.onPointerUp"
-        @pointercancel="updateSwipe.onPointerCancel"
+        @pointerdown="onUpdatePointerDown"
+        @pointermove="onUpdatePointerMove"
+        @pointerup="onUpdatePointerUp"
+        @pointercancel="onUpdatePointerCancel"
       >
-        <h2 class="text-center !text-brand">補充工廠資訊 ({{ updateIndex + 1 }}/4)</h2>
-        <img
-          :src="updateImages[updateIndex]"
-          :alt="`補充步驟 ${updateIndex + 1}`"
-          class="mx-auto max-h-[65vh] object-contain"
-          draggable="false"
-        />
+        <div
+          :style="{
+            transform: `translateX(${updateDragX}px)`,
+            transition: updateDragging ? 'none' : 'transform 200ms ease',
+          }"
+        >
+          <h2 class="text-center !text-brand">補充工廠資訊 ({{ updateIndex + 1 }}/4)</h2>
+          <img
+            :src="updateImages[updateIndex]"
+            :alt="`補充步驟 ${updateIndex + 1}`"
+            class="mx-auto max-h-[65vh] object-contain"
+            draggable="false"
+          />
+        </div>
         <button
           type="button"
           class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"

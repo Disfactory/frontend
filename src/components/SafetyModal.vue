@@ -26,7 +26,14 @@ const next = () => {
 const prev = () => {
   index.value = (index.value - 1 + slides.length) % slides.length
 }
-const swipe = useCarouselSwipe(next, prev)
+const {
+  dragX: safetyDragX,
+  dragging: safetyDragging,
+  onPointerDown: onSafetyPointerDown,
+  onPointerMove: onSafetyPointerMove,
+  onPointerUp: onSafetyPointerUp,
+  onPointerCancel: onSafetyPointerCancel,
+} = useCarouselSwipe(next, prev)
 </script>
 
 <template>
@@ -34,11 +41,18 @@ const swipe = useCarouselSwipe(next, prev)
     <div
       class="page-prose relative touch-pan-y select-none"
       data-testid="safety-carousel"
-      @pointerdown="swipe.onPointerDown"
-      @pointerup="swipe.onPointerUp"
-      @pointercancel="swipe.onPointerCancel"
+      @pointerdown="onSafetyPointerDown"
+      @pointermove="onSafetyPointerMove"
+      @pointerup="onSafetyPointerUp"
+      @pointercancel="onSafetyPointerCancel"
     >
-      <div class="min-h-[380px] pb-10">
+      <div
+        class="min-h-[380px] pb-10"
+        :style="{
+          transform: `translateX(${safetyDragX}px)`,
+          transition: safetyDragging ? 'none' : 'transform 200ms ease',
+        }"
+      >
         <h1 class="!mb-4 !border-none text-xl !text-brand">{{ current.title }}</h1>
         <img
           v-if="current.image"

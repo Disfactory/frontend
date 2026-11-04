@@ -34,11 +34,19 @@ test.describe('factory detail on mobile', () => {
 })
 
 test('matches the staging factory image carousel', async ({ page }) => {
-  const images = [1, 2, 3].map((index) => ({
-    id: `image-${index}`,
-    image_path: `https://example.com/photo-${index}.jpg`,
-    url: `https://example.com/photo-${index}.jpg`,
-  }))
+  const images = [
+    { id: 'image-1', image_path: '/images/menu-pic.png', url: '/images/menu-pic.png' },
+    {
+      id: 'image-2',
+      image_path: '/images/safety_notice/1.png',
+      url: '/images/safety_notice/1.png',
+    },
+    {
+      id: 'image-3',
+      image_path: '/images/safety_notice/2.png',
+      url: '/images/safety_notice/2.png',
+    },
+  ]
   await openSharedFactory(page, { factory: { ...factory, images } })
 
   const update = page.getByTestId('update-image-button')
@@ -64,6 +72,17 @@ test('matches the staging factory image carousel', async ({ page }) => {
   expect(await overlay.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
     'rgba(30, 30, 30, 0.9)',
   )
+
+  const lightbox = page.getByTestId('lightbox-content')
+  const lightboxBox = await lightbox.boundingBox()
+  expect(lightboxBox).not.toBeNull()
+  const centerX = lightboxBox!.x + lightboxBox!.width / 2
+  const centerY = lightboxBox!.y + lightboxBox!.height / 2
+  await page.mouse.move(centerX + 80, centerY)
+  await page.mouse.down()
+  await page.mouse.move(centerX - 80, centerY, { steps: 5 })
+  await page.mouse.up()
+  await expect.poll(() => lightbox.locator('img').getAttribute('src')).toContain('safety_notice/1.png')
 })
 
 test.describe('factory detail on desktop', () => {
