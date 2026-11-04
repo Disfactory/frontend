@@ -28,77 +28,86 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 26
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run lint
-        run: |
-          npm ci
-          npm run lint
+        run: pnpm lint
+
   typecheck:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 26
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run typecheck
-        run: |
-          npm ci
-          npm run typecheck
+        run: pnpm type-check
+
   unit-test:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
-      - name: Run unit test
-        run: |
-          npm ci
-          npm run test
+          node-version: 26
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run unit tests
+        run: pnpm test:unit --run
+
   dev-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'staging')
-    env:
-      VUE_APP_PROTOMAP_API_KEY: e6cfbd46818cf623
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 26
+          cache: pnpm
       - name: Install and Build
         run: |
-          npm ci
-          echo "VUE_APP_BASE_URL=https://staging.disfactory.tw/api" > .env
-          echo "VUE_APP_IMGUR_FALLBACK_URL=https://staging.disfactory.tw/imgur" >> .env
-          echo "VUE_APP_IMAGE_UPLOAD_PROVIDER=backend" >> .env
-          echo "VUE_APP_IMAGE_UPLOAD_URL=https://staging.disfactory.tw/api/upload" >> .env
-          npm run build
+          pnpm install --frozen-lockfile
+          echo "VITE_BASE_URL=https://staging.disfactory.tw/api" > .env
+          echo "VITE_IMGUR_FALLBACK_URL=https://staging.disfactory.tw/imgur" >> .env
+          echo "VITE_IMAGE_UPLOAD_PROVIDER=backend" >> .env
+          echo "VITE_IMAGE_UPLOAD_URL=https://staging.disfactory.tw/api/upload" >> .env
+          echo "VITE_PROTOMAP_SOURCE_URL=https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf" >> .env
+          echo "VITE_PROTOMAP_API_KEY=e6cfbd46818cf623" >> .env
+          pnpm build
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           single-commit: true
           commit-message: Deploy [ci skip]
           folder: dist
+
   production-deploy:
     needs: [lint, typecheck, unit-test]
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/production' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'production')
     steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version: 26
+          cache: pnpm
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
@@ -106,16 +115,15 @@ jobs:
           known_hosts: ${{ secrets.KNOWN_HOSTS }}
       - name: Install and Build
         run: |
-          npm ci
-          echo "VUE_APP_BASE_URL=https://api.disfactory.tw/api" > .env.production
-          echo "VUE_APP_IMGUR_FALLBACK_URL=https://api.disfactory.tw/imgur" >> .env.production
-          echo "VUE_APP_IMAGE_UPLOAD_PROVIDER=backend" >> .env.production
-          echo "VUE_APP_IMAGE_UPLOAD_URL=https://api.disfactory.tw/api/upload" >> .env.production
-          npm run build
+          pnpm install --frozen-lockfile
+          echo "VITE_BASE_URL=https://api.disfactory.tw/api" > .env.production
+          echo "VITE_IMGUR_FALLBACK_URL=https://api.disfactory.tw/imgur" >> .env.production
+          echo "VITE_IMAGE_UPLOAD_PROVIDER=backend" >> .env.production
+          echo "VITE_IMAGE_UPLOAD_URL=https://api.disfactory.tw/api/upload" >> .env.production
+          echo "VITE_PROTOMAP_SOURCE_URL=https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf" >> .env.production
+          echo "VITE_PROTOMAP_API_KEY=e6cfbd46818cf623" >> .env.production
+          pnpm build
           echo "disfactory.tw" > dist/CNAME
       - name: Deploy to GitHub Pages
         run: |
-          npm install --silent gh-pages@3.0
-          git config user.email "ci-build@disfactory.tw"
-          git config user.name "ci-build"
-          npx gh-pages -r "git@github.com:Disfactory/disfactory.tw.git" -m "Deploy [ci skip]" --dist dist
+          pnpm dlx gh-pages@3.0 -r "git@github.com:Disfactory/disfactory.tw.git" -m "Deploy [ci skip]" --dist dist
