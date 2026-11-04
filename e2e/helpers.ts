@@ -33,6 +33,15 @@ export async function mockApi(page: Page) {
 
     if (path.endsWith('/factories')) return route.fulfill({ json: [factory] })
     if (path.endsWith('/factories/f1/report_records')) return route.fulfill({ json: records })
+    if (path.endsWith('/factories/f1/images')) {
+      return route.fulfill({
+        json: {
+          id: 'image-1',
+          image_path: 'https://example.com/photo.jpg',
+          url: 'https://example.com/photo.jpg',
+        },
+      })
+    }
     if (path.endsWith('/factories/f1')) return route.fulfill({ json: factory })
     if (path.endsWith('/images')) return route.fulfill({ json: { token: 'token-1' } })
     if (path.endsWith('/upload')) {

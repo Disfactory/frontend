@@ -80,7 +80,7 @@ const typeValue = computed({
             經度：{{ appStore.factoryLocation[0]?.toFixed(7) }}<br />
             緯度：{{ appStore.factoryLocation[1]?.toFixed(7) }}
           </p>
-          <p><small>以上經緯度版本為 WGS84</small></p>
+          <p><small>以上經緯度版本為WGS84</small></p>
         </div>
       </div>
 

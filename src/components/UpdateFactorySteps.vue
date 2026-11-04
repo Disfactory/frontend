@@ -10,6 +10,7 @@ import AppSelect from './AppSelect.vue'
 import ImageUploadForm from './ImageUploadForm.vue'
 import { useAppStore } from '@/stores/app'
 import { useModalStore } from '@/stores/modals'
+import { useAlertStore } from '@/stores/alerts'
 import { useMapStore } from '@/stores/map'
 import { useGA } from '@/lib/useGA'
 import { useUpdateFactoryImage } from '@/lib/imageUpload'
@@ -19,6 +20,7 @@ import { FACTORY_TYPE, type FactoryType } from '@/types'
 const appStore = useAppStore()
 const isDesktop = useMediaQuery('(min-width: 960px)')
 const modalStore = useModalStore()
+const alertStore = useAlertStore()
 const mapStore = useMapStore()
 const { event } = useGA()
 
@@ -28,6 +30,7 @@ const {
   selectedImages,
   imageUploadState,
   uploadedImages,
+  allFiles,
   onClickRemoveImage,
   imageUploadFormValid,
 } = useUpdateFactoryImage()
@@ -36,11 +39,11 @@ const imagesValid = computed(() => imageUploadFormValid.value && !imageSubmittin
 
 const submitImageUpload = async () => {
   const factory = appStore.factoryData
-  if (!factory?.id || !selectedImages.value) return
+  if (!factory?.id || allFiles.value.length === 0) return
 
   imageSubmitting.value = true
   try {
-    const newImages = await updateFactoryImages(factory.id, selectedImages.value, {
+    const newImages = await updateFactoryImages(factory.id, allFiles.value, {
       nickname: imageUploadFormState.nickname,
       contact: imageUploadFormState.contact,
     })
@@ -51,6 +54,7 @@ const submitImageUpload = async () => {
     modalStore.openUpdateFactoryImagesSuccessModal()
   } catch (err) {
     console.error(err)
+    alertStore.showAlert('補充照片失敗，請稍後再試。')
   }
   imageSubmitting.value = false
 }
@@ -108,13 +112,18 @@ const submitUpdateFactory = async () => {
   try {
     const field = appStore.updateFactoryField
     event('updateFactory', { field })
-    const updated = await updateFactory(factory.id, { [field]: formState[field] } as never)
+    const payload =
+      field === 'factory_type'
+        ? { factory_type: formState.factory_type }
+        : { [field]: formState[field] }
+    const updated = await updateFactory(factory.id, payload)
     mapStore.controller?.updateFactory(updated.id, updated)
     appStore.setFactoryData(updated)
     appStore.cancelUpdateFactoryComment()
     modalStore.openUpdateFactorySuccessModal()
   } catch (err) {
     console.error(err)
+    alertStore.showAlert('更新工廠資訊失敗，請稍後再試。')
   }
   formState.submitting = false
 }

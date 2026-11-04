@@ -5,6 +5,7 @@ import type {
   FactoriesResponse,
   FactoryImage,
   FactoryPostData,
+  FactoryType,
   ReportRecord,
 } from '@/types'
 
@@ -180,12 +181,16 @@ export async function createFactory(factory: FactoryPostData): Promise<FactoryDa
   }
 }
 
-type UpdatableFactoryFields = {
-  name: string
-  nickname: string
-  contact: string
-  others: string
-  images: string[]
+// The update endpoint (`PUT /factories/:id`) uses `factory_type`, while
+// read/create payloads expose the same value as `type`.
+export type UpdatableFactoryFields = {
+  name?: string
+  nickname?: string
+  contact?: string
+  others?: string
+  images?: string[]
+  factory_type?: FactoryType
+  type?: FactoryType
 }
 
 export async function updateFactory(

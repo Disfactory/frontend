@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
 import { ArrowLeft, ChevronRight, X } from '@lucide/vue'
 import AppButton from './AppButton.vue'
 import AppModal from './AppModal.vue'
@@ -18,6 +19,7 @@ import { createFactory } from '@/api'
 import type { FactoryPostData, FactoryType } from '@/types'
 
 const appStore = useAppStore()
+const isDesktop = useMediaQuery('(min-width: 960px)')
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
 const mapStore = useMapStore()
@@ -109,14 +111,14 @@ const submitFactory = async () => {
     event('createFactory', { lng, lat })
     const resultFactory = await createFactory(factory)
     mapStore.controller?.addFactories([resultFactory])
+    appStore.closeFactoryPage()
+    modalStore.openCreateFactorySuccessModal()
   } catch (err) {
     console.error(err)
+    alertStore.showAlert('新增可疑工廠失敗，請稍後再試。')
   } finally {
     formState.submitting = false
   }
-
-  appStore.closeFactoryPage()
-  modalStore.openCreateFactorySuccessModal()
 }
 </script>
 
@@ -169,10 +171,10 @@ const submitFactory = async () => {
     </header>
 
     <template v-if="appStore.createStepIndex === 1">
-      <div class="pointer-events-auto absolute inset-x-0 top-14 bg-brand px-4 py-3 text-white md:px-10">
+      <div v-if="showLongLat" class="pointer-events-auto absolute inset-x-0 top-14 bg-brand px-4 py-3 text-white md:px-10">
         <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div class="flex flex-col gap-2 md:flex-row md:items-center md:gap-6">
-            <p class="text-xs md:text-sm">以下經緯度版本為 WGS84</p>
+            <p class="text-xs md:text-sm">以下經緯度版本為WGS84</p>
             <template v-if="!inlineLocationForm">
               <p class="text-sm font-medium md:text-base">經度：{{ appStore.mapLngLat[0]?.toFixed(7) }}</p>
               <p class="text-sm font-medium md:text-base">緯度：{{ appStore.mapLngLat[1]?.toFixed(7) }}</p>
@@ -185,7 +187,7 @@ const submitFactory = async () => {
               </button>
             </template>
 
-            <div v-else class="flex flex-wrap items-center gap-2">
+            <div v-else-if="isDesktop" class="flex flex-wrap items-center gap-2">
               <span class="text-sm font-medium">搜尋經緯度</span>
               <span class="hidden h-9 w-px bg-white/40 md:block" />
               <label class="text-sm">經度</label>
@@ -211,7 +213,7 @@ const submitFactory = async () => {
           </button>
         </div>
 
-        <div v-if="inlineLocationForm" class="mt-3 flex flex-wrap items-end gap-2 md:hidden">
+        <div v-if="inlineLocationForm && !isDesktop" class="mt-3 flex flex-wrap items-end gap-2">
           <div>
             <h3 class="mb-1 text-sm">經度</h3>
             <AppTextField v-model="locationInputState.longitude" placeholder="例：121.5231872" small class="w-40" />
@@ -220,6 +222,7 @@ const submitFactory = async () => {
             <h3 class="mb-1 text-sm">緯度</h3>
             <AppTextField v-model="locationInputState.latitude" placeholder="例：25.0458344" small class="w-40" />
           </div>
+          <button type="button" class="text-sm underline" @click="clearLocationInput">清空</button>
           <button type="button" class="rounded-full bg-white px-4 py-2 text-sm font-medium text-brand" @click="setLocation">
             定位
           </button>
