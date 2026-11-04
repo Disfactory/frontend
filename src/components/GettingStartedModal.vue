@@ -8,7 +8,7 @@ const props = defineProps<{
 }>()
 
 const agree = () => {
-  localStorage.setItem('use-app', 'true')
+  window.localStorage?.setItem('use-app', 'true')
   props.dismiss?.()
 }
 </script>

@@ -17,8 +17,9 @@ export const useModalStore = defineStore('modals', () => {
   const aboutModalOpen = ref(false)
   const contactModalOpen = ref(false)
   const safetyModalOpen = ref(false)
-  const hasStorage = typeof localStorage !== 'undefined'
-  const gettingStartedModalOpen = ref(hasStorage ? localStorage.getItem('use-app') !== 'true' : true)
+  const storedUseApp =
+    typeof window !== 'undefined' ? (window.localStorage?.getItem('use-app') ?? null) : null
+  const gettingStartedModalOpen = ref(storedUseApp !== 'true')
   const tutorialModalOpen = ref(false)
   const supportIOSVersionModalOpen = ref(isNotSupportedIOS())
   const apiConfigModalOpen = ref(false)

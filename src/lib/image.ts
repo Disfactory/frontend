@@ -1,10 +1,20 @@
  
 type PixelMapper = (data: Uint8ClampedArray) => void
 
-const canvas = window.OffscreenCanvas
-  ? new OffscreenCanvas(500, 500)
-  : document.createElement('canvas')
-const ctx = canvas.getContext('2d')! as CanvasRenderingContext2D
+type CanvasContext = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
+
+let canvas: HTMLCanvasElement | OffscreenCanvas | null = null
+let ctx: CanvasContext | null = null
+
+function ensureCanvas (): { canvas: HTMLCanvasElement | OffscreenCanvas, ctx: CanvasContext | null } {
+  if (!canvas) {
+    canvas = window.OffscreenCanvas
+      ? new OffscreenCanvas(500, 500)
+      : document.createElement('canvas')
+    ctx = canvas.getContext('2d') as CanvasContext | null
+  }
+  return { canvas, ctx }
+}
 
 export const createImageProcessor =
   (processor: PixelMapper) =>
@@ -15,16 +25,26 @@ export const createImageProcessor =
       image.src = src
       image.style.display = 'none'
       image.onload = async () => {
-        canvas.width = image.width
-        canvas.height = image.height
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        ctx.drawImage(image, 0, 0)
+        const { canvas: workCanvas, ctx: workCtx } = ensureCanvas()
+        if (!workCtx) {
+          resolve(src)
+          return
+        }
 
-        const imageData = ctx.getImageData(0, 0, image.width, image.height)
+        workCanvas.width = image.width
+        workCanvas.height = image.height
+        workCtx.clearRect(0, 0, workCanvas.width, workCanvas.height)
+        workCtx.drawImage(image, 0, 0)
+
+        const imageData = workCtx.getImageData(0, 0, image.width, image.height)
         await Promise.resolve(processor(imageData.data))
 
         const tmpCanvas = document.createElement('canvas')
-        const tmpCtx = tmpCanvas.getContext('2d')!
+        const tmpCtx = tmpCanvas.getContext('2d')
+        if (!tmpCtx) {
+          resolve(src)
+          return
+        }
         tmpCanvas.width = image.width
         tmpCanvas.height = image.height
         tmpCtx.putImageData(imageData, 0, 0)
