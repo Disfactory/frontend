@@ -30,7 +30,7 @@ pnpm build
 # Unit tests (Vitest)
 pnpm test:unit --run
 
-# End-to-end tests (Playwright)
+# End-to-end tests (Playwright, mocked API, headless Chromium)
 pnpm test:e2e
 ```
 

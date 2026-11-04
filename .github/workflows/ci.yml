@@ -69,8 +69,25 @@ jobs:
       - name: Run unit tests
         run: pnpm test:unit --run
 
+  e2e:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || !contains(github.event.head_commit.message, '[skip ci]')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run e2e tests
+        run: pnpm test:e2e
+
   dev-deploy:
-    needs: [lint, typecheck, unit-test]
+    needs: [lint, typecheck, unit-test, e2e]
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'staging')
     steps:
@@ -98,7 +115,7 @@ jobs:
           folder: dist
 
   production-deploy:
-    needs: [lint, typecheck, unit-test]
+    needs: [lint, typecheck, unit-test, e2e]
     runs-on: ubuntu-latest
     if: (github.event_name == 'push' && github.ref == 'refs/heads/production' && !contains(github.event.head_commit.message, '[skip ci]')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.deployment_type == 'production')
     steps:

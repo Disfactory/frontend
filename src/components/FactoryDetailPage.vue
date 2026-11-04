@@ -138,8 +138,8 @@ const lastUpdatedAt = computed(() => {
 
 <template>
   <aside
-    v-if="appStore.factoryData && !appStore.formPageOpen"
-    class="fixed z-20 flex flex-col bg-white shadow-xl transition-transform duration-200 md:top-14 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
+    v-if="appStore.factoryData && !appStore.isCreateMode && !appStore.isEditMode"
+    class="fixed inset-x-0 bottom-0 z-20 flex flex-col bg-white shadow-xl transition-transform duration-200 md:top-14 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
     :class="[
       'inset-x-0 translate-y-0',
       full ? 'top-14' : 'top-[45%]',
@@ -156,7 +156,12 @@ const lastUpdatedAt = computed(() => {
       <ChevronLeft class="size-5 text-brand" :class="{ 'rotate-180': full }" />
     </button>
 
-    <div v-if="appStore.factoryData" ref="scroller" class="h-full overflow-y-auto">
+    <div
+      v-if="appStore.factoryData"
+      ref="scroller"
+      data-testid="detail-scroller"
+      class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+    >
       <div class="flex items-center justify-between bg-white px-4 pt-3 pb-2 md:hidden">
         <div class="flex items-center gap-1 text-sm text-brand-dark">
           <MapPin class="size-4" :style="{ color: statusColor ?? undefined }" />
@@ -237,15 +242,6 @@ const lastUpdatedAt = computed(() => {
 
         <hr class="my-4 border-brand-line" />
 
-        <button
-          v-if="!full"
-          type="button"
-          class="mb-4 flex items-center gap-1 text-sm font-medium text-brand md:hidden"
-          @click="appStore.expandFactoryDetail()"
-        >
-          顯示更多資訊 <ChevronDown class="size-4" />
-        </button>
-
         <div v-if="full">
           <h2 class="mb-5 text-xl font-medium text-brand-dark">其他工廠資訊</h2>
 
@@ -293,6 +289,15 @@ const lastUpdatedAt = computed(() => {
       </div>
     </div>
 
+    <button
+      v-if="!full"
+      type="button"
+      data-testid="expand-detail"
+      class="shrink-0 border-t border-brand-line bg-white px-4 py-3 text-sm font-medium text-brand md:hidden"
+      @click="appStore.expandFactoryDetail()"
+    >
+      <span class="inline-flex items-center gap-1">顯示更多資訊 <ChevronDown class="size-4" /></span>
+    </button>
   </aside>
 
   <AppModal
