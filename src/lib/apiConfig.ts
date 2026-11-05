@@ -2,29 +2,26 @@ import { ref, computed } from 'vue'
 
 const API_BASE_URL_KEY = 'api-base-url'
 
-// Default API base URL (build-time value)
-const defaultBaseURL = process.env.NODE_ENV === 'production' ? process.env.VUE_APP_BASE_URL : '/server/api'
+// In development we proxy `/server` to staging via Vite.
+const defaultBaseURL = import.meta.env.DEV
+  ? '/server/api'
+  : (import.meta.env.VITE_BASE_URL || 'https://api.disfactory.tw/api')
 
-// Reactive API base URL
-const customBaseURL = ref<string | null>(localStorage.getItem(API_BASE_URL_KEY))
+const storedBaseURL = typeof window !== 'undefined' ? (window.localStorage?.getItem(API_BASE_URL_KEY) ?? null) : null
+const customBaseURL = ref<string | null>(storedBaseURL)
 
-// Computed current base URL
 export const currentBaseURL = computed(() => customBaseURL.value || defaultBaseURL)
 
-// Get the default base URL
 export const getDefaultBaseURL = (): string => defaultBaseURL
 
-// Set custom base URL and save to localStorage
 export const setCustomBaseURL = (url: string): void => {
   customBaseURL.value = url
-  localStorage.setItem(API_BASE_URL_KEY, url)
+  window.localStorage?.setItem(API_BASE_URL_KEY, url)
 }
 
-// Reset to default base URL and remove from localStorage
 export const resetToDefaultBaseURL = (): void => {
   customBaseURL.value = null
-  localStorage.removeItem(API_BASE_URL_KEY)
+  window.localStorage?.removeItem(API_BASE_URL_KEY)
 }
 
-// Get current custom base URL (null if using default)
 export const getCustomBaseURL = (): string | null => customBaseURL.value

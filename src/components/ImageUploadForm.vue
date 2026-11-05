@@ -1,159 +1,138 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { CheckCircle2, X } from '@lucide/vue'
+import AppButton from './AppButton.vue'
+import AppTextField from './AppTextField.vue'
+import type { UploadedImage } from '@/api'
+
+const props = withDefaults(
+  defineProps<{
+    modelValue?: FileList | null
+    previewImages?: UploadedImage[]
+    uploading?: boolean
+    error?: boolean | null
+    onClickRemoveImage?: (image: UploadedImage) => void
+    submit?: () => void
+    valid?: boolean
+    formState?: { nickname?: string; contact?: string }
+    submitText?: string
+    disableProgressiveUpload?: boolean
+  }>(),
+  {
+    modelValue: null,
+    previewImages: () => [],
+    uploading: false,
+    error: null,
+    onClickRemoveImage: undefined,
+    submit: undefined,
+    valid: false,
+    formState: () => ({ nickname: '', contact: '' }),
+    submitText: '',
+    disableProgressiveUpload: false,
+  },
+)
+
+const emit = defineEmits<{
+  'update:modelValue': [FileList | null]
+  'update:formState': [{ nickname: string; contact: string }]
+}>()
+
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const onChange = (event: Event) => {
+  emit('update:modelValue', (event.target as HTMLInputElement).files)
+}
+
+const nickname = computed({
+  get: () => props.formState?.nickname ?? '',
+  set: (value: string) =>
+    emit('update:formState', { ...props.formState, nickname: value, contact: props.formState?.contact ?? '' }),
+})
+const contact = computed({
+  get: () => props.formState?.contact ?? '',
+  set: (value: string) =>
+    emit('update:formState', { ...props.formState, nickname: props.formState?.nickname ?? '', contact: value }),
+})
+
+const onSubmit = () => {
+  if (props.valid) props.submit?.()
+}
+</script>
+
 <template>
-  <div class="image-upload-form w-100">
-    <v-container style="max-width: 630px; position: relative;" class="pt-3 pt-md-12 pb-md-8">
-      <h2 class="mb-4 secondary--text">上傳工廠照片</h2>
+  <div
+    data-testid="image-upload-form"
+    class="absolute inset-x-0 top-14 bottom-0 z-10 overflow-y-auto bg-white"
+  >
+    <div class="mx-auto w-full max-w-[630px] px-4 pt-4 pb-24 md:pt-12">
+      <h2 class="mb-4 text-xl font-medium text-brand-dark">上傳工廠照片</h2>
+      <p class="mb-6 text-brand-dark">請至少上傳一張工廠照片。</p>
 
-      <p>請至少上傳一張工廠照片。</p>
-
-      <h3 class="mb-3 mt-7 primary--text required">工廠照片</h3>
-
-      <div class="flex align-items-center mb-3">
-        <v-btn :disabled="uploading" outlined class="mr-3">
-          <label>
-            <input multiple type="file" accept="image/*" ref="image" style="display: none;" @change="onChange" :disabled="uploading">
-              新增照片
-          </label>
-        </v-btn>
-
-        <span v-if="uploading && !disableProgressiveUpload">上傳中...</span>
-        <span v-if="valid && !uploading && !error && !disableProgressiveUpload">
-          上傳成功
-          <v-icon class="primary--text">mdi-checkbox-marked-circle</v-icon>
+      <h3 class="required mb-3 text-lg font-medium text-brand">工廠照片</h3>
+      <div class="mb-3 flex items-center gap-3">
+        <button
+          type="button"
+          class="rounded border border-brand px-4 py-2 text-sm font-medium text-brand transition hover:bg-brand hover:text-white disabled:opacity-50"
+          :disabled="uploading"
+          @click="fileInput?.click()"
+        >
+          新增照片
+        </button>
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/*"
+          multiple
+          class="hidden"
+          :disabled="uploading"
+          @change="onChange"
+        />
+        <span v-if="uploading && !disableProgressiveUpload" class="text-sm text-brand-gray">上傳中...</span>
+        <span
+          v-if="valid && !uploading && !error && !disableProgressiveUpload"
+          class="flex items-center gap-1 text-sm text-brand"
+        >
+          上傳成功 <CheckCircle2 class="size-4" />
         </span>
-        <span v-if="error && !disableProgressiveUpload">上傳錯誤</span>
+        <span v-if="error && !disableProgressiveUpload" class="text-sm text-brand-red">上傳錯誤</span>
       </div>
 
-      <div class="preview-images-container mb-2">
-        <div v-for="image of previewImages" :key="image.token" class="uploaded-image">
-          <img :src="image.src" />
-          <button class="remove-image-btn" @click="removeImage(image)" />
+      <div class="mb-4 grid grid-cols-2 gap-3">
+        <div
+          v-for="image in previewImages"
+          :key="image.token"
+          class="relative aspect-[2/1] overflow-hidden rounded border"
+        >
+          <img :src="image.src" class="h-full w-full object-cover" alt="" />
+          <button
+            type="button"
+            class="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white"
+            aria-label="移除照片"
+            @click="onClickRemoveImage?.(image)"
+          >
+            <X class="size-4" />
+          </button>
         </div>
       </div>
 
-      <hr>
+      <hr class="my-6 border-brand-line" />
 
-      <h2 class="mt-7 mb-2 secondary--text">聯絡資訊（非必填）</h2>
-
-      <p>
-        如果對於照片有疑問，<br>
-        我們會透過以下提供的資訊聯絡你。<br>
-        如不願揭露自己身份，可跳過不填。
+      <h2 class="mb-2 text-xl font-medium text-brand-dark">聯絡資訊（非必填）</h2>
+      <p class="mb-6 text-brand-dark">
+        如果對於照片有疑問，<br />我們會透過以下提供的資訊聯絡你。<br />如不願揭露自己身份，可跳過不填。
       </p>
 
-      <h3 class="primary--text mt-7 mb-2">聯絡人暱稱</h3>
+      <h3 class="mb-2 text-lg font-medium text-brand">聯絡人暱稱</h3>
+      <AppTextField v-model="nickname" placeholder="例：林先生、林小姐" />
 
-      <v-text-field
-        outlined
-        placeholder="例：林先生、林小姐"
-        :value="formState.nickname"
-        @input="$emit('update:formState', { ...formState, nickname: $event })"
-      ></v-text-field>
+      <h3 class="mt-7 mb-2 text-lg font-medium text-brand">聯絡方式（email 或電話）</h3>
+      <AppTextField v-model="contact" placeholder="例：abc@email.com、0920-123456" />
 
-      <h3 class="primary--text mt-7 mb-2">聯絡方式 (email或電話)</h3>
-
-      <v-text-field
-        outlined
-        placeholder="例：abc@email.com、0920-123456"
-        :value="formState.contact"
-        @input="$emit('update:formState', { ...formState, contact: $event })"
-      ></v-text-field>
-
-      <div class="bottom-button-container w-100 d-flex justify-center align-items-center px-xs-3 pb-md-9">
-        <v-btn x-large rounded @click="onSubmit" :disabled="!valid" style="width: 100%; max-width: 345px;" color="primary">
+      <div class="fixed inset-x-0 bottom-0 flex justify-center bg-white px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <AppButton class="max-w-[345px]" :disabled="!valid" @click="onSubmit">
           {{ submitText || '下一步' }}
-        </v-btn>
+        </AppButton>
       </div>
-    </v-container>
+    </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent } from 'vue'
-import { UploadedImage } from '../api'
-export default defineComponent({
-  props: {
-    previewImages: {
-      type: Array,
-      default: () => []
-    },
-    uploading: {
-      default: false
-    },
-    error: {
-      default: null
-    },
-    onClickRemoveImage: {
-      type: Function
-    },
-    submit: {
-      type: Function
-    },
-    valid: {
-      type: Boolean,
-      default: false
-    },
-    formState: {
-      type: Object
-    },
-    submitText: {
-      type: String
-    },
-    disableProgressiveUpload: {
-      type: Boolean,
-      default: false
-    }
-  },
-  name: 'ImageUploadForm',
-  setup (props, context) {
-    return {
-      images: [],
-      onChange: function (e: InputEvent) {
-        context.emit('input', (e.target as HTMLInputElement).files)
-      },
-      onSubmit () {
-        if (props.valid && typeof props.submit === 'function') {
-          props.submit()
-        }
-      },
-      removeImage: (image: UploadedImage) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        props.onClickRemoveImage!(image)
-      }
-    }
-  }
-})
-</script>
-
-<style lang="scss" scoped>
-@import '@/styles/components/preview-images.scss';
-
-.image-upload-form {
-  @import '@/styles/typography.scss';
-
-  background-color: white;
-  z-index: 1;
-  position: absolute;
-  height: 100%;
-
-  padding-bottom: 50px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.bottom-button-container {
-  background: white;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  padding: 10px 15px;
-}
-
-hr {
-  color: #EAF3BF;
-  border-color: #EAF3BF;
-  background-color: #EAF3BF;
-  height: 1px;
-  border-width: inherit;
-}
-
-</style>

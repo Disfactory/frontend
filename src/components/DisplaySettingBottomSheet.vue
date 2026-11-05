@@ -1,151 +1,123 @@
-<template>
-  <span>
-    <v-menu
-      v-if="$vuetify.breakpoint.mdAndUp"
-      content-class="display-setting-popover"
-      v-model="isOpen"
-      :close-on-content-click="false"
-      :nudge-width="200"
-      offset-y
-    >
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn
-          color="primary"
-          class="mx-2 mb-5 white--text"
-          v-bind="attrs"
-          v-on="on"
-        >
-          顯示設定
-        </v-btn>
-      </template>
-      <v-card>
-        <v-list>
-          <v-list-item>
-            <h2 class="primary--text text-button">農地範圍 •</h2>
-            <v-btn
-              text
-              x-small
-              class="primary--text"
-              :class="
-                !isLUIMapVisable ? 'font-weight-bold' : 'font-weight-light'
-              "
-              @click="isLUIMapVisable = false"
-              >隱藏</v-btn
-            >
-            <v-btn
-              text
-              x-small
-              class="primary--text"
-              :class="
-                isLUIMapVisable ? 'font-weight-bold' : 'font-weight-light'
-              "
-              @click="isLUIMapVisable = true"
-              >顯示</v-btn
-            >
-          </v-list-item>
-          <v-list-item>
-            <switch-map-mode-button :isInSheet="true" />
-          </v-list-item>
-        </v-list>
-      </v-card>
-    </v-menu>
-
-    <!-- Mobile -->
-    <v-bottom-sheet v-else v-model="isOpen">
-      <template v-slot:activator="{ on, attrs }">
-        <v-btn
-          color="primary"
-          class="mx-2 mb-5 white--text"
-          v-bind="attrs"
-          v-on="on"
-        >
-          顯示設定
-        </v-btn>
-      </template>
-      <v-list>
-        <v-subheader>地圖顯示設定</v-subheader>
-        <v-list-item>
-          <h2 class="primary--text text-button">農地範圍 •</h2>
-          <v-btn
-            text
-            x-small
-            class="primary--text"
-            :class="!isLUIMapVisable ? 'font-weight-bold' : 'font-weight-light'"
-            @click="isLUIMapVisable = false"
-            >隱藏</v-btn
-          >
-          <v-btn
-            text
-            x-small
-            class="primary--text"
-            :class="isLUIMapVisable ? 'font-weight-bold' : 'font-weight-light'"
-            @click="isLUIMapVisable = true"
-            >顯示</v-btn
-          >
-        </v-list-item>
-        <v-list-item>
-          <switch-map-mode-button :isInSheet="true" />
-        </v-list-item>
-      </v-list>
-    </v-bottom-sheet>
-  </span>
-</template>
-
-<script lang="ts">
-import { defineComponent, ref, inject, computed } from 'vue'
-import { MainMapControllerSymbol } from '@/symbols'
-import { MapFactoryController } from '@/lib/map'
-
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { onClickOutside, onKeyStroke, useMediaQuery } from '@vueuse/core'
 import SwitchMapModeButton from '@/components/SwitchMapModeButton.vue'
+import { useMapStore } from '@/stores/map'
 
-export default defineComponent({
-  name: 'DisplaySettingBottomSheet',
-  components: {
-    SwitchMapModeButton
-  },
-  setup () {
-    const isOpen = ref(false)
-    const mapController = inject(
-      MainMapControllerSymbol,
-      ref<MapFactoryController>()
-    )
+const mapStore = useMapStore()
+const isDesktop = useMediaQuery('(min-width: 960px)')
+const isOpen = ref(false)
+const panel = ref<HTMLElement | null>(null)
 
-    const isLUIMapVisable$ = ref(false)
-    const isLUIMapVisable = computed({
-      get: () => {
-        return !!mapController.value?.mapInstance.getLUILayerVisible()
-      },
-      set: value => {
-        mapController.value?.mapInstance.setLUILayerVisible(value)
-        isLUIMapVisable$.value = value
-      }
-    })
+onClickOutside(panel, () => {
+  if (isDesktop.value) isOpen.value = false
+})
 
-    return {
-      isOpen,
-      isLUIMapVisable
-    }
-  }
+onKeyStroke('Escape', () => {
+  if (isDesktop.value) isOpen.value = false
+})
+
+const isLUIMapVisible = computed({
+  get: () => mapStore.luiVisible,
+  set: (value: boolean) => mapStore.setLUIVisible(value),
 })
 </script>
 
-<style lang="scss" scoped>
-.display-setting-popover {
-  margin-top: 20px;
-  contain: initial;
-  overflow: visible;
+<template>
+  <div ref="panel" class="relative shrink-0">
+    <button
+      type="button"
+      class="min-w-[94px] rounded bg-brand px-4 py-2 text-sm font-medium text-white shadow-md"
+      @click="isOpen = !isOpen"
+    >
+      顯示設定
+    </button>
+
+    <Transition name="menu">
+      <div
+        v-if="isDesktop && isOpen"
+        class="absolute top-full left-0 z-30 mt-9 w-[294px] rounded bg-white p-4 shadow-xl"
+    >
+      <div class="flex items-center justify-between gap-2 border-b border-black/5 pb-3">
+        <h2 class="text-base font-bold text-brand">農地範圍 •</h2>
+        <div class="flex gap-1">
+          <button
+            type="button"
+            class="rounded px-2 py-1 text-sm text-brand"
+            :class="!isLUIMapVisible ? 'font-bold' : 'font-light'"
+            @click="isLUIMapVisible = false"
+          >
+            隱藏
+          </button>
+          <button
+            type="button"
+            class="rounded px-2 py-1 text-sm text-brand"
+            :class="isLUIMapVisible ? 'font-bold' : 'font-light'"
+            @click="isLUIMapVisible = true"
+          >
+            顯示
+          </button>
+        </div>
+      </div>
+        <div class="pt-3">
+          <SwitchMapModeButton :is-in-sheet="true" />
+        </div>
+      </div>
+    </Transition>
+  </div>
+
+  <Teleport to="body">
+    <div
+      v-if="!isDesktop"
+      class="fixed inset-0 z-[80] transition-opacity duration-200"
+      :class="isOpen ? 'visible opacity-100' : 'invisible pointer-events-none opacity-0'"
+    >
+      <div class="absolute inset-0 bg-black/45" @click="isOpen = false" />
+      <div
+        data-testid="display-settings-sheet"
+        class="absolute inset-x-0 bottom-0 bg-white px-4 pt-2 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-2xl transition-transform duration-300 ease-out"
+        :class="isOpen ? 'translate-y-0' : 'translate-y-full'"
+        @click.stop
+      >
+        <p class="py-2 text-sm text-brand-gray-light">地圖顯示設定</p>
+        <div class="flex items-center justify-between gap-2 border-b border-black/5 py-3">
+          <h2 class="text-base font-bold text-brand">農地範圍 •</h2>
+          <div class="flex gap-1">
+            <button
+              type="button"
+              class="rounded px-2 py-1 text-sm text-brand"
+              :class="!isLUIMapVisible ? 'font-bold' : 'font-light'"
+              @click="isLUIMapVisible = false"
+            >
+              隱藏
+            </button>
+            <button
+              type="button"
+              class="rounded px-2 py-1 text-sm text-brand"
+              :class="isLUIMapVisible ? 'font-bold' : 'font-light'"
+              @click="isLUIMapVisible = true"
+            >
+              顯示
+            </button>
+          </div>
+        </div>
+        <div class="pt-3">
+          <SwitchMapModeButton :is-in-sheet="true" />
+        </div>
+      </div>
+    </div>
+  </Teleport>
+</template>
+
+<style scoped>
+.menu-enter-active,
+.menu-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
 }
-.display-setting-popover::before {
-  position: absolute;
-  content: "";
-  top: 0;
-  left: 30px;
-  transform: translateY(-100%);
-  width: 10px;
-  height: 13px;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 13px solid #fff;
-  z-index: 1;
+
+.menu-enter-from,
+.menu-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
 }
 </style>

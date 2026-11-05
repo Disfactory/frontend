@@ -1,20 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { getCurrentInstance } from 'vue'
+type GAEventPayload = Record<string, unknown> & { event: string }
 
-export function useGA () {
-  const instance = getCurrentInstance()
-  const gtag = (instance?.proxy as any)?.$gtag
+declare global {
+  interface Window {
+    dataLayer?: GAEventPayload[]
+  }
+}
 
-  const pageview = (path: string) => {
-    if (gtag) {
-      gtag.pageview({ page_path: path })
-    }
+export function useGA() {
+  const push = (payload: GAEventPayload) => {
+    window.dataLayer?.push(payload)
   }
 
-  const event = (event: string, data: any = {}) => {
-    if (gtag) {
-      gtag.event(event, data)
-    }
+  const pageview = (path: string) => {
+    push({ event: 'page_view', page_path: path })
+  }
+
+  const event = (name: string, data: Record<string, unknown> = {}) => {
+    push({ event: name, ...data })
   }
 
   return { pageview, event }

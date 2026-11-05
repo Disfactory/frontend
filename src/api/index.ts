@@ -1,224 +1,225 @@
-import axios from 'axios'
-import { FactoryPostData, FactoryData, FactoriesResponse, FactoryImage, ReportRecord } from '@/types'
-import EXIF from '@disfactory/exif-js'
+import exifr from 'exifr'
 import { currentBaseURL } from '@/lib/apiConfig'
-import { watch } from 'vue'
+import type {
+  FactoryData,
+  FactoriesResponse,
+  FactoryImage,
+  FactoryPostData,
+  FactoryType,
+  ReportRecord,
+} from '@/types'
 
-const instance = axios.create({
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
-
-// Update base URL whenever currentBaseURL changes
-const updateBaseURL = () => {
-  instance.defaults.baseURL = currentBaseURL.value
-}
-
-// Set initial base URL and watch for changes
-updateBaseURL()
-watch(currentBaseURL, updateBaseURL)
-
-type ImageResponse = {
+export type UploadedImage = {
   token: string
+  src: string
 }
+export type UploadedImages = UploadedImage[]
 
-export type UploadedImages = {
-  token: string,
-  src: string // used for preview images
-}[]
-
-// Image upload provider configuration
 type ImageUploadProvider = 'imgur' | 'backend'
-const IMAGE_UPLOAD_PROVIDER: ImageUploadProvider = (process.env.VUE_APP_IMAGE_UPLOAD_PROVIDER as ImageUploadProvider) || 'imgur'
-const IMAGE_UPLOAD_URL = process.env.VUE_APP_IMAGE_UPLOAD_URL || ''
-
-export async function getFactories (range: number, lng: number, lat: number): Promise<FactoriesResponse> {
-  try {
-    const { data } = await instance.get(`/factories?range=${range}&lng=${lng}&lat=${lat}`)
-    return data
-  } catch (err) {
-    console.error(err)
-    throw new TypeError('Get factory failed')
-  }
-}
-
-export async function getFactory (factoryId: string): Promise<FactoryData> {
-  try {
-    const { data } = await instance.get(`/factories/${factoryId}`)
-    return data
-  } catch (err) {
-    console.error(err)
-    throw new TypeError('Get factory failed')
-  }
-}
-
+const IMAGE_UPLOAD_PROVIDER: ImageUploadProvider =
+  (import.meta.env.VITE_IMAGE_UPLOAD_PROVIDER as ImageUploadProvider) || 'backend'
+const IMAGE_UPLOAD_URL = import.meta.env.VITE_IMAGE_UPLOAD_URL || ''
+const IMGUR_FALLBACK_URL = import.meta.env.VITE_IMGUR_FALLBACK_URL || ''
 const IMGUR_CLIENT_ID = '39048813b021935'
 
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetch(`${currentBaseURL.value}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status} ${response.statusText}`)
+  }
+
+  return (await response.json()) as T
+}
+
+export async function getFactories(range: number, lng: number, lat: number): Promise<FactoriesResponse> {
+  try {
+    return await request<FactoriesResponse>(`/factories?range=${range}&lng=${lng}&lat=${lat}`)
+  } catch (err) {
+    console.error(err)
+    throw new TypeError('Get factory failed')
+  }
+}
+
+export async function getFactory(factoryId: string): Promise<FactoryData> {
+  try {
+    return await request<FactoryData>(`/factories/${factoryId}`)
+  } catch (err) {
+    console.error(err)
+    throw new TypeError('Get factory failed')
+  }
+}
+
 type ImageUploadResult = {
-  link: string,
-  deletehash: string,
+  link: string
+  deletehash: string
   file: File
 }
 
-async function uploadToImgur (file: File): Promise<ImageUploadResult> {
+async function uploadToImgur(file: File): Promise<ImageUploadResult> {
   const formData = new FormData()
   formData.append('image', file)
 
-  const { data } = await axios({
+  const response = await fetch('https://api.imgur.com/3/image', {
     method: 'POST',
-    url: 'https://api.imgur.com/3/image',
-    data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      Authorization: `Client-ID ${IMGUR_CLIENT_ID}`
-    }
+    body: formData,
+    headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}` },
   })
+  if (!response.ok) throw new Error('Imgur upload failed')
+  const data = await response.json()
 
-  return {
-    link: data.data.link as string,
-    deletehash: data.data.deletehash as string,
-    file
-  }
+  return { link: data.data.link as string, deletehash: data.data.deletehash as string, file }
 }
 
-async function uploadToBackend (file: File): Promise<ImageUploadResult> {
+async function uploadToBackend(file: File): Promise<ImageUploadResult> {
   const formData = new FormData()
   formData.append('image', file)
 
-  // Use the configured backend upload URL, or construct from current base URL
   const uploadUrl = IMAGE_UPLOAD_URL || `${currentBaseURL.value}/upload`
+  const response = await fetch(uploadUrl, { method: 'POST', body: formData })
+  if (!response.ok) throw new Error('Image upload failed')
+  const data = await response.json()
 
-  const { data } = await axios({
-    method: 'POST',
-    url: uploadUrl,
-    data: formData,
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-
-  // Backend returns Imgur-compatible response format
   if (!data.success) {
     throw new Error(data.data?.error || 'Image upload failed')
   }
 
-  return {
-    link: data.data.link as string,
-    deletehash: data.data.deletehash as string,
-    file
-  }
+  return { link: data.data.link as string, deletehash: data.data.deletehash as string, file }
 }
 
-// Upload image using configured provider
-async function uploadImage (file: File): Promise<ImageUploadResult> {
-  if (IMAGE_UPLOAD_PROVIDER === 'backend') {
-    return uploadToBackend(file)
-  }
+async function uploadImage(file: File): Promise<ImageUploadResult> {
+  if (IMAGE_UPLOAD_PROVIDER === 'backend') return uploadToBackend(file)
   return uploadToImgur(file)
 }
 
-const convertTurple2Number = (input: [number, number, number]) => input[0] + (input[1] / 60) + (input[2] / 3600)
-
-type ExifData = { DateTimeOriginal?: string, GPSLatitude?: [number, number, number], GPSLongitude?: [number, number, number] }
-type AfterExifData = { Latitude?: number, Longitude?: number, DateTimeOriginal?: string }
-
-function readImageExif (file: File): Promise<AfterExifData> {
-  const fileReader = new FileReader()
-  return new Promise((resolve) => {
-    fileReader.onload = (e: ProgressEvent<FileReader>) => {
-      if (!e.target) {
-        resolve({})
-        return
-      }
-      const data: ExifData = EXIF.readFromBinaryFile(e.target.result)
-
-      const result: AfterExifData = {}
-      if (data.GPSLatitude) {
-        result.Latitude = convertTurple2Number(data.GPSLatitude)
-      }
-      if (data.GPSLongitude) {
-        result.Longitude = convertTurple2Number(data.GPSLongitude)
-      }
-      if (data.DateTimeOriginal) {
-        result.DateTimeOriginal = data.DateTimeOriginal
-      }
-
-      resolve(result)
-    }
-    fileReader.readAsArrayBuffer(file)
-  })
+type AfterExifData = {
+  Latitude?: number
+  Longitude?: number
+  DateTimeOriginal?: string
 }
 
-export type UploadedImage = {
-  token: string,
-  src: string
-}
-
-async function uploadExifAndGetToken ({ link, file, deletehash }: { link: string, file: File, deletehash: string }) {
-  const exifData = await readImageExif(file)
-  const { data }: { data: ImageResponse } = await instance.post('/images', { url: link, ...exifData, deletehash })
-
-  return {
-    token: data.token,
-    src: URL.createObjectURL(file)
-  } as UploadedImage
-}
-
-export async function uploadImages (files: FileList): Promise<UploadedImages> {
-  return Promise.all(
-    Array.from(files).map((file) => uploadImage(file).then((el) => uploadExifAndGetToken(el)))
-  )
-}
-
-export async function updateFactoryImages (factoryId: string, files: FileList, { nickname, contact }: { nickname?: string, contact?: string }) {
-  return Promise.all(
-    Array.from(files).map((file) => uploadImage(file).then((el) => (async () => {
-      const exifData = await readImageExif(el.file)
-      const { data }: { data: FactoryImage } = await instance.post(`/factories/${factoryId}/images`, { url: el.link, ...exifData, nickname, contact, deletehash: el.deletehash })
-      data.image_path = el.link
-      return data
-    })()))
-  )
-}
-
-export async function createFactory (factory: FactoryPostData): Promise<FactoryData> {
+async function readImageExif(file: File): Promise<AfterExifData> {
   try {
-    const { data }: { data: FactoryData } = await instance.post('/factories', JSON.stringify(factory))
+    const [gps, exif] = await Promise.all([
+      exifr.gps(file),
+      exifr.parse(file, ['DateTimeOriginal']),
+    ])
+    const date = exif?.DateTimeOriginal
+    return {
+      Latitude: gps?.latitude,
+      Longitude: gps?.longitude,
+      DateTimeOriginal:
+        date instanceof Date ? date.toISOString() : (date as string | undefined),
+    }
+  } catch (err) {
+    console.warn('Unable to read EXIF metadata', err)
+    return {}
+  }
+}
 
-    return data
+type ImageResponse = { token: string }
+
+async function uploadExifAndGetToken({
+  link,
+  file,
+  deletehash,
+}: ImageUploadResult): Promise<UploadedImage> {
+  const exifData = await readImageExif(file)
+  const data = await request<ImageResponse>('/images', {
+    method: 'POST',
+    body: JSON.stringify({ url: link, ...exifData, deletehash }),
+  })
+
+  return { token: data.token, src: URL.createObjectURL(file) }
+}
+
+export async function uploadImages(files: FileList | File[]): Promise<UploadedImages> {
+  return Promise.all(Array.from(files).map((file) => uploadImage(file).then(uploadExifAndGetToken)))
+}
+
+export async function updateFactoryImages(
+  factoryId: string,
+  files: FileList | File[],
+  { nickname, contact }: { nickname?: string; contact?: string },
+) {
+  return Promise.all(
+    Array.from(files).map((file) =>
+      uploadImage(file).then(async (el) => {
+        const exifData = await readImageExif(el.file)
+        const data = await request<FactoryImage>(`/factories/${factoryId}/images`, {
+          method: 'POST',
+          body: JSON.stringify({
+            url: el.link,
+            ...exifData,
+            nickname,
+            contact,
+            deletehash: el.deletehash,
+          }),
+        })
+        data.image_path = el.link
+        return data
+      }),
+    ),
+  )
+}
+
+export async function createFactory(factory: FactoryPostData): Promise<FactoryData> {
+  try {
+    return await request<FactoryData>('/factories', {
+      method: 'POST',
+      body: JSON.stringify(factory),
+    })
   } catch (err) {
     console.error(err)
     throw new TypeError('Create factory failed')
   }
 }
 
-// !FIXME: add more factory fields
-type UpdatableFactoryFields = {
-  name: string,
-  nickname: string,
-  contact: string,
-  others: string,
-  images: string[]
+// The update endpoint (`PUT /factories/:id`) uses `factory_type`, while
+// read/create payloads expose the same value as `type`.
+export type UpdatableFactoryFields = {
+  name?: string
+  nickname?: string
+  contact?: string
+  others?: string
+  images?: string[]
+  factory_type?: FactoryType
+  type?: FactoryType
 }
 
-export async function updateFactory (factoryId: string, factoryData: Partial<UpdatableFactoryFields>): Promise<FactoryData> {
+export async function updateFactory(
+  factoryId: string,
+  factoryData: Partial<UpdatableFactoryFields>,
+): Promise<FactoryData> {
   try {
-    const { data }: { data: FactoryData } = await instance.put(`/factories/${factoryId}`, JSON.stringify(factoryData))
-
-    return data
+    return await request<FactoryData>(`/factories/${factoryId}`, {
+      method: 'PUT',
+      body: JSON.stringify(factoryData),
+    })
   } catch (err) {
     console.error(err)
     throw new TypeError('Update factory failed')
   }
 }
 
-export async function getFactoryReportRecords (factoryId: string) {
+export async function getFactoryReportRecords(factoryId: string): Promise<ReportRecord[]> {
   try {
-    const { data }: { data: ReportRecord[] } = await instance.get(`/factories/${factoryId}/report_records`)
-    return data
+    return await request<ReportRecord[]>(`/factories/${factoryId}/report_records`)
   } catch (err) {
     console.error(err)
     throw new TypeError('Fetch factory error')
   }
+}
+
+export const getImgurFallbackUrl = (src: string) => {
+  const match = /i\.imgur\.com\/([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)(\?.*)?$/.exec(src)
+  if (!match) return src
+  const base = IMGUR_FALLBACK_URL || '/server/imgur'
+  return `${base}/${match[1]}.${match[2]}`
 }

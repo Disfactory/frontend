@@ -1,109 +1,108 @@
-import { Map as OlMap, View, Feature, MapBrowserEvent } from 'ol'
+import OlMap from 'ol/Map'
+import type { MapOptions } from 'ol/Map'
+import type MapBrowserEvent from 'ol/MapBrowserEvent'
+import Feature from 'ol/Feature'
+import View from 'ol/View'
 import { Style, Icon, Circle, Fill, Stroke, Text } from 'ol/style'
-import IconAnchorUnits from 'ol/style/IconAnchorUnits'
-import { Point } from 'ol/geom'
+import Point from 'ol/geom/Point'
 import WMTS from 'ol/source/WMTS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS'
 import { get as getProjection, transform, transformExtent } from 'ol/proj'
 import { getWidth, getTopLeft } from 'ol/extent'
-import { Tile as TileLayer, Vector as VectorLayer, Layer } from 'ol/layer'
+import TileLayer from 'ol/layer/Tile'
+import VectorLayer from 'ol/layer/Vector'
+import VectorTileLayer from 'ol/layer/VectorTile'
 import { Vector as VectorSource, OSM, Cluster } from 'ol/source'
+import VectorTileSource from 'ol/source/VectorTile'
+import MVT from 'ol/format/MVT'
 import { Zoom, ScaleLine, Rotate, Attribution } from 'ol/control'
 import Geolocation from 'ol/Geolocation'
 import { defaults as defaultInteractions, PinchRotate } from 'ol/interaction'
+import { stylefunction } from 'ol-mapbox-style'
 
-import { FactoryData, defaultFactoryDisplayStatuses, FactoryDisplayStatusType, FactoryDisplayStatuses } from '../types'
-import { flipArgriculturalLand } from '../lib/image'
-import { MapOptions } from 'ol/PluggableMap'
-import IconOrigin from 'ol/style/IconOrigin'
-import VectorTileLayer from 'ol/layer/VectorTile'
-import VectorTileSource from 'ol/source/VectorTile'
-import MVT from 'ol/format/MVT'
-import VectorTileRenderType from 'ol/layer/VectorTileRenderType'
-import stylefunction from 'ol-mapbox-style/dist/stylefunction'
+import {
+  type FactoryData,
+  type FactoryDisplayStatusType,
+  FactoryDisplayStatuses,
+  defaultFactoryDisplayStatuses,
+} from '../types'
+import { flipArgriculturalLand } from './image'
 import { baseStyle } from './layerStyle'
 import FactoryPointCache from './utils/factoryPointCache'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
+
 export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
-  // We use == instead of === here because `type` can be either a string or number
-  // == results in a form of typecasting that works good enough for here
-  // eslint-disable-next-line
-  return FactoryDisplayStatuses.find(s => s.type == status)?.color
+  // We use == instead of === here because `type` can be either a string or number.
+   
+  return FactoryDisplayStatuses.find((s) => s.type == status)?.color
 }
 
-export function getFactoryStatus (factory: FactoryData): FactoryDisplayStatusType {
-  if (factory.wont_fix) {
-    return FactoryDisplayStatuses[4].type
-  } else if (factory.document_display_status) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return FactoryDisplayStatuses.find(s => s.documentDisplayStatuses.includes(factory.document_display_status!))?.type as FactoryDisplayStatusType
-  } else {
-    return FactoryDisplayStatuses[0].type
+export function getFactoryStatus(factory: FactoryData): FactoryDisplayStatusType {
+  if (factory.wont_fix) return FactoryDisplayStatuses[4]!.type
+  if (factory.document_display_status) {
+    return (
+      (FactoryDisplayStatuses.find((s) =>
+        s.documentDisplayStatuses.includes(factory.document_display_status!),
+      )?.type as FactoryDisplayStatusType) ?? FactoryDisplayStatuses[0]!.type
+    )
   }
+  return FactoryDisplayStatuses[0]!.type
 }
 
 export enum BASE_MAP {
   OSM,
   TAIWAN,
   SATELITE,
-  PROTOMAP
+  PROTOMAP,
 }
 
 export const BASE_MAP_NAME = {
   [BASE_MAP.OSM]: '簡易地圖',
   [BASE_MAP.TAIWAN]: '詳細地圖',
   [BASE_MAP.SATELITE]: '衛星地圖',
-  [BASE_MAP.PROTOMAP]: '向量地圖'
+  [BASE_MAP.PROTOMAP]: '向量地圖',
 }
 
 type ButtonElements = {
-  zoomIn: HTMLImageElement,
+  zoomIn: HTMLImageElement
   zoomOut: HTMLImageElement
 }
 
-const makeMapButtons = () => {
-  return Object.entries({
+const makeMapButtons = () =>
+  Object.entries({
     zoomIn: '/images/zoom-in.svg',
-    zoomOut: '/images/zoom-out.svg'
-  }).reduce((acc, [key, image]) => {
+    zoomOut: '/images/zoom-out.svg',
+  }).reduce<Partial<ButtonElements>>((acc, [key, image]) => {
     const label = document.createElement('img')
     label.setAttribute('src', image)
-    label.setAttribute('alt',
-      key === 'zoomIn' ? '放大' : '縮小')
-
-    return {
-      ...acc,
-      [key]: label
-    }
+    label.setAttribute('alt', key === 'zoomIn' ? '放大' : '縮小')
+    return { ...acc, [key]: label }
   }, {}) as ButtonElements
-}
 
-const iconStyleMap = defaultFactoryDisplayStatuses.reduce((acc, status) => ({
-  ...acc,
-  [status]: new Style({
-    image: new Icon({
-      anchorYUnits: IconAnchorUnits.PIXELS,
-      anchorOrigin: IconOrigin.BOTTOM_LEFT,
-      src: getFactoryStatusImage(status)
+const iconStyleMap = defaultFactoryDisplayStatuses.reduce(
+  (acc, status) => ({
+    ...acc,
+    [status]: new Style({
+      image: new Icon({
+        anchorYUnits: 'pixels',
+        anchorOrigin: 'bottom-left',
+        src: getFactoryStatusImage(status),
+      }),
+      zIndex: defaultFactoryDisplayStatuses.indexOf(status),
     }),
-    zIndex: defaultFactoryDisplayStatuses.indexOf(status)
-  })
-}), {}) as {[key in FactoryDisplayStatusType]: Style}
+  }),
+  {},
+) as { [key in FactoryDisplayStatusType]: Style }
 
 const nullStyle = new Style({})
 
 const minimapPinStyle = new Style({
   image: new Circle({
-    fill: new Fill({
-      color: '#A22929'
-    }),
+    fill: new Fill({ color: '#A22929' }),
     radius: 12,
-    stroke: new Stroke({
-      color: '#FFFFFF',
-      width: 1
-    })
-  })
+    stroke: new Stroke({ color: '#FFFFFF', width: 1 }),
+  }),
 })
 
 export const featureStyleCache = new Map<string, Style>()
@@ -111,96 +110,84 @@ export const featureStyleCache = new Map<string, Style>()
 export class MapFactoryController {
   private _map: OLMap
   private appliedFilters: FactoryDisplayStatusType[] = defaultFactoryDisplayStatuses
-  private _factoriesLayerSource?: VectorSource
-  private _factoriesLayerStatusMap: {[key: string]: VectorSource}
+  private _factoriesLayerStatusMap: Record<string, VectorSource>
   private factoryMap = new Map<string, FactoryData>()
 
-  constructor (map: OLMap) {
+  constructor(map: OLMap) {
     this._map = map
-    this._factoriesLayerStatusMap = {} as {[key: string]: VectorSource}
+    this._factoriesLayerStatusMap = {}
   }
 
-  get mapInstance () {
+  get mapInstance() {
     return this._map
   }
 
-  get factories () {
+  get factories() {
     return [...this.factoryMap.values()]
   }
 
-  getFactoriesLayerForStatus (factoryStatus: FactoryDisplayStatusType) {
+  getFactoriesLayerForStatus(factoryStatus: FactoryDisplayStatusType) {
     const CLUSTER_DISTANCE = 50
     if (!this._factoriesLayerStatusMap[`${factoryStatus}`]) {
-      this._factoriesLayerStatusMap[`${factoryStatus}`] = new VectorSource({ features: [] })
-      const clusterSource = new Cluster({
-        distance: CLUSTER_DISTANCE,
-        source: this._factoriesLayerStatusMap[`${factoryStatus}`]
-      })
-      const styleCache = {}
+      const source = new VectorSource({ features: [] })
+      this._factoriesLayerStatusMap[`${factoryStatus}`] = source
+
+      const clusterSource = new Cluster({ distance: CLUSTER_DISTANCE, source })
+      const styleCache: Record<number, Style> = {}
+
       const vectorLayer = new VectorLayer({
         source: clusterSource,
         zIndex: 3,
         style: (feature, resolution) => {
-          const zoom = this.mapInstance.map.getView().getZoom()!
-
+          void resolution
+          const zoom = this.mapInstance.map.getView().getZoom() ?? 0
           const clusterDistance = clusterSource.getDistance()
-          if (zoom > 16) {
-            if (clusterDistance !== 0) clusterSource.setDistance(0)
-          } else {
-            if (clusterDistance !== CLUSTER_DISTANCE) clusterSource.setDistance(CLUSTER_DISTANCE)
+
+          if (zoom > 16 && clusterDistance !== 0) clusterSource.setDistance(0)
+          else if (zoom <= 16 && clusterDistance !== CLUSTER_DISTANCE) {
+            clusterSource.setDistance(CLUSTER_DISTANCE)
           }
 
-          const features = feature.get('features')
+          const features = feature.get('features') as Feature[]
           if (features.length > 1) {
             const size = features.length
-            // eslint-disable-next-line
-            // @ts-ignore
             let style = styleCache[size]
             if (!style) {
               style = new Style({
                 image: new Circle({
                   radius: 20,
-                  stroke: new Stroke({
-                    color: '#fff'
-                  }),
-                  fill: new Fill({
-                    color: getStatusBorderColor(factoryStatus)
-                  })
+                  stroke: new Stroke({ color: '#fff' }),
+                  fill: new Fill({ color: getStatusBorderColor(factoryStatus) }),
                 }),
                 text: new Text({
                   text: size.toString(),
-                  fill: new Fill({
-                    color: '#fff'
-                  }),
-                  scale: 1.8
-                })
+                  fill: new Fill({ color: '#fff' }),
+                  scale: 1.8,
+                }),
               })
-              // eslint-disable-next-line
-              // @ts-ignore
               styleCache[size] = style
             }
             return style
-          } else {
-            const factoryFeature = features[0]
-            ;(feature as Feature).set('factoryId', factoryFeature.get('factoryId'))
-            return factoryFeature.getStyle()
           }
-        }
+
+          const factoryFeature = features[0]!
+          ;(feature as Feature).set('factoryId', factoryFeature.get('factoryId'))
+          return (factoryFeature.getStyle() as Style) ?? undefined
+        },
       })
       vectorLayer.setProperties({ factoryStatus })
       this.mapInstance.map.addLayer(vectorLayer)
     }
-    return this._factoriesLayerStatusMap[`${factoryStatus}`]
+
+    return this._factoriesLayerStatusMap[`${factoryStatus}`]!
   }
 
-  public getFactory (id: string) {
+  getFactory(id: string) {
     return this.factoryMap.get(id)
   }
 
-  public updateFactory (id: string, factory: FactoryData) {
+  updateFactory(id: string, factory: FactoryData) {
     this.factoryMap.set(id, factory)
-
-    // Update factory feature style base on new data
     const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(id)
     if (feature) {
       const style = this.getFactoryStyle(factory)
@@ -209,101 +196,89 @@ export class MapFactoryController {
     }
   }
 
-  public addFactories (factories: FactoryData[]) {
-    const createFactoryFeature = this.createFactoryFeature.bind(this)
-    const factoriesToAdd = [] as FactoryData[]
-    const factoriesToUpdate = [] as FactoryData[]
-
-    factories.forEach(factory => {
-      if (this.factoryMap.has(factory.id)) {
-        factoriesToUpdate.push(factory)
-      } else {
-        factoriesToAdd.push(factory)
-      }
+  addFactories(factories: FactoryData[]) {
+    const factoriesToAdd: FactoryData[] = []
+    factories.forEach((factory) => {
+      if (!this.factoryMap.has(factory.id)) factoriesToAdd.push(factory)
     })
 
-    const features = factoriesToAdd.map(createFactoryFeature).filter(Boolean) as Feature[]
-    interface FeatureFactoryStatusMap {
-      [key: string]: Feature[]
-    }
-    const featuresByFactoryStatus = {} as FeatureFactoryStatusMap
+    const features = factoriesToAdd
+      .map((factory) => this.createFactoryFeature(factory))
+      .filter(Boolean) as Feature[]
+
+    const featuresByFactoryStatus: Record<string, Feature[]> = {}
     features.forEach((feature) => {
-      if (!featuresByFactoryStatus[feature.get('factoryStatus')]) {
-        featuresByFactoryStatus[feature.get('factoryStatus')] = []
-      }
-      featuresByFactoryStatus[feature.get('factoryStatus')].push(feature)
-    })
-    Object.entries(featuresByFactoryStatus).forEach(([factoryStatus, features]) => {
-      this.getFactoriesLayerForStatus(factoryStatus as FactoryDisplayStatusType).addFeatures(features)
+      const status = feature.get('factoryStatus') as string
+      featuresByFactoryStatus[status] ??= []
+      featuresByFactoryStatus[status].push(feature)
     })
 
-    // ? Disable updating factory style when fetching new factories, user now should refresh the page manually to get factory status updated
-    // factoriesToUpdate.forEach((factory) => this.updateFactory(factory.id, factory))
-  }
-
-  public hideFactories (factories: FactoryData[]) {
-    factories.forEach(factory => {
-      const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(factory.id)
-      feature.setStyle(nullStyle)
+    Object.entries(featuresByFactoryStatus).forEach(([status, statusFeatures]) => {
+      this.getFactoriesLayerForStatus(status as FactoryDisplayStatusType).addFeatures(
+        statusFeatures,
+      )
     })
   }
 
-  public setFactoryStatusFilter (filters: FactoryDisplayStatusType[]) {
+  hideFactories(factories: FactoryData[]) {
+    factories.forEach((factory) => {
+      const feature = this.getFactoriesLayerForStatus(getFactoryStatus(factory)).getFeatureById(
+        factory.id,
+      )
+      feature?.setStyle(nullStyle)
+    })
+  }
+
+  setFactoryStatusFilter(filters: FactoryDisplayStatusType[]) {
     this.appliedFilters = filters
+
+    this.mapInstance.map.getLayers().forEach((layer) => {
+      const status = layer.get('factoryStatus') as FactoryDisplayStatusType | undefined
+      if (status === undefined) return
+      const comparable = status === 'default' ? status : (Number(status) as FactoryDisplayStatusType)
+      layer.setVisible(filters.includes(comparable))
+    })
 
     this.updateFactoriesFeatureStyle()
   }
 
-  private isFactoryVisible (factory: FactoryData) {
+  private isFactoryVisible(factory: FactoryData) {
     return this.appliedFilters.includes(getFactoryStatus(factory))
   }
 
-  private getFactoryStyle (factory: FactoryData): Style {
-    const visible = this.isFactoryVisible(factory)
-    return visible ? iconStyleMap[getFactoryStatus(factory)] : nullStyle
+  private getFactoryStyle(factory: FactoryData): Style {
+    return this.isFactoryVisible(factory) ? iconStyleMap[getFactoryStatus(factory)] : nullStyle
   }
 
-  private createFactoryFeature (factory: FactoryData) {
-    const existingFeature = FactoryPointCache.getFactoryCache(factory)
-    if (existingFeature) {
-      return null
-    }
+  private createFactoryFeature(factory: FactoryData) {
+    if (FactoryPointCache.getFactoryCache(factory)) return null
 
     const feature = new Feature({
-      geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857'))
+      geometry: new Point(transform([factory.lng, factory.lat], 'EPSG:4326', 'EPSG:3857')),
     })
     feature.setId(factory.id)
     feature.set('factoryId', factory.id)
     feature.set('factoryStatus', getFactoryStatus(factory))
+
     const style = this.getFactoryStyle(factory)
     featureStyleCache.set(factory.id, style.clone())
     feature.setStyle(style)
-
     this.factoryMap.set(factory.id, factory)
-
     FactoryPointCache.setFactoryCache(factory, feature)
-
     return feature
   }
 
-  private forEachFeatureFactory (fn: (feature: Feature, factory: FactoryData) => void) {
-    Object.entries(this._factoriesLayerStatusMap).forEach(([, layerSource]) => {
-      layerSource.getFeatures().forEach(feature => {
+  private forEachFeatureFactory(fn: (feature: Feature, factory: FactoryData) => void) {
+    Object.values(this._factoriesLayerStatusMap).forEach((layerSource) => {
+      layerSource.getFeatures().forEach((feature) => {
         const id = feature.getId() as string
-        const factory = this.factoryMap.get(id) as FactoryData
-
-        fn(feature, factory)
+        const factory = this.factoryMap.get(id)
+        if (factory) fn(feature, factory)
       })
     })
   }
 
-  private displayAllFactory () {
-    this.forEachFeatureFactory((feature, factory) => {
-      feature.setStyle(iconStyleMap[getFactoryStatus(factory)])
-    })
-  }
-
-  private updateFactoriesFeatureStyle () {
+  private updateFactoriesFeatureStyle() {
     this.forEachFeatureFactory((feature, factory) => {
       feature.setStyle(this.getFactoryStyle(factory))
     })
@@ -311,96 +286,92 @@ export class MapFactoryController {
 }
 
 const getWMTSTileGrid = () => {
-  const projection = getProjection('EPSG:3857')
+  const projection = getProjection('EPSG:3857')!
   const projectionExtent = projection.getExtent()
-  const resolutions = new Array(21)
+  const resolutions: number[] = []
   const size = getWidth(projectionExtent) / 256
-  const matrixIds = new Array(21)
+  const matrixIds: string[] = []
   for (let z = 0; z < 21; ++z) {
-    // generate resolutions and matrixIds arrays for this WMTS
-    resolutions[z] = size / Math.pow(2, z)
-    matrixIds[z] = z
+    resolutions.push(size / Math.pow(2, z))
+    matrixIds.push(String(z))
   }
 
   return new WMTSTileGrid({
     origin: getTopLeft(projectionExtent),
     resolutions,
-    matrixIds
+    matrixIds,
   })
 }
 
 const getBaseLayer = (type: BASE_MAP, wmtsTileGrid: WMTSTileGrid) => {
   if (type === BASE_MAP.PROTOMAP) {
-    const taiwanExtent = transformExtent([119.90423060095736, 21.83090666506977, 122.2876172488333, 25.33409668479448], 'EPSG:4326', 'EPSG:3857')
+    const taiwanExtent = transformExtent(
+      [119.90423060095736, 21.83090666506977, 122.2876172488333, 25.33409668479448],
+      'EPSG:4326',
+      'EPSG:3857',
+    )
     const layer = new VectorTileLayer({
       source: new VectorTileSource({
-        attributions: '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
+        attributions:
+          '<a href="https://protomaps.com" target="_blank">Protomaps</a> © <a href="https://www.openstreetmap.org" target="_blank"> OpenStreetMap</a>',
         format: new MVT(),
-        url: process.env.VUE_APP_PROTOMAP_SOURCE_URL || 'https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
-        maxZoom: 14
+        url:
+          import.meta.env.VITE_PROTOMAP_SOURCE_URL ||
+          'https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf',
+        maxZoom: 14,
       }),
       opacity: 1,
       zIndex: 1,
-      renderMode: VectorTileRenderType.VECTOR
+      renderMode: 'vector',
     })
     layer.setExtent(taiwanExtent)
     stylefunction(layer, baseStyle, 'protomaps')
     return layer
-  } else {
-    const source = (() => {
-      switch (type) {
-        case BASE_MAP.OSM:
-          return new OSM({
-            crossOrigin: 'Anonymous',
-            attributions:
-              '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
-          })
-        case BASE_MAP.TAIWAN:
-          return new WMTS({
-            matrixSet: 'EPSG:3857',
-            format: 'image/png',
-            url: 'https://wmts.nlsc.gov.tw/wmts',
-            layer: 'EMAP',
-            tileGrid: wmtsTileGrid,
-            crossOrigin: 'Anonymous',
-            style: 'default',
-            wrapX: true,
-            attributions:
-              '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
-          })
-        case BASE_MAP.SATELITE:
-          return new WMTS({
-            matrixSet: 'EPSG:3857',
-            format: 'image/png',
-            url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
-            layer: 'EMAP',
-            tileGrid: wmtsTileGrid,
-            requestEncoding: 'REST',
-            crossOrigin: 'Anonymous',
-            style: 'default',
-            wrapX: true,
-            attributions:
-              '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
-          })
-        default:
-          return new OSM({
-            crossOrigin: 'Anonymous',
-            attributions:
-              '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>'
-          })
-      }
-    })()
-
-    return new TileLayer({
-      source,
-      opacity: 0.6,
-      zIndex: 1
-    })
   }
+
+  const source = (() => {
+    switch (type) {
+      case BASE_MAP.TAIWAN:
+        return new WMTS({
+          matrixSet: 'EPSG:3857',
+          format: 'image/png',
+          url: 'https://wmts.nlsc.gov.tw/wmts',
+          layer: 'EMAP',
+          tileGrid: wmtsTileGrid,
+          crossOrigin: 'Anonymous',
+          style: 'default',
+          wrapX: true,
+          attributions:
+            '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>',
+        })
+      case BASE_MAP.SATELITE:
+        return new WMTS({
+          matrixSet: 'EPSG:3857',
+          format: 'image/png',
+          url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO_MIX/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
+          layer: 'EMAP',
+          tileGrid: wmtsTileGrid,
+          requestEncoding: 'REST',
+          crossOrigin: 'Anonymous',
+          style: 'default',
+          wrapX: true,
+          attributions:
+            '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>',
+        })
+      default:
+        return new OSM({
+          crossOrigin: 'Anonymous',
+          attributions:
+            '<a href="https://osm.tw/" target="_blank">OpenStreetMap 台灣</a>',
+        })
+    }
+  })()
+
+  return new TileLayer({ source, opacity: 0.6, zIndex: 1 })
 }
 
-const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
-  return new TileLayer({
+const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) =>
+  new TileLayer({
     source: new WMTS({
       matrixSet: 'EPSG:3857',
       format: 'image/png',
@@ -408,10 +379,9 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
       layer: 'LUIMAP',
       requestEncoding: 'REST',
       tileGrid: wmtsTileGrid,
-      tileLoadFunction: function (imageTile, src) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const image: HTMLImageElement = (imageTile as any).getImage()
-        flipArgriculturalLand(src).then(newSrc => {
+      tileLoadFunction(imageTile, src) {
+        const image = (imageTile as unknown as { getImage: () => HTMLImageElement }).getImage()
+        flipArgriculturalLand(src).then((newSrc) => {
           image.src = newSrc
         })
       },
@@ -419,26 +389,22 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
       style: 'default',
       wrapX: true,
       attributions:
-        '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
+        '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>',
     }),
     opacity: 0.5,
     zIndex: 2,
-    // TS is wrong, for some reason className is a valid property
-    // eslint-disable-next-line
-    // @ts-ignore
-    className: 'lui-layer'
+    className: 'lui-layer',
   })
-}
 
 type MapEventHandler = {
-  onMoved?: (location: [number, number, number, number], canPlaceFactory: boolean) => void,
-  onClicked?: (location: [number, number], feature?: Feature) => void,
-  onZoomed?: (zoom: number) => void,
+  onMoved?: (location: [number, number, number, number], canPlaceFactory: boolean) => void
+  onClicked?: (location: [number, number], feature?: Feature) => void
+  onZoomed?: (zoom: number) => void
   onLUILayerVisibilityChange?: (visible: boolean) => void
 }
 
 type OLMapOptions = {
-  minimap?: boolean,
+  minimap?: boolean
   getInitialLocation?: () => [number, number, number] | undefined
 }
 
@@ -448,148 +414,139 @@ export class OLMap {
   private geolocation?: Geolocation
   private baseLayer: TileLayer | VectorTileLayer
   private tileGrid: WMTSTileGrid = getWMTSTileGrid()
+  private luiLayer!: TileLayer
   private minimapPinFeature?: Feature
   private hasInitialLocation = false
 
-  constructor (target: HTMLElement, handler: MapEventHandler = {}, options: OLMapOptions = {}) {
+  constructor(target: HTMLElement, handler: MapEventHandler = {}, options: OLMapOptions = {}) {
     this.mapDom = target
-
     this.baseLayer = getBaseLayer(BASE_MAP.OSM, this.tileGrid)
     this._map = this.instantiateOLMap(this.mapDom, this.baseLayer, options)
 
-    if (!options.minimap) {
-      this.geolocation = this.setupGeolocationTracking(this._map)
-    }
-
+    if (!options.minimap) this.geolocation = this.setupGeolocationTracking(this._map)
     this.setupEventListeners(this._map, handler)
   }
 
-  get map () {
+  get map() {
     return this._map
   }
 
-  private setupEventListeners (map: OlMap, handler: MapEventHandler) {
+  private setupEventListeners(map: OlMap, handler: MapEventHandler) {
     const move = async () => {
       const view = map.getView()
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const zoom = view.getZoom()!
-
-      // resolution in meter
+      const zoom = view.getZoom() ?? 0
       const resolution = view.getResolutionForZoom(zoom)
       const range = Math.ceil(resolution / 2)
+      const center = view.getCenter()
+      if (!center) return
 
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const [lng, lat] = transform(view.getCenter()!, 'EPSG:3857', 'EPSG:4326')
+      const [lng, lat] = transform(center, 'EPSG:3857', 'EPSG:4326')
+      const lngValue = lng as number
+      const latValue = lat as number
 
       if (handler.onMoved) {
         const { width, height } = this.mapDom.getBoundingClientRect()
         const canPlace = await this.canPlaceFactory([width / 2, height / 2])
-        handler.onMoved([lng, lat, range, zoom], canPlace)
+        handler.onMoved([lngValue, latValue, range, zoom], canPlace)
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    map.on('change:resolution', move)
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    map.on('moveend', move)
-
-    // https://stackoverflow.com/a/54441119
-    // After any layer is loaded, check onMoved event for the first time.
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    map.on('rendercomplete', move)
-
-    map.on('zoomend', () => {
-      const view = map.getView()
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const zoom = view.getZoom()!
-      if (handler.onZoomed) {
-        handler.onZoomed(zoom)
-      }
+    map.getView().on('change:resolution', () => {
+      void move()
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    map.on('click', async (event) => {
-      if (handler.onClicked) {
-        const [lng, lat] = transform(event.coordinate, 'EPSG:3857', 'EPSG:4326')
-        const feature = map.forEachFeatureAtPixel(event.pixel, (feature) => feature, {
-          layerFilter: (layer) => {
-            return layer.getZIndex() !== 5 // TODO: Hack
-          }
-        })
-        handler.onClicked([lng, lat], feature as Feature)
-      }
+    const onMapEvent = (type: string, listener: () => void) => {
+      ;(map as unknown as { on: (t: string, l: () => void) => void }).on(type, listener)
+    }
+
+    onMapEvent('moveend', () => {
+      void move()
+    })
+    onMapEvent('rendercomplete', () => {
+      void move()
     })
 
-    // snippet taken from https://gis.stackexchange.com/q/310775
-    map.on('pointermove', event => {
+    onMapEvent('zoomend', () => {
+      const zoom = map.getView().getZoom() ?? 0
+      handler.onZoomed?.(zoom)
+    })
+
+    map.on('click', (event) => {
+      if (!handler.onClicked) return
+      const [lng, lat] = transform(event.coordinate, 'EPSG:3857', 'EPSG:4326')
+      const feature = map.forEachFeatureAtPixel(
+        event.pixel,
+        (candidate) => candidate,
+        { layerFilter: (layer) => layer.getZIndex() !== 5 },
+      )
+      handler.onClicked([lng as number, lat as number], feature as Feature | undefined)
+    })
+
+    map.on('pointermove', (event) => {
       if (!event.dragging) {
-        map.getTargetElement().style.cursor = map.hasFeatureAtPixel(map.getEventPixel(event.originalEvent)) ? 'pointer' : ''
+        const target = map.getTargetElement()
+        if (target) {
+          target.style.cursor = map.hasFeatureAtPixel(map.getEventPixel(event.originalEvent))
+            ? 'pointer'
+            : ''
+        }
       }
     })
 
-    const layer = this.getLUIMAPLayer()
-    layer.on('change:visible', function () {
-      if (handler.onLUILayerVisibilityChange) {
-        handler.onLUILayerVisibilityChange(layer.getVisible())
-      }
+    this.luiLayer.on('change:visible', () => {
+      handler.onLUILayerVisibilityChange?.(this.luiLayer.getVisible())
     })
   }
 
-  public setCoordinate (longitude: number, latitude: number, zoom?: number) {
+  setCoordinate(longitude: number, latitude: number, zoom?: number) {
     const view = this.map.getView()
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    zoom = zoom || view.getZoom()!
     view.setCenter(transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'))
-    view.setZoom(zoom)
+    view.setZoom(zoom ?? view.getZoom() ?? 14)
   }
 
-  private instantiateOLMap (target: HTMLElement, baseLayer: TileLayer | VectorTileLayer, options: OLMapOptions = {}) {
+  private instantiateOLMap(
+    target: HTMLElement,
+    baseLayer: TileLayer | VectorTileLayer,
+    options: OLMapOptions = {},
+  ) {
     const tileGrid = getWMTSTileGrid()
+    const initial = options.getInitialLocation?.()
 
-    let view
-    let location
-    if (options.getInitialLocation && (location = options.getInitialLocation())) {
-      const [longitude, latitude, zoom] = location
-      view = new View({
-        center: transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'),
-        zoom
-      })
-      this.hasInitialLocation = true
-    } else {
-      view = new View({
-        center: transform([120.48504632216294, 24.088258816482295], 'EPSG:4326', 'EPSG:3857'),
-        zoom: 14
-      })
-    }
+    const view = initial
+      ? (() => {
+          const [longitude, latitude, zoom] = initial
+          this.hasInitialLocation = true
+          return new View({
+            center: transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857'),
+            zoom,
+          })
+        })()
+      : new View({
+          center: transform([120.48504632216294, 24.088258816482295], 'EPSG:4326', 'EPSG:3857'),
+          zoom: 14,
+        })
 
     const mapControlButtons = makeMapButtons()
+    this.luiLayer = getLUIMapLayer(tileGrid)
 
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const mapOptions: MapOptions = {
       target,
-      layers: [
-        baseLayer,
-        getLUIMapLayer(tileGrid)
-      ],
+      layers: [baseLayer, this.luiLayer],
       view,
       controls: [
         new Zoom({
           zoomInLabel: mapControlButtons.zoomIn,
           zoomOutLabel: mapControlButtons.zoomOut,
           zoomInTipLabel: '放大',
-          zoomOutTipLabel: '縮小'
+          zoomOutTipLabel: '縮小',
         }),
         new ScaleLine(),
         new Rotate(),
-        new Attribution()
+        new Attribution(),
       ],
-      interactions: defaultInteractions({
-        pinchRotate: false
-      }).extend([
-        new PinchRotate({
-          threshold: 0.4
-        })
-      ])
+      interactions: defaultInteractions({ pinchRotate: false }).extend([
+        new PinchRotate({ threshold: 0.4 }),
+      ]),
     }
 
     if (options.minimap) {
@@ -600,177 +557,137 @@ export class OLMap {
     return new OlMap(mapOptions)
   }
 
-  private setupGeolocationTracking (map: OlMap) {
+  private setupGeolocationTracking(map: OlMap) {
     const view = map.getView()
-
     const geolocation = new Geolocation({
-      trackingOptions: {
-        enableHighAccuracy: true
-      },
-      projection: view.getProjection()
+      trackingOptions: { enableHighAccuracy: true },
+      projection: view.getProjection(),
     })
-
     geolocation.setTracking(true)
 
     const positionLayer = this.setupGeolocationLayer(geolocation)
-
     map.addLayer(positionLayer)
-
     return geolocation
   }
 
-  private setupGeolocationLayer (geolocation: Geolocation) {
+  private setupGeolocationLayer(geolocation: Geolocation) {
     const positionFeature = new Feature()
     const getPositionStyles = (heading: number) =>
-      (!Number.isNaN(heading))
+      !Number.isNaN(heading)
         ? new Style({
-          image: new Icon({
-            anchor: [0.5, 0.5],
-            src: '/images/now.svg',
-            rotation: heading,
-            rotateWithView: true
+            image: new Icon({
+              anchor: [0.5, 0.5],
+              src: '/images/now.svg',
+              rotation: heading,
+              rotateWithView: true,
+            }),
           })
-        })
         : new Style({
-          image: new Circle({
-            fill: new Fill({ color: '#0099ff' }),
-            stroke: new Stroke({ color: '#fff', width: 3 }),
-            radius: 15
+            image: new Circle({
+              fill: new Fill({ color: '#0099ff' }),
+              stroke: new Stroke({ color: '#fff', width: 3 }),
+              radius: 15,
+            }),
           })
-        })
 
     positionFeature.setStyle(getPositionStyles(NaN))
-    geolocation.on('change:position', function () {
+    geolocation.on('change:position', () => {
       const coordinates = geolocation.getPosition()
       positionFeature.setGeometry(coordinates ? new Point(coordinates) : undefined)
     })
-
-    geolocation.on('change:heading', function () {
+    geolocation.on('change:heading', () => {
       positionFeature.setStyle(getPositionStyles(geolocation.getHeading() ?? NaN))
     })
 
     const accuracyFeature = new Feature()
-    geolocation.on('change:accuracyGeometry', function () {
-      accuracyFeature.setGeometry(geolocation.getAccuracyGeometry())
+    geolocation.on('change:accuracyGeometry', () => {
+      accuracyFeature.setGeometry(geolocation.getAccuracyGeometry() ?? undefined)
     })
 
-    let run = false || this.hasInitialLocation
+    let run = this.hasInitialLocation
     geolocation.on('change', () => {
-      if (run) {
-        return
-      }
-
-      const position = geolocation.getPosition()
-      if (position) {
+      if (run) return
+      if (geolocation.getPosition()) {
         this.zoomToGeolocation()
         run = true
       }
     })
 
-    const positionLayer = new VectorLayer({
-      source: new VectorSource({
-        features: [positionFeature, accuracyFeature]
-      }),
-      zIndex: 5
+    return new VectorLayer({
+      source: new VectorSource({ features: [positionFeature, accuracyFeature] }),
+      zIndex: 5,
     })
-
-    return positionLayer
   }
 
-  public zoomToGeolocation () {
-    if (!this.geolocation) {
-      throw new Error('No location permission')
-    }
-
+  zoomToGeolocation() {
+    if (!this.geolocation) throw new Error('No location permission')
     const location = this.geolocation.getPosition()
-    if (!location) {
-      throw new Error('No location permission')
-    }
+    if (!location) throw new Error('No location permission')
 
     const view = this._map.getView()
     view.setCenter(location)
     view.setZoom(16)
   }
 
-  public changeBaseMap (type: BASE_MAP) {
+  changeBaseMap(type: BASE_MAP) {
     this._map.removeLayer(this.baseLayer)
     this.baseLayer = getBaseLayer(type, this.tileGrid)
     this._map.addLayer(this.baseLayer)
   }
 
-  public async canPlaceFactory (pixel: MapBrowserEvent['pixel']): Promise<boolean> {
-    return new Promise(resolve => {
-      let resolved = false
-      const check = this._map.forEachLayerAtPixel(pixel, function (_, data) {
-        const [,,, a] = data
+  async canPlaceFactory(pixel: MapBrowserEvent['pixel']): Promise<boolean> {
+    // The LUIMAP layer paints agricultural land transparent and everything
+    // else opaque. Sample the layer canvas to decide whether the centre of
+    // the screen is inside an agricultural zone.
+    const viewport = this._map.getViewport()
+    if (!viewport) return true
 
-        resolved = true
-        resolve(a !== 128)
-      }, {
-        // TS is wrong, for some reason layer does have .getClassName()
-        // eslint-disable-next-line
-        // @ts-ignore
-        layerFilter: (layer) => layer.getClassName() === 'lui-layer'
-      })
+    const layerElement = viewport.querySelector('.lui-layer') as HTMLElement | null
+    const canvas = layerElement?.querySelector('canvas') ?? null
+    if (!canvas) return true
 
-      // !Workaround #forEachLayerAtPixel would not correctly run for some browsers
-      if (!resolved) {
-        if (check === undefined) {
-          resolve(true)
-        } else {
-          resolve(check)
-        }
-      }
-    })
+    const context = canvas.getContext('2d')
+    if (!context) return true
+
+    const canvasRect = canvas.getBoundingClientRect()
+    const mapRect = viewport.getBoundingClientRect()
+    const x = Math.round(
+      ((pixel[0] as number) + mapRect.left - canvasRect.left) *
+        (canvas.width / canvasRect.width),
+    )
+    const y = Math.round(
+      ((pixel[1] as number) + mapRect.top - canvasRect.top) *
+        (canvas.height / canvasRect.height),
+    )
+
+    if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return true
+
+    const data = context.getImageData(x, y, 1, 1).data
+    return (data[3] ?? 0) < 128
   }
 
-  private getLUIMAPLayer (): Layer {
-    let layer
-    this._map.getLayers().forEach(_layer => {
-      if (_layer.getProperties().source.layer_ === 'LUIMAP') {
-        layer = _layer
-      }
-    })
-
-    if (!layer) {
-      throw (new TypeError('LUIMAP Layer not found'))
-    }
-
-    return layer as Layer
+  private getLUIMAPLayer() {
+    if (!this.luiLayer) throw new TypeError('LUIMAP Layer not found')
+    return this.luiLayer
   }
 
-  public setLUILayerVisible (visible: boolean) {
-    const layer = this.getLUIMAPLayer()
-    layer.setVisible(visible)
+  setLUILayerVisible(visible: boolean) {
+    this.getLUIMAPLayer().setVisible(visible)
   }
 
-  public getLUILayerVisible () {
-    const layer = this.getLUIMAPLayer()
-    return layer.getVisible()
+  getLUILayerVisible() {
+    return this.getLUIMAPLayer().getVisible()
   }
 
-  public setMinimapPin (longitude: number, latitude: number) {
+  setMinimapPin(longitude: number, latitude: number) {
     const coordinate = transform([longitude, latitude], 'EPSG:4326', 'EPSG:3857')
 
     if (!this.minimapPinFeature) {
-      const feature = new Feature({
-        geometry: new Point(coordinate)
-      })
+      const feature = new Feature({ geometry: new Point(coordinate) })
       feature.setStyle(minimapPinStyle)
       this.minimapPinFeature = feature
-
-      const source = new VectorSource({
-        features: [
-          feature
-        ]
-      })
-
-      const vectorLayer = new VectorLayer({
-        source,
-        zIndex: 4
-      })
-
-      this.map.addLayer(vectorLayer)
+      const source = new VectorSource({ features: [feature] })
+      this.map.addLayer(new VectorLayer({ source, zIndex: 4 }))
     } else {
       this.minimapPinFeature.setGeometry(new Point(coordinate))
     }
@@ -779,14 +696,16 @@ export class OLMap {
   }
 }
 
-export function initializeMap (target: HTMLElement, handler: MapEventHandler = {}, options: OLMapOptions) {
-  const mapInstance = new OLMap(target, handler, options);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (window as any).changeBaseMap = mapInstance.changeBaseMap.bind(mapInstance)
+export function initializeMap(
+  target: HTMLElement,
+  handler: MapEventHandler = {},
+  options: OLMapOptions = {},
+) {
+  const mapInstance = new OLMap(target, handler, options)
   return new MapFactoryController(mapInstance)
 }
 
-export function initializeMinimap (target: HTMLElement, center: number[]) {
+export function initializeMinimap(target: HTMLElement, center: number[]) {
   const mapInstance = new OLMap(target, {}, { minimap: true })
   mapInstance.map.getView().setCenter(center)
   return new MapFactoryController(mapInstance)
