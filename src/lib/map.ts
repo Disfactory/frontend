@@ -430,6 +430,26 @@ const getLUIMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
   })
 }
 
+const getLandCodeMapLayer = (wmtsTileGrid: WMTSTileGrid) => {
+  return new TileLayer({
+    opacity: 0.5,
+    source: new WMTS({
+      url: 'http://localhost:8888/maps/S_Maps/wmts/DMAPS/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
+      layer: 'LAND_OPENDATA',
+      requestEncoding: 'REST',
+      matrixSet: 'GoogleMapsCompatible',
+      format: 'image/png',
+      tileGrid: wmtsTileGrid,
+      style: 'default',
+      wrapX: true,
+      crossOrigin: 'Anonymous',
+      attributions:
+        '<a href="https://maps.nlsc.gov.tw/" target="_blank">國土測繪圖資服務雲</a>'
+    }),
+    zIndex: 3
+  })
+}
+
 type MapEventHandler = {
   onMoved?: (location: [number, number, number, number], canPlaceFactory: boolean) => void,
   onClicked?: (location: [number, number], feature?: Feature) => void,
@@ -569,7 +589,8 @@ export class OLMap {
       target,
       layers: [
         baseLayer,
-        getLUIMapLayer(tileGrid)
+        getLUIMapLayer(tileGrid),
+        getLandCodeMapLayer(tileGrid)
       ],
       view,
       controls: [
