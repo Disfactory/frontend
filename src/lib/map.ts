@@ -23,32 +23,15 @@ import { stylefunction } from 'ol-mapbox-style'
 import {
   type FactoryData,
   type FactoryDisplayStatusType,
-  FactoryDisplayStatuses,
   defaultFactoryDisplayStatuses,
+  getDisplayStatusColor,
 } from '../types'
 import { flipArgriculturalLand } from './image'
+import { getFactoryStatus } from './timeline'
 import { baseStyle } from './layerStyle'
 import FactoryPointCache from './utils/factoryPointCache'
 
 const getFactoryStatusImage = (status: FactoryDisplayStatusType) => `/images/marker-${status}.svg`
-
-export const getStatusBorderColor = (status: FactoryDisplayStatusType) => {
-  // We use == instead of === here because `type` can be either a string or number.
-   
-  return FactoryDisplayStatuses.find((s) => s.type == status)?.color
-}
-
-export function getFactoryStatus(factory: FactoryData): FactoryDisplayStatusType {
-  if (factory.wont_fix) return FactoryDisplayStatuses[4]!.type
-  if (factory.document_display_status) {
-    return (
-      (FactoryDisplayStatuses.find((s) =>
-        s.documentDisplayStatuses.includes(factory.document_display_status!),
-      )?.type as FactoryDisplayStatusType) ?? FactoryDisplayStatuses[0]!.type
-    )
-  }
-  return FactoryDisplayStatuses[0]!.type
-}
 
 export enum BASE_MAP {
   OSM,
@@ -157,7 +140,7 @@ export class MapFactoryController {
                 image: new Circle({
                   radius: 20,
                   stroke: new Stroke({ color: '#fff' }),
-                  fill: new Fill({ color: getStatusBorderColor(factoryStatus) }),
+                  fill: new Fill({ color: getDisplayStatusColor(factoryStatus) }),
                 }),
                 text: new Text({
                   text: size.toString(),
@@ -235,8 +218,7 @@ export class MapFactoryController {
     this.mapInstance.map.getLayers().forEach((layer) => {
       const status = layer.get('factoryStatus') as FactoryDisplayStatusType | undefined
       if (status === undefined) return
-      const comparable = status === 'default' ? status : (Number(status) as FactoryDisplayStatusType)
-      layer.setVisible(filters.includes(comparable))
+      layer.setVisible(filters.includes(status))
     })
 
     this.updateFactoriesFeatureStyle()

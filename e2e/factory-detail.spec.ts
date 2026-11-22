@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test'
 
-import { dismissIntro, factory, hideDevTools, mockApi, openSharedFactory } from './helpers'
+import {
+  dismissIntro,
+  factory,
+  hideDevTools,
+  mockApi,
+  openSharedFactory,
+  timeline,
+} from './helpers'
 
 test.describe('factory detail on mobile', () => {
   test.use({ viewport: { width: 390, height: 844 } })
@@ -16,7 +23,8 @@ test.describe('factory detail on mobile', () => {
     expect(box!.y + box!.height).toBeLessThanOrEqual(844)
 
     await expand.click()
-    await expect(page.getByText('其他工廠資訊')).toBeVisible()
+    await expect(page.getByRole('tab', { name: '過往紀錄' })).toBeVisible()
+    await expect(page.getByTestId('timeline-event').first()).toBeVisible()
 
     const scroller = page.getByTestId('detail-scroller')
     await expect(scroller).toBeVisible()
@@ -48,6 +56,7 @@ test('matches the staging factory image carousel', async ({ page }) => {
     },
   ]
   await openSharedFactory(page, { factory: { ...factory, images } })
+  await page.getByRole('tab', { name: '現場照片' }).click()
 
   const update = page.getByTestId('update-image-button')
   const updateBox = await update.boundingBox()
@@ -90,7 +99,7 @@ test.describe('factory detail on desktop', () => {
 
   test('keeps the detail panel and shows the supplement modal above it', async ({ page }) => {
     await openSharedFactory(page)
-    await expect(page.getByText('其他工廠資訊')).toBeVisible()
+    await expect(page.getByRole('tab', { name: '過往紀錄', selected: true })).toBeVisible()
 
     await page.getByRole('button', { name: '補充工廠描述' }).click()
 
@@ -106,6 +115,80 @@ test.describe('factory detail on desktop', () => {
 
     await expect(page.getByRole('heading', { name: '補充工廠資訊成功', level: 3 })).toBeVisible()
   })
+})
+
+test.describe('factory timeline', () => {
+  test.use({ viewport: { width: 1280, height: 800 } })
+
+  test('shows the alert and events oldest first', async ({ page }) => {
+    await openSharedFactory(page, {
+      factory: { ...factory, document_display_status: '已勒令停工' },
+      timeline: {
+        ...timeline,
+        user_reports: [
+          {
+            id: '1',
+            action_type: 'UPDATE',
+            action_body: {},
+            created_at: '2026-01-10T02:00:00Z',
+            others: '還是有在運作的聲音。',
+          },
+        ],
+      },
+    })
+
+    await expect(page.getByTestId('factory-status')).toHaveText('尚可持續檢舉裁罰')
+    await expect(page.getByTestId('timeline-alert')).toContainText('能幫忙拍一下最新的照片嗎？')
+
+    const events = page.getByTestId('timeline-event')
+    await expect(events).toHaveCount(5)
+    await expect(events.locator('h4')).toHaveText([
+      '新照片事證',
+      '發公文檢舉',
+      '新狀況回報',
+      '新狀況回報',
+      '處分：勒令停工',
+    ])
+
+    await expect(events.nth(0)).toContainText('2026/01/02')
+    await expect(events.nth(0)).toContainText('備註：2 張照片。')
+    await expect(events.nth(1)).toContainText('資訊來源：地球公民基金會')
+    await expect(events.nth(2)).toContainText('資訊來源：匿名民眾')
+    await expect(events.nth(2)).toContainText('還是有在運作的聲音。')
+    await expect(events.nth(3)).toContainText('縣府已回覆會派員稽查。')
+    await expect(events.nth(4)).toContainText('2026/01/20')
+  })
+
+  test('shows an empty state and no alert while a report is in progress', async ({ page }) => {
+    await openSharedFactory(page, {
+      factory: { ...factory, document_display_status: '已檢舉' },
+      timeline: {
+        factory_id: 'f1',
+        display_number: 1,
+        documents: [],
+        status_transitions: [],
+        user_reports: [],
+        follow_ups_for_user: [],
+        image_batches: [],
+      },
+    })
+
+    await expect(page.getByTestId('factory-status')).toHaveText('舉報處理中')
+    await expect(page.getByTestId('timeline-alert')).toHaveCount(0)
+    await expect(page.getByText('目前還沒有過往紀錄。')).toBeVisible()
+  })
+})
+
+test('lists the four status categories as map filters', async ({ page }) => {
+  await mockApi(page)
+  await page.goto('/')
+  await hideDevTools(page)
+  await dismissIntro(page)
+
+  for (const name of ['尚可連續裁罰', '舉報處理中', '已拆除', '現階段無法處理']) {
+    await expect(page.getByRole('button', { name, exact: true })).toBeVisible()
+  }
+  await expect(page.getByRole('button', { name: '未處理', exact: true })).toHaveCount(0)
 })
 
 test('creates a factory with a mocked upload', async ({ page }) => {

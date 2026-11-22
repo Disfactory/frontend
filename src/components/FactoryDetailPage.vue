@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
-import { useMediaQuery } from '@vueuse/core'
-import { Camera, ChevronDown, ChevronLeft, ChevronRight, MapPin, Share2, X } from '@lucide/vue'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useMediaQuery, useResizeObserver } from '@vueuse/core'
+import { Camera, ChevronDown, ChevronLeft, ChevronRight, Share2, X } from '@lucide/vue'
 import AppModal from './AppModal.vue'
+import FactoryTimeline from './FactoryTimeline.vue'
+import MapMarkerIcon from './MapMarkerIcon.vue'
 import ImgurFallbackImage from './ImgurFallbackImage.vue'
-import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
-import { getFactoryReportRecords } from '@/api'
+import { formatTimelineDate, getFactoryStatus } from '@/lib/timeline'
 import { useAppStore } from '@/stores/app'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   type CarouselApi,
 } from '@/components/ui/carousel'
-import { getDisplayStatusText, type FactoryImage, type ReportRecord } from '@/types'
+import { getDisplayStatus, type FactoryImage } from '@/types'
 
 const appStore = useAppStore()
 const isDesktop = useMediaQuery('(min-width: 960px)')
@@ -35,7 +37,9 @@ const scrollCarousel = (direction: number) => {
   imageCarousel.value?.scrollBy({ left: direction * 136, behavior: 'smooth' })
 }
 
-onMounted(updateCarouselArrows)
+// The carousel only mounts with the 現場照片 tab; this fires once it's laid out
+// and again whenever its size changes.
+useResizeObserver(imageCarousel, updateCarouselArrows)
 watch(images, async () => {
   await nextTick()
   updateCarouselArrows()
@@ -55,18 +59,8 @@ const setLightboxApi = (val: CarouselApi | undefined) => {
   })
 }
 
-const factoryStatus = computed(() =>
-  appStore.factoryData ? getFactoryStatus(appStore.factoryData) : undefined,
-)
-const factoryFollowups = computed(() => appStore.factoryData?.follow_ups_for_user ?? [])
-const factoryStatusText = computed(() => {
-  if (typeof factoryStatus.value === 'undefined') return ''
-  const name = getDisplayStatusText(factoryStatus.value)
-  const documentStatus = appStore.factoryData?.document_display_status
-  return documentStatus ? `${name}：${documentStatus}` : name
-})
-const statusColor = computed(() =>
-  typeof factoryStatus.value === 'undefined' ? null : getStatusBorderColor(factoryStatus.value),
+const category = computed(() =>
+  appStore.factoryData ? getDisplayStatus(getFactoryStatus(appStore.factoryData)) : null,
 )
 const factoryId = computed(() => appStore.factoryData?.display_number ?? '')
 const factoryType = computed(() =>
@@ -78,8 +72,8 @@ const factoryAddressAndLandcode = computed(() => {
   if (!data) return ''
   const { townname, sectname, sectcode, landcode } = data
   return townname && sectname && sectcode && landcode
-    ? `${townname} ${sectname} (${sectcode}) ${landcode}地號`
-    : '擷取中'
+    ? `${townname}${sectname}(${sectcode})${landcode}地號`
+    : '地段擷取中'
 })
 const source = computed(() => {
   const raw = appStore.factoryData?.source
@@ -91,8 +85,21 @@ const source = computed(() => {
     .join('、')
 })
 const full = computed(() => appStore.factoryDetailsExpanded)
-const longitude = computed(() => appStore.factoryData?.lng.toFixed(7))
-const latitude = computed(() => appStore.factoryData?.lat.toFixed(7))
+const longitude = computed(() => appStore.factoryData?.lng.toFixed(6))
+const latitude = computed(() => appStore.factoryData?.lat.toFixed(6))
+const lastUpdatedAt = computed(() => {
+  const reportedAt = appStore.factoryData?.reported_at
+  return reportedAt ? formatTimelineDate(reportedAt) : null
+})
+
+type DetailTab = 'history' | 'photos' | 'info'
+const activeTab = ref<DetailTab>('history')
+watch(
+  () => appStore.factoryData?.id,
+  () => {
+    activeTab.value = 'history'
+  },
+)
 
 const scroller = ref<HTMLElement | null>(null)
 
@@ -122,45 +129,6 @@ const startUpdateFactoryCommentFor = (field: 'others' | 'name' | 'factory_type' 
   appStore.startUpdateFactoryComment(field)
 }
 
-const reportRecords = ref<ReportRecord[]>([])
-watch(
-  () => appStore.factoryData,
-  async (factory) => {
-    if (!factory) {
-      reportRecords.value = []
-      return
-    }
-    try {
-      reportRecords.value = ((await getFactoryReportRecords(factory.id)) || []).sort((a, b) =>
-        new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1,
-      )
-    } catch {
-      reportRecords.value = []
-    }
-  },
-  { immediate: true },
-)
-
-const pastDescriptions = computed(() =>
-  reportRecords.value
-    .map((record) => {
-      const date = new Date(record.created_at)
-      return {
-        date: `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,
-        others: record.others,
-      }
-    })
-    .filter((record) => record.others),
-)
-const lastUpdatedAt = computed(() => {
-  const factory = appStore.factoryData
-  if (!factory?.reported_at) return null
-  const date =
-    reportRecords.value.length === 0
-      ? new Date(factory.reported_at)
-      : new Date(reportRecords.value[0]?.created_at as string)
-  return `最後更新 ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
-})
 </script>
 
 <template>
@@ -193,124 +161,155 @@ const lastUpdatedAt = computed(() => {
         已複製連結
       </div>
 
-      <div class="px-4 pt-3">
-        <div class="mb-3 flex items-center justify-between">
-          <span class="text-base text-brand-dark">工廠狀態</span>
-          <button
-            type="button"
-            class="hidden rounded-full border px-4 py-2 text-sm md:block"
-            :class="showCopiedMessage ? 'border-brand bg-brand text-white' : 'border-brand-line bg-white text-brand shadow-sm'"
-            @click="copyToClipboard"
-          >
-            <Share2 class="mr-1 inline size-4" />
-            {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
-          </button>
-          <span class="flex items-center gap-2 md:hidden">
-            <button type="button" class="rounded p-1 hover:bg-black/5" aria-label="分享工廠" @click="copyToClipboard">
-              <Share2 class="size-5" />
+      <header class="px-6 pt-4">
+        <div class="flex items-center justify-between gap-3">
+          <span class="text-sm font-medium text-brand-gray-light">工廠編號 {{ factoryId }}</span>
+          <span class="flex items-center gap-1">
+            <button
+              type="button"
+              class="rounded p-1 text-brand-dark hover:bg-black/5"
+              :aria-label="showCopiedMessage ? '已複製連結' : '分享工廠'"
+              @click="copyToClipboard"
+            >
+              <Share2 class="size-6" />
             </button>
             <button
               type="button"
-              class="rounded p-1 hover:bg-black/5"
+              class="rounded p-1 hover:bg-black/5 md:hidden"
               aria-label="關閉"
               @click="appStore.collapseFactoryDetail()"
             >
-              <X class="size-5" />
+              <X class="size-6" />
             </button>
           </span>
         </div>
 
-        <p class="mb-2 text-2xl text-brand-dark">
-          <MapPin class="mb-1 inline size-5" :style="{ color: statusColor ?? undefined }" />
-          {{ factoryStatusText }}
-        </p>
-        <p class="mb-0 text-xs text-brand-gray-light">
-          工廠編號 {{ factoryId }}<br />
-          {{ lastUpdatedAt }}
-        </p>
-      </div>
+        <h2 data-testid="factory-status" class="mt-3 flex items-center gap-3 text-2xl font-bold text-brand-dark">
+          <MapMarkerIcon class="size-7 shrink-0" :style="{ color: category?.color }" />
+          {{ category?.title }}
+        </h2>
 
-      <div class="mt-4 flex">
-        <button
-          v-if="images.length > 0"
-          type="button"
-          class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
-          :disabled="!canScrollCarouselLeft"
-          aria-label="上一張工廠照片"
-          @click="scrollCarousel(-1)"
-        >
-          <ChevronLeft class="size-6" />
-        </button>
-
-        <div
-          ref="imageCarousel"
-          data-testid="image-carousel"
-          class="flex min-w-0 flex-1 touch-auto gap-4 overflow-x-auto overscroll-x-contain"
-          style="-webkit-overflow-scrolling: touch"
-          @scroll="updateCarouselArrows"
-        >
-          <button
-            type="button"
-            data-testid="update-image-button"
-            class="ml-4 flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
-            @click="appStore.startUpdateFactoryImages()"
-          >
-            <Camera class="size-5" />
-            補充照片
-          </button>
-          <button
-            v-for="(image, index) in images"
-            :key="image.id"
-            type="button"
-            data-testid="carousel-image"
-            class="h-[68px] w-[120px] shrink-0 overflow-hidden"
-            @click="setLightboxIndex(index)"
-          >
-            <ImgurFallbackImage :src="image.url" class="h-full w-full object-cover" />
-          </button>
+        <div class="mt-3 flex flex-col gap-2 text-[#333333]">
+          <p class="text-sm font-medium">{{ factoryAddressAndLandcode }}</p>
+          <p class="text-xs font-medium">{{ latitude }}, {{ longitude }} ( 經緯度版本為WGS84 )</p>
         </div>
+      </header>
 
+      <div v-if="!full" class="px-6 md:hidden">
         <button
-          v-if="images.length > 0"
-          type="button"
-          class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
-          :disabled="!canScrollCarouselRight"
-          aria-label="下一張工廠照片"
-          @click="scrollCarousel(1)"
-        >
-          <ChevronRight class="size-6" />
-        </button>
-      </div>
-
-      <div class="mx-4 mt-4 mb-2">
-        <h3 class="mb-1 text-base font-medium text-brand">地段 / 地址</h3>
-        <p class="mb-5">{{ factoryAddressAndLandcode }}</p>
-
-        <div v-if="full || isDesktop" class="mb-5">
-          <h3 class="mb-1 text-base font-medium text-brand">經緯度</h3>
-          <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
-          <p class="text-xs text-brand-gray-light">以上經緯度版本為 WGS84</p>
-        </div>
-
-        <template v-if="source">
-          <h3 class="mb-1 text-base font-medium text-brand">資料來源</h3>
-          <p class="mb-5">{{ source }}</p>
-        </template>
-
-        <hr v-if="full || isDesktop" class="my-4 border-brand-line" />
-
-        <button
-          v-if="!full"
           type="button"
           data-testid="expand-detail"
-          class="sticky bottom-0 z-[1] flex w-full items-center gap-1 bg-white pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-left text-sm font-medium text-brand md:hidden"
+          class="sticky bottom-0 z-[1] flex w-full items-center gap-1 bg-white pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-left text-sm font-medium text-brand"
           @click="appStore.expandFactoryDetail()"
         >
           顯示更多資訊 <ChevronDown class="size-4" />
         </button>
+      </div>
 
-        <div v-if="full">
-          <h2 class="mb-5 text-xl font-medium text-brand-dark">其他工廠資訊</h2>
+      <Tabs
+        v-if="full || isDesktop"
+        v-model="activeTab"
+        class="mt-6 gap-0 px-6 pb-6"
+      >
+        <TabsList variant="line" class="h-auto w-full gap-4 border-b border-brand-gray-light p-0">
+          <TabsTrigger
+            v-for="tab in ([['history', '過往紀錄'], ['photos', '現場照片'], ['info', '工廠資訊']] as const)"
+            :key="tab[0]"
+            :value="tab[0]"
+            class="rounded-none border-0 px-1 pb-2 text-sm font-medium text-[#565B66] after:bottom-[-1px] after:bg-[#4A5613] hover:text-brand data-[state=active]:text-brand"
+          >
+            {{ tab[1] }}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="history" class="pt-6">
+          <FactoryTimeline v-if="appStore.factoryData" :factory="appStore.factoryData" />
+
+          <div class="flex gap-4 border-t border-brand-gray-light pt-6">
+            <button
+              type="button"
+              class="flex-1 rounded-[5px] border border-brand bg-white px-[15px] py-[5px] text-base text-[#333333]"
+              @click="appStore.startUpdateFactoryImages()"
+            >
+              上傳照片
+            </button>
+            <button
+              type="button"
+              class="flex-1 rounded-[5px] border border-brand bg-white px-[15px] py-[5px] text-base text-[#333333]"
+              @click="startUpdateFactoryCommentFor('others')"
+            >
+              補充工廠描述
+            </button>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="photos" class="-mx-6 pt-6">
+          <div class="flex">
+            <button
+              v-if="images.length > 0"
+              type="button"
+              class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
+              :disabled="!canScrollCarouselLeft"
+              aria-label="上一張工廠照片"
+              @click="scrollCarousel(-1)"
+            >
+              <ChevronLeft class="size-6" />
+            </button>
+
+            <div
+              ref="imageCarousel"
+              data-testid="image-carousel"
+              class="flex min-w-0 flex-1 touch-auto gap-4 overflow-x-auto overscroll-x-contain"
+              style="-webkit-overflow-scrolling: touch"
+              @scroll="updateCarouselArrows"
+            >
+              <button
+                type="button"
+                data-testid="update-image-button"
+                class="ml-6 flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
+                @click="appStore.startUpdateFactoryImages()"
+              >
+                <Camera class="size-5" />
+                補充照片
+              </button>
+              <button
+                v-for="(image, index) in images"
+                :key="image.id"
+                type="button"
+                data-testid="carousel-image"
+                class="h-[68px] w-[120px] shrink-0 overflow-hidden"
+                @click="setLightboxIndex(index)"
+              >
+                <ImgurFallbackImage :src="image.url" class="h-full w-full object-cover" />
+              </button>
+            </div>
+
+            <button
+              v-if="images.length > 0"
+              type="button"
+              class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
+              :disabled="!canScrollCarouselRight"
+              aria-label="下一張工廠照片"
+              @click="scrollCarousel(1)"
+            >
+              <ChevronRight class="size-6" />
+            </button>
+          </div>
+          <p v-if="images.length === 0" class="mx-6 mt-4 text-sm text-brand-gray-light">
+            目前還沒有現場照片。
+          </p>
+        </TabsContent>
+
+        <TabsContent value="info" class="pt-6">
+          <template v-if="source">
+            <h3 class="mb-1 text-base font-medium text-brand">資料來源</h3>
+            <p class="mb-5">{{ source }}</p>
+          </template>
+
+          <template v-if="lastUpdatedAt">
+            <h3 class="mb-1 text-base font-medium text-brand">最後更新</h3>
+            <p class="mb-5">{{ lastUpdatedAt }}</p>
+          </template>
 
           <h3 class="mb-1 text-base font-medium text-brand">工廠外部文字</h3>
           <p v-if="factoryName" class="mb-3">{{ factoryName }}</p>
@@ -326,34 +325,13 @@ const lastUpdatedAt = computed(() => {
           <p v-if="factoryType" class="mb-3">{{ factoryType }}</p>
           <button
             type="button"
-            class="mb-5 rounded border border-brand px-4 py-2 text-sm text-brand"
+            class="rounded border border-brand px-4 py-2 text-sm text-brand"
             @click="startUpdateFactoryCommentFor('factory_type')"
           >
             {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
           </button>
-
-          <h3 class="mb-1 text-base font-medium text-brand">工廠描述</h3>
-          <button
-            type="button"
-            class="mb-2 rounded border border-brand px-4 py-2 text-sm text-brand"
-            @click="startUpdateFactoryCommentFor('others')"
-          >
-            補充工廠描述
-          </button>
-
-          <div v-for="(desc, index) in pastDescriptions" :key="index" class="mt-2 text-sm">
-            <p class="mb-1 text-brand-gray-light">{{ desc.date }}</p>
-            <p class="leading-6">{{ desc.others }}</p>
-          </div>
-
-          <template v-if="factoryFollowups.length > 0">
-            <h3 class="mt-5 mb-1 text-base font-medium text-brand">政府回應</h3>
-            <div v-for="(followup, index) in factoryFollowups" :key="index" class="mt-2 text-sm">
-              <p class="leading-6">{{ followup.note }}</p>
-            </div>
-          </template>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
 
   </aside>

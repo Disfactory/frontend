@@ -5,6 +5,7 @@ import type {
   FactoriesResponse,
   FactoryImage,
   FactoryPostData,
+  FactoryTimeline,
   FactoryType,
   ReportRecord,
 } from '@/types'
@@ -214,6 +215,15 @@ export async function getFactoryReportRecords(factoryId: string): Promise<Report
   } catch (err) {
     console.error(err)
     throw new TypeError('Fetch factory error')
+  }
+}
+
+export async function getFactoryTimeline(factoryId: string): Promise<FactoryTimeline> {
+  try {
+    return await request<FactoryTimeline>(`/factories/${factoryId}/timeline`)
+  } catch (err) {
+    console.error(err)
+    throw new TypeError('Fetch factory timeline error')
   }
 }
 

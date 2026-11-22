@@ -71,7 +71,7 @@ test('can cancel the create flow from the visible cancel control', async ({ page
 
 test('uploads every selected photo batch on update', async ({ page }) => {
   await openSharedFactory(page)
-  await page.getByRole('button', { name: '補充照片' }).click()
+  await page.getByRole('button', { name: '上傳照片' }).click()
   await expect(page.getByText('上傳工廠照片')).toBeVisible()
 
   let uploads = 0
@@ -95,6 +95,7 @@ test('uploads every selected photo batch on update', async ({ page }) => {
 
 test('sends factory_type when updating the factory type', async ({ page }) => {
   await openSharedFactory(page)
+  await page.getByRole('tab', { name: '工廠資訊' }).click()
   await page.getByRole('button', { name: '更改工廠類型' }).click()
 
   let updateBody: Record<string, unknown> | undefined

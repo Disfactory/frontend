@@ -53,7 +53,7 @@ test.describe('overlays on desktop', () => {
     expect(contactBox!.width).toBeLessThanOrEqual(341)
     await page.keyboard.press('Escape')
 
-    const pendingPill = page.getByRole('button', { name: '未處理' })
+    const pendingPill = page.getByRole('button', { name: '尚可連續裁罰' })
     const pillBox = await pendingPill.boundingBox()
     expect(pillBox).not.toBeNull()
     expect(pillBox!.width).toBeGreaterThan(105)

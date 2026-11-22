@@ -6,7 +6,8 @@ import MapMarkerIcon from '@/components/MapMarkerIcon.vue'
 
 import DisplaySettingBottomSheet from '@/components/DisplaySettingBottomSheet.vue'
 import { getFactories } from '@/api'
-import { initializeMap, getFactoryStatus, type MapFactoryController } from '@/lib/map'
+import { initializeMap, type MapFactoryController } from '@/lib/map'
+import { getFactoryStatus } from '@/lib/timeline'
 import {
   defaultFactoryDisplayStatuses,
   getDisplayStatusColor,
