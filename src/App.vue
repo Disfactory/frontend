@@ -6,6 +6,7 @@ import AppSidebar from '@/components/AppSidebar.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import MapView from '@/components/MapView.vue'
 import FactoryDetailPage from '@/components/FactoryDetailPage.vue'
+import PwaInstallBanner from '@/components/PwaInstallBanner.vue'
 import CreateFactorySteps from '@/components/CreateFactorySteps.vue'
 import UpdateFactorySteps from '@/components/UpdateFactorySteps.vue'
 import AboutModal from '@/components/AboutModal.vue'
@@ -19,10 +20,13 @@ import SuccessModal from '@/components/SuccessModal.vue'
 import { useAppStore } from '@/stores/app'
 import { useAlertStore } from '@/stores/alerts'
 import { useModalStore } from '@/stores/modals'
+import { usePwaStore } from '@/stores/pwa'
 
 const appStore = useAppStore()
 const modalStore = useModalStore()
 const alertStore = useAlertStore()
+const pwaStore = usePwaStore()
+pwaStore.init()
 
 if (typeof window !== 'undefined') {
   ;(window as unknown as { openApiConfigModal?: () => void }).openApiConfigModal =
@@ -38,6 +42,7 @@ const showHeader = computed(
 <template>
   <div class="flex h-full flex-col overflow-hidden">
     <AppHeader v-if="showHeader" @open-menu="modalStore.toggleSidebar()" />
+    <PwaInstallBanner />
 
     <main class="relative min-h-0 flex-1">
       <MapView />
