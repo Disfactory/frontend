@@ -1,0 +1,12 @@
+# Netlify only builds pull request previews. dev.disfactory.tw (GitHub Pages)
+# and production are built and deployed by .github/workflows/ci.yml.
+# Point every Netlify build at the staging API, with the same values as the
+# CI dev-deploy job. Vite only reads VITE_* variables; the old VUE_APP_*
+# variables in the Netlify UI are ignored.
+[build.environment]
+  VITE_BASE_URL = "https://staging.disfactory.tw/api"
+  VITE_IMGUR_FALLBACK_URL = "https://staging.disfactory.tw/imgur"
+  VITE_IMAGE_UPLOAD_PROVIDER = "backend"
+  VITE_IMAGE_UPLOAD_URL = "https://staging.disfactory.tw/api/upload"
+  VITE_PROTOMAP_SOURCE_URL = "https://api.disfactory.tw/tiles/{z}/{x}/{y}.pbf"
+  VITE_PROTOMAP_API_KEY = "e6cfbd46818cf623"
