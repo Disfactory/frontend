@@ -1,575 +1,403 @@
-<template>
-  <div>
-    <v-card elevation="3" class="factory-container" :class="{ full, desktop: $vuetify.breakpoint.mdAndUp, empty: !appState.factoryData }" v-show="!appState.formPageOpen">
-      <div class="factory-detail-scroller" ref="factoryDetailScrollerRef" v-show="appState.factoryData">
-        <v-app-bar fixed color="white" class="d-block d-md-none" v-if="scrollOff">
-          <v-spacer></v-spacer>
-          <v-toolbar-title>
-            <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
-          </v-toolbar-title>
-          <v-spacer></v-spacer>
-          <div class="btn-container">
-            <v-icon class="float-right" @click="collapseFactoryDetail">mdi-close</v-icon>
-            <v-icon class="float-right mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
-          </div>
-          <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage">
-            <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
-            已複製連結
-          </div>
-        </v-app-bar>
-
-        <v-card-text>
-          <div class="d-flex justify-between align-items-center mb-3">
-            <span class="factory-status-title">工廠狀態</span>
-
-            <v-btn @click="copyToClipboard" rounded v-if="$vuetify.breakpoint.mdAndUp" :outlined="showCopiedMessage" :color="showCopiedMessage ? null : 'white'">
-              <v-icon class="mr-1">mdi-share-variant</v-icon>
-              {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
-            </v-btn>
-
-            <span v-else>
-              <v-icon class="mr-4" @click="copyToClipboard">mdi-share-variant</v-icon>
-              <v-icon @click="collapseFactoryDetail">mdi-close</v-icon>
-            </span>
-          </div>
-
-          <p class="factory-status secondary--text mb-2" style="clear: both">
-            <v-icon style="margin-bottom: 5px;" :color="statusColor">mdi-map-marker</v-icon>{{ factoryStatusText }}
-          </p>
-
-          <p class="caption mb-0" style="color: #A1A1A1;">
-            工廠編號 {{ factoryId }} <br>
-            {{ lastUpdatedAt }}
-          </p>
-
-          <div class="copied-message flex justify-center align-items-center" v-if="showCopiedMessage && !scrollOff">
-            <v-icon color="white" class="mr-1">mdi-content-copy</v-icon>
-            已複製連結
-          </div>
-        </v-card-text>
-
-        <v-slide-group :show-arrows="images.length > 0" ref="slideGroup">
-          <v-slide-item>
-            <div class='update-image-button d-flex flex-column justify-center align-items-center' @click="pageTransition.startUpdateFactoryImages">
-              <v-icon color="white" class='mb-1'>mdi-camera-plus</v-icon>
-              補充照片
-            </div>
-          </v-slide-item>
-          <v-slide-item v-for="(image, index) in images" class="mr-4" :key="image.id" :class="{ 'ml-4': index === 0 }" @click.native="setLightboxIndex(index)">
-            <ImgurFallbackImage :src="image.url" className="factory-slide-image" />
-          </v-slide-item>
-        </v-slide-group>
-
-        <div class="mt-4 mx-3 mb-2">
-          <h3 class="mb-1">地段 / 地址</h3>
-          <p class="mb-5">{{ factoryAddressAndLandcode }}</p>
-
-          <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mb-5">
-            <h3 class="mb-1">經緯度</h3>
-            <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
-            <p class="text-caption">以上經緯度版本為 WGS84</p>
-          </div>
-
-          <template v-if="source">
-            <h3 class="mb-1">資料來源</h3>
-            <p class="mb-5">{{ source }}</p>
-          </template>
-
-          <hr v-if="full || $vuetify.breakpoint.mdAndUp">
-
-          <v-btn text depressed elevation="0" :ripple="false" color="#697F01" class="m-0 mb-0 px-0 v-btn-plain show-more-btn" @click="expandFactoryDetail" v-if="!full && !$vuetify.breakpoint.mdAndUp">
-            顯示更多資訊
-            &nbsp;
-            <v-icon>mdi-menu-down</v-icon>
-          </v-btn>
-
-          <div v-if="full || $vuetify.breakpoint.mdAndUp" class="mt-4">
-            <h2 class="mb-5">其他工廠資訊</h2>
-
-            <h3 class="mb-1">工廠外部文字</h3>
-            <p class="mb-3" v-if="factoryName">{{ factoryName }}</p>
-            <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('name')">
-              {{ factoryName ? '更改外部文字' : '回報外部文字' }}
-            </v-btn>
-
-            <h3 class="mb-1">工廠類型</h3>
-            <p class="mb-3" v-if="factoryType">{{ factoryType }}</p>
-            <v-btn class="d-block mb-5" outlined @click="startUpdateFactoryCommentFor('factory_type')">
-              {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
-            </v-btn>
-
-            <h3 class="mb-1">工廠描述</h3>
-            <v-btn outlined @click="startUpdateFactoryCommentFor('others')" class="mb-2">補充工廠描述</v-btn>
-
-            <div v-for="(desc, index) in pastDescriptions" :key="index" class="mt-2" style="font-size: 14px">
-              <p class="color-gray-light mb-1">{{ desc.date }}</p>
-              <p style="line-height: 24px;">{{ desc.others }}</p>
-            </div>
-
-            <template v-if="factoryFollowups.length > 0">
-              <h3 class="mb-1">政府回應</h3>
-
-              <div v-for="(followup, index) in factoryFollowups" class="mt-2" :key="index" style="font-size: 14px">
-                <p style="line-height: 24px;">{{ followup.note }}</p>
-              </div>
-            </template>
-          </div>
-        </div>
-      </div>
-
-      <div class="factory-detail-scroller px-4 py-5" v-show="!appState.factoryData">
-        <h1 class="secondary--text mb-5">請選擇一個地標</h1>
-        <p>請選擇一間工廠查看工廠詳細資訊。</p>
-      </div>
-
-      <div class="sidebar-collapse-button d-flex align-items-center justify-center" v-show="$vuetify.breakpoint.mdAndUp" @click="toggleFactoryDetail">
-        <v-icon color="primary">mdi-menu-left</v-icon>
-      </div>
-    </v-card>
-
-    <CoolLightBox
-      :items="lightboxItems"
-      :index="lightboxIndex"
-      @close="() => setLightboxIndex(null)">
-    </CoolLightBox>
-  </div>
-</template>
-
-<script lang="ts">
-import { defineComponent, computed, ref, onUpdated, watch } from 'vue'
-import copy from 'copy-to-clipboard'
+<script setup lang="ts">
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
+import { Camera, ChevronDown, ChevronLeft, ChevronRight, MapPin, Share2, X } from '@lucide/vue'
+import AppModal from './AppModal.vue'
+import ImgurFallbackImage from './ImgurFallbackImage.vue'
 import { getFactoryStatus, getStatusBorderColor } from '@/lib/map'
 import { getFactoryTypeText } from '@/lib/factory'
-import useScroll from '@/lib/hooks/useScroll'
 import { getFactoryReportRecords } from '@/api'
+import { useAppStore } from '@/stores/app'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from '@/components/ui/carousel'
+import { getDisplayStatusText, type FactoryImage, type ReportRecord } from '@/types'
 
-import { useAppState } from '../lib/appState'
-import { FactoryImage, getDisplayStatusText, ReportRecord } from '../types'
-import ImgurFallbackImage from './ImgurFallbackImage.vue'
+const appStore = useAppStore()
+const isDesktop = useMediaQuery('(min-width: 960px)')
 
-export default defineComponent({
-  name: 'FactoryDetailPage',
-  components: {
-    ImgurFallbackImage
-  },
-  setup () {
-    const [appState, { pageTransition, expandFactoryDetail, collapseFactoryDetail, toggleFactoryDetail }] = useAppState()
+const images = computed<FactoryImage[]>(() => appStore.factoryData?.images ?? [])
+const imageCarousel = ref<HTMLElement | null>(null)
+const canScrollCarouselLeft = ref(false)
+const canScrollCarouselRight = ref(false)
 
-    const images = computed(() => {
-      if (appState.factoryData) {
-        return appState.factoryData.images
-      } else {
-        return []
-      }
-    })
+const updateCarouselArrows = () => {
+  const el = imageCarousel.value
+  if (!el) return
+  canScrollCarouselLeft.value = el.scrollLeft > 1
+  canScrollCarouselRight.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+}
 
-    const lightboxItems = computed(() => {
-      if (appState.factoryData) {
-        return appState.factoryData.images.map(image => ({
-          title: '',
-          description: '',
-          src: image.url
-        }))
-      } else {
-        return []
-      }
-    })
-    const lightboxIndex = ref<number|null>(null)
-    const setLightboxIndex = (i: number|null) => {
-      lightboxIndex.value = i
-    }
+const scrollCarousel = (direction: number) => {
+  imageCarousel.value?.scrollBy({ left: direction * 136, behavior: 'smooth' })
+}
 
-    const factoryStatus = computed(() => {
-      if (appState.factoryData) {
-        return getFactoryStatus(appState.factoryData)
-      } else {
-        return undefined
-      }
-    })
+onMounted(updateCarouselArrows)
+watch(images, async () => {
+  await nextTick()
+  updateCarouselArrows()
+}, { deep: true })
+const lightboxIndex = ref<number | null>(null)
+const setLightboxIndex = (index: number) => {
+  lightboxIndex.value = index
+}
+const lightboxApi = ref<CarouselApi>()
+const lightboxSelected = ref(0)
+const setLightboxApi = (val: CarouselApi | undefined) => {
+  if (!val) return
+  lightboxApi.value = val
+  lightboxSelected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    lightboxSelected.value = val.selectedScrollSnap()
+  })
+}
 
-    const factoryFollowups = computed(() => {
-      if (appState.factoryData) {
-        return appState.factoryData.follow_ups_for_user
-      } else {
-        return []
-      }
-    })
+const factoryStatus = computed(() =>
+  appStore.factoryData ? getFactoryStatus(appStore.factoryData) : undefined,
+)
+const factoryFollowups = computed(() => appStore.factoryData?.follow_ups_for_user ?? [])
+const factoryStatusText = computed(() => {
+  if (typeof factoryStatus.value === 'undefined') return ''
+  const name = getDisplayStatusText(factoryStatus.value)
+  const documentStatus = appStore.factoryData?.document_display_status
+  return documentStatus ? `${name}：${documentStatus}` : name
+})
+const statusColor = computed(() =>
+  typeof factoryStatus.value === 'undefined' ? null : getStatusBorderColor(factoryStatus.value),
+)
+const factoryId = computed(() => appStore.factoryData?.display_number ?? '')
+const factoryType = computed(() =>
+  appStore.factoryData ? getFactoryTypeText(appStore.factoryData) : null,
+)
+const factoryName = computed(() => appStore.factoryData?.name ?? '')
+const factoryAddressAndLandcode = computed(() => {
+  const data = appStore.factoryData
+  if (!data) return ''
+  const { townname, sectname, sectcode, landcode } = data
+  return townname && sectname && sectcode && landcode
+    ? `${townname} ${sectname} (${sectcode}) ${landcode}地號`
+    : '擷取中'
+})
+const source = computed(() => {
+  const raw = appStore.factoryData?.source
+  if (!raw) return ''
+  return raw
+    .split('')
+    .map((char) => ({ U: '本系統', G: '農委會', E: '經濟部' })[char] ?? '')
+    .filter(Boolean)
+    .join('、')
+})
+const full = computed(() => appStore.factoryDetailsExpanded)
+const longitude = computed(() => appStore.factoryData?.lng.toFixed(7))
+const latitude = computed(() => appStore.factoryData?.lat.toFixed(7))
 
-    const factoryStatusText = computed(() => {
-      if (typeof factoryStatus.value !== 'undefined') {
-        const factoryDisplayStatus = getDisplayStatusText(factoryStatus.value)
-        const { document_display_status: documentDisplayStatus } = appState.factoryData || {}
-        if (documentDisplayStatus) {
-          return `${factoryDisplayStatus}：${documentDisplayStatus}`
-        }
-        return factoryDisplayStatus
-      } else {
-        return ''
-      }
-    })
+const scroller = ref<HTMLElement | null>(null)
 
-    const statusColor = computed(() => {
-      if (typeof factoryStatus.value !== 'undefined') {
-        return getStatusBorderColor(factoryStatus.value)
-      } else {
-        return null
-      }
-    })
-
-    const factoryId = computed(() => {
-      if (appState.factoryData) {
-        return appState.factoryData.display_number
-      } else {
-        return ''
-      }
-    })
-
-    const factoryType = computed(() => {
-      if (appState.factoryData) {
-        return getFactoryTypeText(appState.factoryData)
-      } else {
-        return null
-      }
-    })
-
-    const factoryName = computed(() => {
-      return appState.factoryData?.name || ''
-    })
-
-    const factoryAddressAndLandcode = computed(() => {
-      if (appState.factoryData) {
-        const { townname, sectname, sectcode, landcode } = appState.factoryData
-        // 白鷺段（1005）817地號
-        if (townname && sectname && sectcode && landcode) {
-          return `${townname} ${sectname} (${sectcode}) ${landcode}地號`
-        } else {
-          return '擷取中'
-        }
-      } else {
-        return ''
-      }
-    })
-
-    const source = computed(() => {
-      if (appState.factoryData) {
-        return appState.factoryData.source?.split('')
-          .map(function getName (source) {
-            switch (source) {
-              case 'U':
-                return '本系統'
-              case 'G':
-                return '農委會'
-              case 'E':
-                return '經濟部'
-              default:
-                return ''
-            }
-          }).filter(Boolean)
-          .join('、')
-      }
-
-      return ''
-    })
-
-    const full = computed(() => appState.factoryDetailsExpanded)
-
-    const longitude = computed(() => appState.factoryData?.lng.toFixed(7))
-    const latitude = computed(() => appState.factoryData?.lat.toFixed(7))
-
-    const factoryDetailScrollerRef = ref(null)
-    const { scrollTop } = useScroll(factoryDetailScrollerRef)
-    const scrollOff = computed(() => scrollTop.value > 29 && full.value)
-
-    const showCopiedMessage = ref(false)
-    const copyToClipboard = () => {
-      if (!appState.factoryData) {
-        return
-      }
-
-      const { host, protocol } = window.location
-      const url = `${protocol}//${host}/#map=16/${appState.factoryData?.lng}/${appState.factoryData?.lat}&factoryId=${appState.factoryData.id}`
-
-      copy(url)
-
-      showCopiedMessage.value = true
-      window.setTimeout(() => {
-        showCopiedMessage.value = false
-      }, 1000)
-    }
-
-    // Workaround https://github.com/vuetifyjs/vuetify/issues/10971
-    const slideGroup = ref(null)
-    let prevImages: FactoryImage[]
-    onUpdated(() => {
-      if (JSON.stringify(images.value) === JSON.stringify(prevImages)) {
-        return
-      } else {
-        if (!prevImages) {
-          prevImages = images.value.slice()
-          return
-        } else {
-          prevImages = images.value.slice()
-        }
-      }
-
-      if (!slideGroup.value) {
-        return
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const content = (slideGroup.value as any)?.$refs.content
-      window.setTimeout(() => {
-        content.style = 'translateX(0px)'
-      }, 50)
-    })
-
-    const startUpdateFactoryCommentFor = (field = 'others') => {
-      pageTransition.startUpdateFactoryComment(field)
-    }
-
-    const reportRecords = ref<ReportRecord[]>([])
-    watch(() => appState.factoryData, function () {
-      if (appState.factoryData) {
-        (async () => {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          reportRecords.value = ((await getFactoryReportRecords(appState.factoryData?.id!)) || []).sort((a, b) => {
-            return new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1
-          })
-        })()
-      }
-    })
-
-    const pastDescriptions = computed(() => {
-      return reportRecords.value.map(record => {
-        const date = new Date(record.created_at)
-        const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
-        return {
-          date: dateStr,
-          others: record.others
-        }
-      }).filter(rec => rec.others)
-    })
-    const lastUpdatedAt = computed(() => {
-      if (!appState.factoryData || !appState.factoryData.reported_at) {
-        return null
-      }
-
-      let date
-      if (reportRecords.value.length === 0) {
-        date = new Date(appState.factoryData.reported_at)
-      } else {
-        date = new Date(reportRecords.value[0].created_at)
-      }
-      const dateStr = `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
-
-      return `最後更新 ${dateStr}`
-    })
-
-    return {
-      full,
-      appState,
-      pageTransition,
-      images,
-      expandFactoryDetail,
-      collapseFactoryDetail,
-      toggleFactoryDetail,
-      factoryStatus,
-      factoryStatusText,
-      statusColor,
-      factoryId,
-      factoryType,
-      factoryName,
-      factoryAddressAndLandcode,
-      factoryFollowups,
-      source,
-      pastDescriptions,
-      lastUpdatedAt,
-      longitude,
-      latitude,
-      factoryDetailScrollerRef,
-      scrollOff,
-      showCopiedMessage,
-      copyToClipboard,
-      slideGroup,
-      startUpdateFactoryCommentFor,
-      lightboxItems,
-      lightboxIndex,
-      setLightboxIndex
-    }
+const showCopiedMessage = ref(false)
+const copyToClipboard = async () => {
+  const factory = appStore.factoryData
+  if (!factory) return
+  const { host, protocol } = window.location
+  const url = `${protocol}//${host}/#map=16/${factory.lng}/${factory.lat}&factoryId=${factory.id}`
+  try {
+    await navigator.clipboard.writeText(url)
+  } catch {
+    const textarea = document.createElement('textarea')
+    textarea.value = url
+    document.body.appendChild(textarea)
+    textarea.select()
+    document.execCommand('copy')
+    textarea.remove()
   }
+  showCopiedMessage.value = true
+  window.setTimeout(() => {
+    showCopiedMessage.value = false
+  }, 1000)
+}
+
+const startUpdateFactoryCommentFor = (field: 'others' | 'name' | 'factory_type' = 'others') => {
+  appStore.startUpdateFactoryComment(field)
+}
+
+const reportRecords = ref<ReportRecord[]>([])
+watch(
+  () => appStore.factoryData,
+  async (factory) => {
+    if (!factory) {
+      reportRecords.value = []
+      return
+    }
+    try {
+      reportRecords.value = ((await getFactoryReportRecords(factory.id)) || []).sort((a, b) =>
+        new Date(b.created_at) >= new Date(a.created_at) ? 1 : -1,
+      )
+    } catch {
+      reportRecords.value = []
+    }
+  },
+  { immediate: true },
+)
+
+const pastDescriptions = computed(() =>
+  reportRecords.value
+    .map((record) => {
+      const date = new Date(record.created_at)
+      return {
+        date: `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`,
+        others: record.others,
+      }
+    })
+    .filter((record) => record.others),
+)
+const lastUpdatedAt = computed(() => {
+  const factory = appStore.factoryData
+  if (!factory?.reported_at) return null
+  const date =
+    reportRecords.value.length === 0
+      ? new Date(factory.reported_at)
+      : new Date(reportRecords.value[0]?.created_at as string)
+  return `最後更新 ${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()}`
 })
 </script>
 
-<style scoped lang="scss">
-@import '@/styles/variables';
+<template>
+  <aside
+    v-if="appStore.factoryData && !appStore.formPageOpen"
+    data-testid="detail-panel"
+    class="fixed inset-x-0 bottom-0 z-20 flex max-h-[calc(100%-56px)] flex-col bg-white pb-[env(safe-area-inset-bottom)] shadow-xl transition-transform duration-200 md:top-16 md:right-0 md:bottom-0 md:left-auto md:w-[395px] md:border-l"
+    :class="[
+      full ? 'top-0 z-40 max-h-none md:top-16 md:z-20' : 'top-auto',
+      full ? 'md:translate-x-0' : 'md:translate-x-full',
+    ]"
+  >
+    <button
+      v-if="appStore.factoryData"
+      type="button"
+      class="absolute top-6 -left-[30px] hidden h-[74px] w-[30px] items-center justify-center rounded-l-lg bg-white shadow md:flex"
+      aria-label="收合工廠資訊"
+      @click="appStore.toggleFactoryDetail()"
+    >
+      <ChevronLeft class="size-5 text-brand" :class="{ 'rotate-180': full }" />
+    </button>
 
-.factory-container {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  z-index: 5;
+    <div
+      v-if="appStore.factoryData"
+      ref="scroller"
+      data-testid="detail-scroller"
+      class="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+    >
+      <div v-if="showCopiedMessage" class="flex h-10 items-center justify-center bg-brand text-sm text-white">
+        已複製連結
+      </div>
 
-  .factory-detail-scroller {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-  }
+      <div class="px-4 pt-3">
+        <div class="mb-3 flex items-center justify-between">
+          <span class="text-base text-brand-dark">工廠狀態</span>
+          <button
+            type="button"
+            class="hidden rounded-full border px-4 py-2 text-sm md:block"
+            :class="showCopiedMessage ? 'border-brand bg-brand text-white' : 'border-brand-line bg-white text-brand shadow-sm'"
+            @click="copyToClipboard"
+          >
+            <Share2 class="mr-1 inline size-4" />
+            {{ showCopiedMessage ? '已複製連結' : '分享工廠' }}
+          </button>
+          <span class="flex items-center gap-2 md:hidden">
+            <button type="button" class="rounded p-1 hover:bg-black/5" aria-label="分享工廠" @click="copyToClipboard">
+              <Share2 class="size-5" />
+            </button>
+            <button
+              type="button"
+              class="rounded p-1 hover:bg-black/5"
+              aria-label="關閉"
+              @click="appStore.collapseFactoryDetail()"
+            >
+              <X class="size-5" />
+            </button>
+          </span>
+        </div>
 
-  .factory-status {
-    font-size: 24px;
-  }
+        <p class="mb-2 text-2xl text-brand-dark">
+          <MapPin class="mb-1 inline size-5" :style="{ color: statusColor ?? undefined }" />
+          {{ factoryStatusText }}
+        </p>
+        <p class="mb-0 text-xs text-brand-gray-light">
+          工廠編號 {{ factoryId }}<br />
+          {{ lastUpdatedAt }}
+        </p>
+      </div>
 
-  h3 {
-    color: $light-green-color;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 24px;
-    letter-spacing: 0.03em;
+      <div class="mt-4 flex">
+        <button
+          v-if="images.length > 0"
+          type="button"
+          class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
+          :disabled="!canScrollCarouselLeft"
+          aria-label="上一張工廠照片"
+          @click="scrollCarousel(-1)"
+        >
+          <ChevronLeft class="size-6" />
+        </button>
 
-    + p {
-      line-height: 1.3;
-    }
-  }
+        <div
+          ref="imageCarousel"
+          data-testid="image-carousel"
+          class="flex min-w-0 flex-1 touch-auto gap-4 overflow-x-auto overscroll-x-contain"
+          style="-webkit-overflow-scrolling: touch"
+          @scroll="updateCarouselArrows"
+        >
+          <button
+            type="button"
+            data-testid="update-image-button"
+            class="ml-4 flex h-[68px] w-[100px] shrink-0 flex-col items-center justify-center gap-1 bg-brand-dark text-xs text-white"
+            @click="appStore.startUpdateFactoryImages()"
+          >
+            <Camera class="size-5" />
+            補充照片
+          </button>
+          <button
+            v-for="(image, index) in images"
+            :key="image.id"
+            type="button"
+            data-testid="carousel-image"
+            class="h-[68px] w-[120px] shrink-0 overflow-hidden"
+            @click="setLightboxIndex(index)"
+          >
+            <ImgurFallbackImage :src="image.url" class="h-full w-full object-cover" />
+          </button>
+        </div>
 
-  h2 {
-    color: $dark-green-color;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 20px;
-    line-height: 30px;
-    letter-spacing: 0.03em;
-  }
+        <button
+          v-if="images.length > 0"
+          type="button"
+          class="flex h-[68px] w-[52px] shrink-0 items-center justify-center text-brand-gray transition disabled:opacity-30"
+          :disabled="!canScrollCarouselRight"
+          aria-label="下一張工廠照片"
+          @click="scrollCarousel(1)"
+        >
+          <ChevronRight class="size-6" />
+        </button>
+      </div>
 
-  .text-caption {
-    color: $gray-light-color;
-  }
+      <div class="mx-4 mt-4 mb-2">
+        <h3 class="mb-1 text-base font-medium text-brand">地段 / 地址</h3>
+        <p class="mb-5">{{ factoryAddressAndLandcode }}</p>
 
-  hr {
-    color: #EAF3BF;
-    border-color: #EAF3BF;
-    background-color: #EAF3BF;
-    height: 1px;
-    border-width: inherit;
-  }
+        <div v-if="full || isDesktop" class="mb-5">
+          <h3 class="mb-1 text-base font-medium text-brand">經緯度</h3>
+          <p class="mb-1">{{ longitude }}, {{ latitude }}</p>
+          <p class="text-xs text-brand-gray-light">以上經緯度版本為 WGS84</p>
+        </div>
 
-  .btn-container {
-    position: absolute;
-    right: 10px;
-  }
+        <template v-if="source">
+          <h3 class="mb-1 text-base font-medium text-brand">資料來源</h3>
+          <p class="mb-5">{{ source }}</p>
+        </template>
 
-  &.full .factory-detail-scroller {
-    padding-bottom: 60px;
-  }
+        <hr v-if="full || isDesktop" class="my-4 border-brand-line" />
 
-  // mobile expand
-  &:not(.desktop) {
-    &.full {
-      min-height: 100%;
-      overflow: auto;
-      top: 0;
-    }
+        <button
+          v-if="!full"
+          type="button"
+          data-testid="expand-detail"
+          class="sticky bottom-0 z-[1] flex w-full items-center gap-1 bg-white pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] text-left text-sm font-medium text-brand md:hidden"
+          @click="appStore.expandFactoryDetail()"
+        >
+          顯示更多資訊 <ChevronDown class="size-4" />
+        </button>
 
-    &.empty {
-      display: none;
-    }
-  }
+        <div v-if="full">
+          <h2 class="mb-5 text-xl font-medium text-brand-dark">其他工廠資訊</h2>
 
-  // sidebar style
-  &.desktop {
-    width: 395px;
-    right: -395px;
-    top: 64px;
-    max-height: calc(100% - 64px);
-    border-radius: 0;
-    z-index: 4;
-    overflow: visible;
-    transition: transform ease-in-out 200ms;
+          <h3 class="mb-1 text-base font-medium text-brand">工廠外部文字</h3>
+          <p v-if="factoryName" class="mb-3">{{ factoryName }}</p>
+          <button
+            type="button"
+            class="mb-5 rounded border border-brand px-4 py-2 text-sm text-brand"
+            @click="startUpdateFactoryCommentFor('name')"
+          >
+            {{ factoryName ? '更改外部文字' : '回報外部文字' }}
+          </button>
 
-    // expanded sidebar
-    &.full {
-      transform: translateX(-395px);
+          <h3 class="mb-1 text-base font-medium text-brand">工廠類型</h3>
+          <p v-if="factoryType" class="mb-3">{{ factoryType }}</p>
+          <button
+            type="button"
+            class="mb-5 rounded border border-brand px-4 py-2 text-sm text-brand"
+            @click="startUpdateFactoryCommentFor('factory_type')"
+          >
+            {{ factoryType ? '更改工廠類型' : '回報工廠類型' }}
+          </button>
 
-      .sidebar-collapse-button .v-icon {
-        transform: rotate(180deg);
-      }
-    }
+          <h3 class="mb-1 text-base font-medium text-brand">工廠描述</h3>
+          <button
+            type="button"
+            class="mb-2 rounded border border-brand px-4 py-2 text-sm text-brand"
+            @click="startUpdateFactoryCommentFor('others')"
+          >
+            補充工廠描述
+          </button>
 
-    .copied-message {
-      display: none;
-    }
+          <div v-for="(desc, index) in pastDescriptions" :key="index" class="mt-2 text-sm">
+            <p class="mb-1 text-brand-gray-light">{{ desc.date }}</p>
+            <p class="leading-6">{{ desc.others }}</p>
+          </div>
 
-    .show-more-btn {
-      position: sticky;
-      bottom: env(safe-area-inset-bottom, 0);
-      background: white;
-      width: 100%;
-      // padding: 0px 0 !important;
-      margin-bottom: 0 !important;
-      z-index: 1;
-    }
-  }
+          <template v-if="factoryFollowups.length > 0">
+            <h3 class="mt-5 mb-1 text-base font-medium text-brand">政府回應</h3>
+            <div v-for="(followup, index) in factoryFollowups" :key="index" class="mt-2 text-sm">
+              <p class="leading-6">{{ followup.note }}</p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
 
-  .sidebar-collapse-button {
-    position: absolute;
-    top: 30px;
-    left: -30px;
-    background-color: white;
-    width: 30px;
-    height: 74px;
-    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.1),  inset -0.7px 0px 2px rgba(0, 0, 0, 0.1);
-    // add important to workaround vutify style
-    border-radius: 10px 0 0 10px !important;
-    cursor: pointer;
-  }
-}
+  </aside>
 
-.factory-status-title {
-  color: $dark-green-color;
-  font-size: 16px;
-}
-
-.factory-slide-image {
-  width: 120px;
-  height: 68px;
-  overflow: hidden;
-  object-fit: cover;
-  cursor: pointer;
-}
-
-.copied-message {
-  background-color: $light-green-color;
-  color: white;
-  font-size: 14px;
-  height: 41px;
-  position: absolute;
-  width: 100%;
-  left: 0;
-}
-
-.v-app-bar .copied-message {
-  top: 56px;
-}
-
-.v-card__text .copied-message {
-  top: 48px;
-}
-
-.update-image-button {
-  background-color: $dark-green-color;
-  width: 100px;
-  height: 68px;
-  color: white;
-  font-size: 12px;
-  user-select: none;
-  cursor: pointer;
-
-  &:first-child {
-    margin-left: 15px;
-  }
-}
-
-.v-slide-group__wrapper {
-  touch-action: auto !important;
-}
-</style>
+  <AppModal
+    :open="lightboxIndex !== null"
+    title="工廠照片"
+    centered
+    :dismiss="() => (lightboxIndex = null)"
+    overlay-class="bg-[rgba(30,30,30,0.9)]"
+    class="max-w-[min(90vw,900px)] border-0 p-0 sm:max-w-[min(90vw,900px)]"
+  >
+    <div data-testid="lightbox-content" class="relative min-w-0 select-none">
+      <Carousel :opts="{ startIndex: lightboxIndex ?? 0, loop: true }" @init-api="setLightboxApi">
+        <CarouselContent class="-ml-0">
+          <CarouselItem v-for="(image, i) in images" :key="image.id" class="pl-0">
+            <img
+              :src="image.url"
+              :alt="`工廠照片 ${i + 1}`"
+              class="max-h-[80vh] w-full object-contain"
+              draggable="false"
+            />
+          </CarouselItem>
+        </CarouselContent>
+      </Carousel>
+      <button
+        type="button"
+        class="absolute top-1/2 left-2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white"
+        aria-label="上一張"
+        @click="lightboxApi?.scrollPrev()"
+      >
+        <ChevronLeft class="size-6" />
+      </button>
+      <button
+        type="button"
+        class="absolute top-1/2 right-2 -translate-y-1/2 rounded-full bg-black/50 p-2 text-white"
+        aria-label="下一張"
+        @click="lightboxApi?.scrollNext()"
+      >
+        <ChevronRight class="size-6" />
+      </button>
+      <span data-testid="lightbox-counter" class="sr-only" aria-live="polite">
+        {{ lightboxSelected + 1 }} / {{ images.length }}
+      </span>
+    </div>
+  </AppModal>
+</template>

@@ -1,336 +1,245 @@
-<template>
-  <div class='update-factory-steps'>
-    <!-- AppBar for Mobile -->
-    <v-app-bar fixed color="white" class="d-block d-md-none">
-      <v-spacer></v-spacer>
-      <v-toolbar-title class="secondary--text" v-if="appState.isEditImagesMode">補充照片</v-toolbar-title>
-      <v-toolbar-title class="secondary--text" v-else>
-        {{ updateFormAppTitle }}
-      </v-toolbar-title>
-      <v-spacer></v-spacer>
-
-      <div class="btn-container">
-        <v-dialog v-model="discardDialog" max-width="290">
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-on="on" v-bind="attrs">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </template>
-          <v-card v-if="appState.isEditImagesMode">
-            <v-card-title class="headline">補充照片尚未完成</v-card-title>
-            <v-card-text>放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片</v-card-text>
-            <v-container class="text-center">
-              <v-btn width="100%" x-large rounded color="green darken-1" @click="discardDialog = false">繼續編輯</v-btn>
-              <a class="d-block mt-4" @click="cancelUpdateFactoryImages">確定放棄</a>
-            </v-container>
-          </v-card>
-          <v-card v-else>
-            <v-card-title class="secondary--text">{{ updateFormAppTitle }}尚未完成！</v-card-title>
-            <v-card-text>放棄編輯的話，你將遺失所有未新增的資料。下次需重新填寫。</v-card-text>
-            <v-container class="text-center">
-              <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
-              <a class="d-block mt-4" @click="cancelUpdateFactory">確定放棄</a>
-            </v-container>
-          </v-card>
-        </v-dialog>
-      </div>
-    </v-app-bar>
-
-    <!-- AppBar for Desktop -->
-    <v-app-bar fixed color="white" class="d-none d-md-block" v-if="appState.isEditImagesMode">
-      <v-toolbar-title class="secondary--text">補充照片</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-
-      <v-dialog v-model="discardDialog" max-width="290">
-        <template v-slot:activator="{ on, attrs }">
-          <v-btn v-on="on" v-bind="attrs" outlined>
-            取消
-          </v-btn>
-        </template>
-        <v-card>
-          <v-card-title class="secondary--text">補充照片尚未完成</v-card-title>
-          <v-card-text>放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片</v-card-text>
-          <v-container class="text-center">
-            <v-btn width="100%" x-large rounded color="primary" @click="discardDialog = false">繼續編輯</v-btn>
-            <a class="d-block mt-4" @click="cancelUpdateFactoryImages">確定放棄</a>
-          </v-container>
-        </v-card>
-      </v-dialog>
-    </v-app-bar>
-
-    <image-upload-form
-      v-if="appState.isEditImagesMode"
-      v-model="selectedImages"
-      :uploading="imageUploadState.uploading"
-      :error="imageUploadState.error"
-      :previewImages="uploadedImages"
-      :onClickRemoveImage="onClickRemoveImage"
-      :valid="imagesValid"
-      :submit="submitImageUpload"
-      :formState="imageUploadFormState"
-      :submitText="imageSubmitting? '照片上傳中...' : '確認新增照片'"
-      disableProgressiveUpload
-    />
-
-    <!-- Update factory field page (Desktop) -->
-    <div class="update-factory-comment-container w-100 px-4 py-4 d-flex flex-column justify-between" v-else-if="$vuetify.breakpoint.smAndDown">
-      <div>
-        <h3 class="mt-4 mb-2 primary--text">{{ updateFormTitle }}</h3>
-
-        <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" v-if="appState.isEditComment" />
-        <v-text-field outlined v-model="formState.name" placeholder="例：小明化工廠" color="primary" v-if="appState.isEditName" />
-        <v-select :items="factoryTypeItems" v-model="formState.factory_type" solo outlined placeholder="未選擇" v-if="appState.isEditType" />
-
-      </div>
-      <v-btn x-large rounded class="w-100 primary" :disabled="!isCurrentFieldValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateFactory">
-        {{ updateFormButton }}
-      </v-btn>
-    </div>
-
-    <!-- Update factory field modal (Mobile) -->
-    <v-dialog v-model="appState.isEditFactoryMode" persistent max-width="395" v-if="$vuetify.breakpoint.mdAndUp">
-      <div class="update-factory-comment-modal w-100 px-4 py-4 d-flex flex-column justify-between">
-        <div class="d-flex justify-end">
-          <v-btn icon @click="cancelUpdateFactory">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </div>
-        <div>
-          <h3 class="mb-3">{{ updateFormTitle }}</h3>
-
-          <v-textarea outlined solo v-model="formState.others" placeholder="例：常常散發異味" v-if="appState.isEditComment" />
-          <v-text-field outlined v-model="formState.name" placeholder="例：小明化工廠" color="primary" v-if="appState.isEditName" />
-          <v-select :items="factoryTypeItems" v-model="formState.factory_type" solo outlined placeholder="未選擇" v-if="appState.isEditType" />
-        </div>
-        <v-btn x-large rounded class="w-100" :disabled="!isCurrentFieldValid" style="width: 100%; max-width: 345px; margin: 0 auto;" @click="submitUpdateFactory" color="primary">
-          {{ updateFormButton }}
-        </v-btn>
-      </div>
-    </v-dialog>
-  </div>
-</template>
-
-<script lang="ts">
-import { useUpdateFactoryImage } from '@/lib/imageUpload'
-import { updateFactoryImages, updateFactory } from '@/api'
-import { computed, defineComponent, inject, reactive, ref } from 'vue'
-import { useGA } from '@/lib/useGA'
-import { useAppState } from '../lib/appState'
-import { useModalState } from '../lib/hooks'
+<script setup lang="ts">
+import { computed, reactive, ref } from 'vue'
+import { useMediaQuery } from '@vueuse/core'
+import { X } from '@lucide/vue'
+import AppButton from './AppButton.vue'
+import AppModal from './AppModal.vue'
+import AppTextArea from './AppTextArea.vue'
+import AppTextField from './AppTextField.vue'
+import AppSelect from './AppSelect.vue'
 import ImageUploadForm from './ImageUploadForm.vue'
-import { MainMapControllerSymbol } from '@/symbols'
-import { MapFactoryController } from '@/lib/map'
-import { FACTORY_TYPE } from '@/types'
+import { useAppStore } from '@/stores/app'
+import { useModalStore } from '@/stores/modals'
+import { useAlertStore } from '@/stores/alerts'
+import { useMapStore } from '@/stores/map'
+import { useGA } from '@/lib/useGA'
+import { useUpdateFactoryImage } from '@/lib/imageUpload'
+import { updateFactory, updateFactoryImages } from '@/api'
+import { FACTORY_TYPE, type FactoryType } from '@/types'
 
-export default defineComponent({
-  name: 'UpdateFactorySteps',
-  components: {
-    ImageUploadForm
-  },
-  setup () {
-    const [appState, { pageTransition }] = useAppState()
-    const [, modalActions] = useModalState()
-    const mapController = inject(MainMapControllerSymbol, ref<MapFactoryController>())
-    const { event } = useGA()
+const appStore = useAppStore()
+const isDesktop = useMediaQuery('(min-width: 960px)')
+const modalStore = useModalStore()
+const alertStore = useAlertStore()
+const mapStore = useMapStore()
+const { event } = useGA()
 
-    const {
-      selectedImages,
-      imageUploadState,
-      uploadedImages,
-      onClickRemoveImage,
-      imageUploadFormValid
-    } = useUpdateFactoryImage()
+const discardDialog = ref(false)
+const imageSubmitting = ref(false)
+const {
+  selectedImages,
+  imageUploadState,
+  uploadedImages,
+  allFiles,
+  onClickRemoveImage,
+  imageUploadFormValid,
+} = useUpdateFactoryImage()
+const imageUploadFormState = reactive({ nickname: '', contact: '' })
+const imagesValid = computed(() => imageUploadFormValid.value && !imageSubmitting.value)
 
-    const imageUploadFormState = reactive({
-      nickname: '',
-      contact: ''
+const submitImageUpload = async () => {
+  const factory = appStore.factoryData
+  if (!factory?.id || allFiles.value.length === 0) return
+
+  imageSubmitting.value = true
+  try {
+    const newImages = await updateFactoryImages(factory.id, allFiles.value, {
+      nickname: imageUploadFormState.nickname,
+      contact: imageUploadFormState.contact,
     })
-
-    const imageSubmitting = ref(false)
-    const imagesValid = computed(() => imageUploadFormValid.value && !imageSubmitting.value)
-    const submitImageUpload = async () => {
-      if (!appState.factoryData?.id || !selectedImages.value) {
-        return
-      }
-
-      imageSubmitting.value = true
-
-      try {
-        const newImages = await updateFactoryImages(
-          appState.factoryData?.id,
-          selectedImages.value, {
-            nickname: imageUploadFormState.nickname,
-            contact: imageUploadFormState.contact
-          }
-        )
-
-        if (mapController.value) {
-          const factory = appState.factoryData
-          factory.images = factory.images.concat(newImages)
-
-          mapController.value.updateFactory(factory.id, factory)
-          appState.factoryData = factory
-        }
-
-        pageTransition.cancelUpdateFactoryImages()
-        modalActions.openUpdateFactoryImagesSuccessModal()
-      } catch (err) {
-        console.error(err)
-      }
-
-      imageSubmitting.value = false
-    }
-
-    const discardDialog = ref(false)
-
-    const cancelUpdateFactoryImages = () => {
-      discardDialog.value = false
-      pageTransition.cancelUpdateFactoryImages()
-    }
-
-    const cancelUpdateFactory = () => {
-      discardDialog.value = false
-      pageTransition.cancelUpdateFactoryComment()
-    }
-
-    const formState = reactive({
-      others: '',
-      name: appState.factoryData?.name,
-      factory_type: appState.factoryData?.type,
-      submitting: false
-    })
-
-    const factoryTypeItems: Array<{ text: string, value?: string }> = [
-      ...FACTORY_TYPE
-    ]
-
-    const validStates = {
-      others: computed(() => formState.others.length > 0 && !formState.submitting),
-      name: computed(() => formState?.name?.length && formState.name?.length > 0 && !formState.submitting),
-      factory_type: computed(() => !!formState.factory_type && !formState.submitting)
-    }
-
-    const isCurrentFieldValid = computed(() => {
-      const field = appState.updateFactoryField as 'others' | 'name' | 'factory_type'
-      return validStates[field].value
-    })
-
-    const updateFormAppTitle = computed(() => {
-      return appState.isEditComment
-        ? '補充工廠描述'
-        : appState.isEditName ? '更改外部文字' : '更改工廠類型'
-    })
-
-    const updateFormTitle = computed(() => {
-      if (appState.isEditComment) {
-        return '工廠描述'
-      } else if (appState.isEditName) {
-        return '工廠外部文字'
-      } else if (appState.isEditType) {
-        return '工廠類型'
-      }
-    })
-
-    const updateFormButton = computed(() => {
-      if (appState.isEditComment) {
-        return '新增工廠描述'
-      } else if (appState.isEditName) {
-        return '確認更改工廠外部文字'
-      } else if (appState.isEditType) {
-        return '確認更改工廠類型'
-      }
-    })
-
-    const submitUpdateFactory = async () => {
-      if (!appState.factoryData?.id || !isCurrentFieldValid.value) {
-        return
-      }
-
-      formState.submitting = true
-
-      try {
-        const field = appState.updateFactoryField as 'others' | 'name' | 'factory_type'
-
-        event('updateFactory', { field })
-        const factory = await updateFactory(appState.factoryData?.id, {
-          [field]: formState[field]
-        })
-
-        if (mapController.value) {
-          mapController.value.updateFactory(factory.id, factory)
-          appState.factoryData = factory
-        }
-
-        // TOOD: comments not displayed or stored in factory data for now
-
-        pageTransition.cancelUpdateFactoryComment()
-        modalActions.openUpdateFactorySuccessModal()
-      } catch (err) {}
-
-      formState.submitting = false
-    }
-
-    return {
-      appState,
-      pageTransition,
-
-      discardDialog,
-      imageUploadFormState,
-      selectedImages,
-      imageUploadState,
-      uploadedImages,
-      onClickRemoveImage,
-      imagesValid,
-      submitImageUpload,
-      cancelUpdateFactoryImages,
-      cancelUpdateFactory,
-
-      updateFormAppTitle,
-      updateFormTitle,
-      updateFormButton,
-
-      formState,
-      isCurrentFieldValid,
-      factoryTypeItems,
-
-      submitUpdateFactory,
-
-      imageSubmitting
-    }
+    factory.images = factory.images.concat(newImages)
+    mapStore.controller?.updateFactory(factory.id, factory)
+    appStore.setFactoryData(factory)
+    appStore.cancelUpdateFactoryImages()
+    modalStore.openUpdateFactoryImagesSuccessModal()
+  } catch (err) {
+    console.error(err)
+    alertStore.showAlert('補充照片失敗，請稍後再試。')
   }
+  imageSubmitting.value = false
+}
+
+const cancelUpdateFactoryImages = () => {
+  discardDialog.value = false
+  appStore.cancelUpdateFactoryImages()
+}
+
+const formState = reactive({
+  others: '',
+  name: appStore.factoryData?.name ?? '',
+  factory_type: appStore.factoryData?.type as FactoryType | undefined,
+  submitting: false,
 })
+const typeValue = ref(formState.factory_type ?? '')
+const setType = (value: string) => {
+  typeValue.value = value
+  formState.factory_type = (value || undefined) as FactoryType | undefined
+}
+
+const validStates = {
+  others: computed(() => formState.others.length > 0 && !formState.submitting),
+  name: computed(() => (formState.name?.length ?? 0) > 0 && !formState.submitting),
+  factory_type: computed(() => !!formState.factory_type && !formState.submitting),
+}
+
+const isCurrentFieldValid = computed(() => validStates[appStore.updateFactoryField]?.value ?? false)
+
+const updateFormAppTitle = computed(() =>
+  appStore.isEditComment ? '補充工廠描述' : appStore.isEditName ? '更改外部文字' : '更改工廠類型',
+)
+const updateFormTitle = computed(() =>
+  appStore.isEditComment
+    ? '工廠描述'
+    : appStore.isEditName
+      ? '工廠外部文字'
+      : appStore.isEditType
+        ? '工廠類型'
+        : '',
+)
+const updateFormButton = computed(() =>
+  appStore.isEditComment
+    ? '新增工廠描述'
+    : appStore.isEditName
+      ? '確認更改工廠外部文字'
+      : '確認更改工廠類型',
+)
+
+const submitUpdateFactory = async () => {
+  const factory = appStore.factoryData
+  if (!factory?.id || !isCurrentFieldValid.value) return
+
+  formState.submitting = true
+  try {
+    const field = appStore.updateFactoryField
+    event('updateFactory', { field })
+    const payload =
+      field === 'factory_type'
+        ? { factory_type: formState.factory_type }
+        : { [field]: formState[field] }
+    const updated = await updateFactory(factory.id, payload)
+    mapStore.controller?.updateFactory(updated.id, updated)
+    appStore.setFactoryData(updated)
+    appStore.cancelUpdateFactoryComment()
+    modalStore.openUpdateFactorySuccessModal()
+  } catch (err) {
+    console.error(err)
+    alertStore.showAlert('更新工廠資訊失敗，請稍後再試。')
+  }
+  formState.submitting = false
+}
+
+const cancelUpdateFactory = () => {
+  discardDialog.value = false
+  appStore.cancelUpdateFactoryComment()
+}
+
+const factoryTypeItems: Array<{ text: string; value?: string }> = [...FACTORY_TYPE]
 </script>
 
-<style lang="scss" scoped>
-.btn-container {
-  position: absolute;
-  right: 5px;
-}
+<template>
+  <div class="pointer-events-none absolute inset-0 z-50">
+    <header class="pointer-events-auto relative z-20 flex h-14 items-center justify-between border-b bg-white px-3 text-brand-dark">
+      <div class="w-10" />
+      <h1 class="text-base font-medium">{{ appStore.isEditImagesMode ? '補充照片' : updateFormAppTitle }}</h1>
+      <button type="button" class="rounded p-2 hover:bg-black/5" aria-label="關閉" @click="discardDialog = true">
+        <X class="size-5" />
+      </button>
+    </header>
 
-.update-factory-steps {
-  z-index: 6;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
+    <ImageUploadForm
+      v-if="appStore.isEditImagesMode"
+      v-model="selectedImages"
+      class="pointer-events-auto"
+      :uploading="imageUploadState.uploading"
+      :error="imageUploadState.error"
+      :preview-images="uploadedImages"
+      :on-click-remove-image="onClickRemoveImage"
+      :valid="imagesValid"
+      :submit="submitImageUpload"
+      :form-state="imageUploadFormState"
+      :submit-text="imageSubmitting ? '照片上傳中...' : '確認新增照片'"
+      disable-progressive-upload
+      @update:form-state="Object.assign(imageUploadFormState, $event)"
+    />
 
-.update-factory-comment-container {
-  @import '@/styles/typography.scss';
+    <div
+      v-else-if="appStore.isEditFactoryMode && isDesktop"
+      data-testid="update-factory-panel"
+      class="pointer-events-auto absolute top-20 left-1/2 z-50 w-[calc(100%-2rem)] max-w-[395px] -translate-x-1/2 rounded-lg bg-white p-5 shadow-xl"
+    >
+      <div class="mb-3 flex items-start justify-between">
+        <h3 class="text-lg font-medium text-brand-dark">{{ updateFormTitle }}</h3>
+        <button type="button" class="rounded p-1 hover:bg-black/5" aria-label="關閉" @click="discardDialog = true">
+          <X class="size-5" />
+        </button>
+      </div>
 
-  background-color: white;
-  z-index: 2;
-  position: absolute;
-  height: 100%;
+      <AppTextArea v-if="appStore.isEditComment" v-model="formState.others" placeholder="例：常常散發異味" />
+      <AppTextField v-if="appStore.isEditName" v-model="formState.name" placeholder="例：小明化工廠" />
+      <AppSelect
+        v-if="appStore.isEditType"
+        :model-value="typeValue"
+        :items="factoryTypeItems"
+        placeholder="未選擇"
+        @update:model-value="setType"
+      />
 
-  padding-bottom: 50px;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+      <AppButton class="mt-5" :disabled="!isCurrentFieldValid" @click="submitUpdateFactory">
+        {{ updateFormButton }}
+      </AppButton>
+    </div>
 
-.update-factory-comment-modal {
-  @import '@/styles/typography.scss';
-  background-color: white;
-  z-index: 2;
-}
-</style>
+    <div
+      v-else-if="appStore.isEditFactoryMode"
+      data-testid="update-factory-panel"
+      class="pointer-events-auto fixed inset-0 z-50 flex flex-col bg-white"
+    >
+      <header class="flex h-14 shrink-0 items-center justify-between border-b px-3">
+        <div class="w-8" />
+        <h1 class="text-base font-medium text-brand-dark">{{ updateFormAppTitle }}</h1>
+        <button type="button" class="rounded p-2 hover:bg-black/5" aria-label="關閉" @click="discardDialog = true">
+          <X class="size-5" />
+        </button>
+      </header>
+
+      <div class="flex-1 overflow-y-auto p-4">
+        <h3 class="mb-2 text-base font-medium text-brand">{{ updateFormTitle }}</h3>
+
+        <AppTextArea v-if="appStore.isEditComment" v-model="formState.others" placeholder="例：常常散發異味" />
+        <AppTextField v-if="appStore.isEditName" v-model="formState.name" placeholder="例：小明化工廠" />
+        <AppSelect
+          v-if="appStore.isEditType"
+          :model-value="typeValue"
+          :items="factoryTypeItems"
+          placeholder="未選擇"
+          @update:model-value="setType"
+        />
+      </div>
+
+      <div class="shrink-0 border-t p-4">
+        <AppButton :disabled="!isCurrentFieldValid" @click="submitUpdateFactory">
+          {{ updateFormButton }}
+        </AppButton>
+      </div>
+    </div>
+
+    <AppModal :open="discardDialog" :dismiss="() => (discardDialog = false)" :title="appStore.isEditImagesMode ? '放棄補充照片' : '放棄編輯'" class="max-w-[290px]">
+      <template v-if="appStore.isEditImagesMode">
+        <h3 class="mb-2 text-lg font-medium">補充照片尚未完成</h3>
+        <p class="mb-4 text-sm">放棄補充照片的話，你將遺失所有未新增的資料。下次需重新上傳照片。</p>
+        <AppButton @click="discardDialog = false">繼續編輯</AppButton>
+        <button type="button" class="mt-4 block w-full text-center underline" @click="cancelUpdateFactoryImages">
+          確定放棄
+        </button>
+      </template>
+      <template v-else>
+        <h3 class="mb-2 text-lg font-medium text-brand-dark">{{ updateFormAppTitle }}尚未完成！</h3>
+        <p class="mb-4 text-sm">放棄編輯的話，你將遺失所有未新增的資料。下次需重新填寫。</p>
+        <AppButton @click="discardDialog = false">繼續編輯</AppButton>
+        <button type="button" class="mt-4 block w-full text-center underline" @click="cancelUpdateFactory">
+          確定放棄
+        </button>
+      </template>
+    </AppModal>
+  </div>
+</template>

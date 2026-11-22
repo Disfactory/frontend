@@ -1,71 +1,29 @@
-<template>
-  <div class="app-alert" v-if="alert">
-    <div class="close" @click="dismiss" data-label="alert-close" />
-    <img src="/images/alert.svg" alt="alert">
-    <div>
-      <div class="alert-title">{{ alert.title }}</div>
-      <p class="alert-descriptioin">{{ alert.dismissText }}</p>
-    </div>
-  </div>
-</template>
+<script setup lang="ts">
+import { AlertCircle, X } from '@lucide/vue'
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'AppAlert',
-  props: {
-    alert: {
-      type: Object
-    },
-    dismiss: {
-      type: Function
-    }
-  }
-})
+defineProps<{
+  alert: { title: string; dismissText: string } | null
+  dismiss?: () => void
+}>()
 </script>
 
-<style lang="scss" scoped>
-@import '~@/styles/utils';
-
-.app-alert {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background-color: rgba(0, 0, 0, 0.82);
-  color: white;
-  padding: 27px 23px 18px;
-
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  z-index: 1;
-
-  img {
-    margin-right: 17px;
-  }
-
-  .alert-title {
-    font-size: 18px;
-    line-height: 20px;
-    font-weight: 500;
-    white-space: pre;
-  }
-
-  .alert-descriptioin {
-    font-size: 12px;
-  }
-
-  .close {
-    z-index: 2;
-    @include close-button;
-
-    top: 17px;
-    right: 17px;
-
-    &::before, &::after {
-      background-color: white;
-    }
-  }
-}
-</style>
+<template>
+  <div
+    v-if="alert"
+    class="fixed inset-x-0 bottom-0 z-[80] flex items-start gap-4 bg-black/85 px-6 pt-6 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-white"
+  >
+    <AlertCircle class="mt-0.5 size-6 shrink-0 text-white" />
+    <div class="min-w-0 flex-1">
+      <p class="text-lg leading-tight font-medium whitespace-pre-line">{{ alert.title }}</p>
+      <p class="mt-1 text-xs text-white/80">{{ alert.dismissText }}</p>
+    </div>
+    <button
+      type="button"
+      class="rounded p-1 text-white/80 transition hover:bg-white/10 hover:text-white"
+      aria-label="關閉提示"
+      @click="dismiss"
+    >
+      <X class="size-5" />
+    </button>
+  </div>
+</template>

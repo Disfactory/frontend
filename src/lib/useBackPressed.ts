@@ -1,6 +1,6 @@
 import { onUnmounted } from 'vue'
 
-export function useBackPressed (onBack: () => void) {
+export function useBackPressed(onBack: () => void) {
   const hideModal = (event: PopStateEvent) => {
     if (event.state === 'backPressed') {
       onBack()

@@ -1,49 +1,33 @@
-<template>
-  <textarea
-    v-bind="$attrs"
-    v-model="inputValue"
-    rows="7"
-  />
-</template>
+<script setup lang="ts">
+import { Textarea } from '@/components/ui/textarea'
 
-<script>
-import { computed, defineComponent } from 'vue'
-export default defineComponent({
-  name: 'AppTextArea',
-  props: {
-    value: {
-      type: String,
-      required: true
-    }
+withDefaults(
+  defineProps<{
+    modelValue?: string
+    placeholder?: string
+    class?: string
+    rows?: number
+  }>(),
+  {
+    modelValue: '',
+    placeholder: '',
+    class: '',
+    rows: 5,
   },
-  setup (props, context) {
-    const inputValue = computed({
-      get: () => props.value,
-      set: (value) => context.emit('input', value)
-    })
+)
 
-    return {
-      inputValue
-    }
-  }
-})
+defineEmits<{ 'update:modelValue': [string] }>()
 </script>
 
-<style lang="scss" scoped>
-@import '@/styles/variables';
-textarea {
-  border: 1px solid $second-color;
-  border-radius: 4px;
-  padding: 10px 15px;
-  outline: none;
-  resize: none;
-
-  width: 100%;
-
-  font-size: $form-font-size;
-
-  &::placeholder {
-    color: rgb(186, 186, 186);
-  }
-}
-</style>
+<template>
+  <Textarea
+    :model-value="modelValue"
+    :placeholder="placeholder"
+    :rows="rows"
+    :class="[
+      'min-h-[140px] rounded border-brand-light bg-white text-base text-black placeholder:text-[#bababa] focus-visible:border-brand focus-visible:ring-brand/30',
+      $props.class,
+    ]"
+    @update:model-value="$emit('update:modelValue', String($event))"
+  />
+</template>

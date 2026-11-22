@@ -1,62 +1,24 @@
-<template>
-  <div class="contact-modal-container">
-    <app-modal :open="open" :dismiss="dismiss">
-      <div class="page">
-        <img width="137" src="/images/cet-logo.png" alt="Citizen of the Earth Taiwan">
+<script setup lang="ts">
+import AppModal from './AppModal.vue'
 
-        <h3>
-          有任何回報相關問題<br>
-          歡迎聯絡
-        </h3>
-
-        <p>
-          地球公民基金會<br>
-          TEL: 02-23920371<br>
-          Email: <a href="mailto:cet@cet-taiwan.org">cet@cet-taiwan.org</a><br>
-        </p>
-      </div>
-    </app-modal>
-  </div>
-</template>
-
-<script lang="ts">
-import AppModal from '@/components/AppModal.vue'
-import { defineComponent } from 'vue'
-
-export default defineComponent({
-  name: 'ContactModal',
-  components: {
-    AppModal
-  },
-  props: {
-    open: {
-      type: Boolean,
-      default: false
-    },
-    dismiss: {
-      type: Function
-    }
-  }
-})
+defineProps<{
+  open: boolean
+  dismiss?: () => void
+}>()
 </script>
 
-<style lang="scss">
-@import '@/styles/page';
-@import '@/styles/variables';
-
-.contact-modal-container .app-modal {
-  top: 25px;
-  max-height: calc(100% - 50px);
-  max-width: calc(100% - 20px);
-  padding-top: 60px;
-
-  .page {
-    text-align: center;
-
-    h3 {
-      color: $primary-color;
-      line-height: 1.5em;
-    }
-  }
-}
-</style>
+<template>
+  <AppModal :open="open" :dismiss="dismiss" title="聯絡我們" top="24px" class="max-w-[340px]">
+    <div class="page-prose text-center">
+      <img width="137" src="/images/cet-logo.png" alt="Citizen of the Earth Taiwan" class="mx-auto" />
+      <h3 class="mt-6 text-xl leading-relaxed font-medium text-brand">
+        有任何回報相關問題<br />歡迎聯絡
+      </h3>
+      <p class="mt-4">
+        地球公民基金會<br />
+        TEL: 02-23920371<br />
+        Email: <a href="mailto:cet@cet-taiwan.org">cet@cet-taiwan.org</a>
+      </p>
+    </div>
+  </AppModal>
+</template>

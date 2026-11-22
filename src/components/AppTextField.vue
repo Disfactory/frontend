@@ -1,62 +1,39 @@
-<template>
-  <input
-    v-bind="$attrs"
-    v-model="inputValue"
-    :type="type"
-    :class="{ small }"
-  >
-</template>
+<script setup lang="ts">
+import { Input } from '@/components/ui/input'
 
-<script>
-import { computed, defineComponent } from 'vue'
-export default defineComponent({
-  name: 'AppTextField',
-  props: {
-    type: {
-      type: String,
-      default: 'text'
-    },
-    value: {
-      type: String,
-      required: true
-    },
-    small: {
-      type: Boolean,
-      default: false
-    }
+withDefaults(
+  defineProps<{
+    modelValue?: string
+    placeholder?: string
+    type?: string
+    class?: string
+    small?: boolean
+    disabled?: boolean
+  }>(),
+  {
+    modelValue: '',
+    placeholder: '',
+    type: 'text',
+    class: '',
+    small: false,
+    disabled: false,
   },
-  setup (props, context) {
-    const inputValue = computed({
-      get: () => props.value,
-      set: (value) => context.emit('input', value)
-    })
+)
 
-    return {
-      inputValue
-    }
-  }
-})
+defineEmits<{ 'update:modelValue': [string] }>()
 </script>
 
-<style lang="scss" scoped>
-@import '@/styles/variables';
-input {
-  border: 1px solid $second-color;
-  border-radius: 4px;
-  padding: 10px 15px;
-  outline: none;
-
-  width: 100%;
-
-  font-size: $form-font-size;
-
-  &::placeholder {
-    color: rgb(186, 186, 186);
-  }
-
-  &.small {
-    font-size: 14px;
-    padding: 3px 10px;
-  }
-}
-</style>
+<template>
+  <Input
+    :model-value="modelValue"
+    :type="type"
+    :placeholder="placeholder"
+    :disabled="disabled"
+    :class="[
+      'rounded border-brand-light bg-white text-base text-black placeholder:text-[#bababa] focus-visible:border-brand focus-visible:ring-brand/30',
+      small ? 'h-9 text-sm' : 'h-11',
+      $props.class,
+    ]"
+    @update:model-value="$emit('update:modelValue', String($event))"
+  />
+</template>
