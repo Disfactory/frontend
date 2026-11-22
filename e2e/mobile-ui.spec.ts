@@ -69,6 +69,7 @@ test.describe('mobile UI', () => {
   test('uses a full-screen page for mobile factory edits', async ({ page }) => {
     await openSharedFactory(page)
     await page.getByTestId('expand-detail').click()
+    await page.getByRole('tab', { name: '工廠資訊' }).click()
     await page.getByRole('button', { name: '更改工廠類型' }).click()
 
     const panel = page.getByTestId('update-factory-panel')

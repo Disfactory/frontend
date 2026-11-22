@@ -14,11 +14,20 @@ export const FACTORY_TYPE = [
 
 export type FactoryType = (typeof FACTORY_TYPE)[number]['value']
 
-export type FactoryDisplayStatusType = 'default' | 0 | 1 | 2 | 3
+/**
+ * Map/panel status categories (2025 redesign). A factory's category is derived
+ * from its latest document status in `getFactoryStatus` (src/lib/timeline.ts).
+ */
+export type FactoryDisplayStatusType = 'actionable' | 'in_progress' | 'demolished' | 'wont_fix'
 
-export const defaultFactoryDisplayStatuses = ['default', 0, 1, 2, 3] as FactoryDisplayStatusType[]
+export const defaultFactoryDisplayStatuses: FactoryDisplayStatusType[] = [
+  'actionable',
+  'in_progress',
+  'demolished',
+  'wont_fix',
+]
 
-type DocumentDisplayStatus =
+export type DocumentDisplayStatus =
   | '已檢舉'
   | '已排程稽查'
   | '陳述意見期'
@@ -30,48 +39,26 @@ type DocumentDisplayStatus =
 
 type FactoryDisplayStatus = {
   type: FactoryDisplayStatusType
+  /** Map filter chip label */
   name: string
-  documentDisplayStatuses: ('疑似工廠' | DocumentDisplayStatus)[]
+  /** Detail panel title */
+  title: string
   color: string
 }
 
 export const FactoryDisplayStatuses: FactoryDisplayStatus[] = [
-  {
-    type: 'default',
-    name: '未處理',
-    documentDisplayStatuses: ['疑似工廠'],
-    color: '#A22A29',
-  },
-  {
-    type: 0,
-    name: '處理中',
-    documentDisplayStatuses: ['已檢舉', '已排程稽查', '陳述意見期', '已勒令停工'],
-    color: '#457287',
-  },
-  {
-    type: 1,
-    name: '已斷電',
-    documentDisplayStatuses: ['已發函斷電', '已排程拆除'],
-    color: '#364516',
-  },
-  {
-    type: 2,
-    name: '已拆除',
-    documentDisplayStatuses: ['已拆除'],
-    color: '#A1A1A1',
-  },
-  {
-    type: 3,
-    name: '無法處理',
-    documentDisplayStatuses: ['等待新事證'],
-    color: '#E0E0E0',
-  },
+  { type: 'actionable', name: '尚可連續裁罰', title: '尚可持續檢舉裁罰', color: '#A22A29' },
+  { type: 'in_progress', name: '舉報處理中', title: '舉報處理中', color: '#457287' },
+  { type: 'demolished', name: '已拆除', title: '已拆除', color: '#697F01' },
+  { type: 'wont_fix', name: '現階段無法處理', title: '現階段無法處理', color: '#A1A1A1' },
 ]
 
-const FactoryDisplayStatusMap = FactoryDisplayStatuses.reduce(
-  (acc, c) => ({ ...acc, [c.type]: c }),
-  {},
-) as { [key in FactoryDisplayStatusType]: FactoryDisplayStatus }
+const FactoryDisplayStatusMap = Object.fromEntries(
+  FactoryDisplayStatuses.map((status) => [status.type, status]),
+) as Record<FactoryDisplayStatusType, FactoryDisplayStatus>
+
+export const getDisplayStatus = (status: FactoryDisplayStatusType) =>
+  FactoryDisplayStatusMap[status]
 
 export const getDisplayStatusText = (status: FactoryDisplayStatusType) =>
   FactoryDisplayStatusMap[status].name
@@ -131,4 +118,45 @@ export type ReportRecord = {
   id: string
   created_at: string
   others?: string
+  action_type?: 'POST' | 'UPDATE' | 'POST_IMAGE'
+  action_body?: {
+    name?: string
+    type?: FactoryType
+    factory_type?: FactoryType
+    url?: string
+  }
+}
+
+// GET /factories/:id/timeline
+export type FactoryTimeline = {
+  factory_id: string
+  display_number: number
+  documents: {
+    id: number
+    created_at: string
+    display_status: string
+  }[]
+  status_transitions: {
+    id: number
+    from_status: string
+    to_status: string
+    created_at: string
+    document_id: number
+  }[]
+  user_reports: ReportRecord[]
+  follow_ups_for_user: {
+    id: number
+    note: string
+    created_at: string
+  }[]
+  image_batches: {
+    date: string // YYYY-MM-DD, Asia/Taipei
+    count: number
+    images: {
+      id: string
+      image_path: string
+      url: string
+      created_at: string
+    }[]
+  }[]
 }

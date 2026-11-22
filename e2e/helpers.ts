@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-import type { FactoryData, ReportRecord } from '@/types'
+import type { FactoryData, FactoryTimeline, ReportRecord } from '@/types'
 
 export const factory: FactoryData = {
   id: 'f1',
@@ -29,17 +29,50 @@ export const records: ReportRecord[] = Array.from({ length: 14 }, (_, index) => 
   others: `第 ${index + 1} 筆工廠描述：這是一段用來讓詳細面板超出版面、驗證捲動行為的測試文字。`,
 }))
 
-export async function mockApi(
-  page: Page,
-  options: { factory?: FactoryData; records?: ReportRecord[] } = {},
-) {
+export const timeline: FactoryTimeline = {
+  factory_id: 'f1',
+  display_number: 1,
+  documents: [{ id: 1, created_at: '2026-01-05T02:00:00Z', display_status: '已檢舉' }],
+  status_transitions: [
+    {
+      id: 1,
+      from_status: '已檢舉',
+      to_status: '已勒令停工',
+      created_at: '2026-01-20T02:00:00Z',
+      document_id: 1,
+    },
+  ],
+  user_reports: records.map((record, index) => ({
+    ...record,
+    id: String(index + 1),
+    action_type: 'UPDATE',
+    action_body: {},
+  })),
+  follow_ups_for_user: [{ id: 1, note: '縣府已回覆會派員稽查。', created_at: '2026-01-15T02:00:00Z' }],
+  image_batches: [
+    {
+      date: '2026-01-02',
+      count: 2,
+      images: [
+        { id: 'i1', image_path: 'a', url: 'a', created_at: '2026-01-02T01:00:00Z' },
+        { id: 'i2', image_path: 'b', url: 'b', created_at: '2026-01-02T02:00:00Z' },
+      ],
+    },
+  ],
+}
+
+type MockOptions = { factory?: FactoryData; records?: ReportRecord[]; timeline?: FactoryTimeline }
+
+export async function mockApi(page: Page, options: MockOptions = {}) {
   const currentFactory = options.factory ?? factory
   const currentRecords = options.records ?? records
+  const currentTimeline = options.timeline ?? timeline
   await page.route('**/server/api/**', async (route) => {
     const path = new URL(route.request().url()).pathname
 
     if (path.endsWith('/factories')) return route.fulfill({ json: [currentFactory] })
     if (path.endsWith('/factories/f1/report_records')) return route.fulfill({ json: currentRecords })
+    if (path.endsWith('/factories/f1/timeline')) return route.fulfill({ json: currentTimeline })
     if (path.endsWith('/factories/f1/images')) {
       return route.fulfill({
         json: {
@@ -79,13 +112,10 @@ export async function dismissIntro(page: Page) {
   await page.getByRole('button', { name: '我同意加入回報' }).click()
 }
 
-export async function openSharedFactory(
-  page: Page,
-  options: { factory?: FactoryData; records?: ReportRecord[] } = {},
-) {
+export async function openSharedFactory(page: Page, options: MockOptions = {}) {
   await mockApi(page, options)
   await page.goto('/#map=16/120.48/24.09&factoryId=f1')
   await hideDevTools(page)
   await dismissIntro(page)
-  await expect(page.getByText('工廠狀態').first()).toBeVisible()
+  await expect(page.getByTestId('factory-status')).toBeVisible()
 }
