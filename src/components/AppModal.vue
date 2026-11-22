@@ -1,91 +1,53 @@
-<template>
-  <div class="app-modal-component"
-    :class="{ open }"
-    data-testid="modal-container"
-  >
-    <div class="app-modal-backdrop" @click="dismiss" data-label="modal-backdrop" />
-    <div class="app-modal">
-      <div class="close" @click="dismiss" v-if="showCloseButton" data-label="modal-close" data-testid="modal-close" />
-      <slot />
-    </div>
-  </div>
-</template>
+<script setup lang="ts">
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog'
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+const props = withDefaults(
+  defineProps<{
+    open?: boolean
+    dismiss?: () => void
+    showCloseButton?: boolean
+    class?: string
+    overlayClass?: string
+    title?: string
+    description?: string
+    top?: string
+    centered?: boolean
+  }>(),
+  {
+    open: false,
+    dismiss: undefined,
+    showCloseButton: true,
+    class: '',
+    overlayClass: '',
+    title: '對話框',
+    description: ' ',
+    top: '90px',
+    centered: false,
+  },
+)
 
-export default defineComponent({
-  name: 'AppModal',
-  props: {
-    open: {
-      type: Boolean,
-      default: false
-    },
-    dismiss: {
-      type: Function
-    },
-    showCloseButton: {
-      type: Boolean,
-      default: true
-    }
-  }
-})
+const handleOpenChange = (open: boolean) => {
+  if (!open) props.dismiss?.()
+}
 </script>
 
-<style lang="scss" scoped>
-@import '../styles/variables';
-@import '~@/styles/utils';
-
-.app-modal-component {
-  z-index: 997;
-  position: fixed;
-  -webkit-overflow-scrolling: touch;
-
-  justify-content: center;
-  align-items: center;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-
-  padding: 45px 16px;
-
-  display: none;
-
-  &.open {
-    display: flex;
-  }
-}
-
-.app-modal-backdrop {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.4);
-  z-index: 998;
-}
-
-.app-modal {
-  z-index: 999;
-
-  border-radius: 3px;
-  border: solid 2px $primary-color;
-  background-color: $background-color;
-
-  padding: 27px 22px;
-
-  position: absolute;
-  -webkit-overflow-scrolling: touch;
-  top: 90px;
-  max-height: 100%;
-  max-width: 100%;
-  overflow: auto;
-
-  .close {
-    z-index: 1;
-    @include close-button;
-  }
-}
-</style>
+<template>
+  <Dialog :open="open" @update:open="handleOpenChange">
+    <DialogContent
+      :show-close-button="showCloseButton"
+      :overlay-class="overlayClass"
+      :class="[
+        'max-h-[calc(100dvh-48px)] w-[calc(100%-2rem)] overflow-auto rounded-md border-2 border-brand bg-white p-6',
+        props.class,
+      ]"
+      :style="{
+        top: centered ? '50%' : top,
+        transform: centered ? 'translate(-50%, -50%)' : 'translate(-50%, 0)',
+      }"
+    >
+      <DialogTitle class="sr-only">{{ title }}</DialogTitle>
+      <DialogDescription class="sr-only">{{ description }}</DialogDescription>
+      <slot />
+    </DialogContent>
+  </Dialog>
+</template>

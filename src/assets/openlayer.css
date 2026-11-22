@@ -1,0 +1,103 @@
+/* OpenLayers control styling to match the Disfactory design. */
+.ol-control {
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.ol-control:hover {
+  background: none;
+}
+
+.ol-control button,
+.ol-control button:hover,
+.ol-control button:focus {
+  cursor: pointer;
+  background: none;
+}
+
+.ol-zoom,
+.ol-fit-location,
+.ol-map-search {
+  color: #6e8501;
+  border-radius: 9px;
+  left: 21px;
+}
+
+.ol-zoom:hover,
+.ol-fit-location:hover,
+.ol-map-search:hover {
+  background-color: #f5f5f5;
+}
+
+.ol-zoom {
+  top: auto;
+  bottom: 100px;
+}
+
+.ol-zoom .ol-zoom-in,
+.ol-zoom .ol-zoom-out {
+  border-radius: 0;
+  background: none;
+}
+
+.ol-zoom .ol-zoom-in:hover,
+.ol-zoom .ol-zoom-out:hover,
+.ol-zoom .ol-zoom-in:active,
+.ol-zoom .ol-zoom-out:active {
+  background: none;
+}
+
+.ol-zoom .ol-zoom-in {
+  border-bottom: solid 1px white;
+  padding-bottom: 11px;
+}
+
+.ol-fit-location {
+  bottom: 185px;
+}
+
+.ol-fit-location.ol-control button {
+  padding: 2px;
+}
+
+.ol-map-search {
+  top: 26px;
+}
+
+.ol-control button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 8px;
+}
+
+.ol-control button img {
+  width: 100%;
+}
+
+.ol-rotate {
+  left: 21px;
+  right: auto;
+  bottom: 235px;
+  top: auto;
+}
+
+.ol-rotate:hover {
+  background-color: #f5f5f5;
+}
+
+.ol-rotate .ol-compass {
+  color: #6e8501;
+  margin-top: -5px;
+}
+
+.ol-attribution {
+  font-size: 11px;
+}
+
+.lui-layer {
+  /* The LUIMAP layer is identified by this class. */
+}

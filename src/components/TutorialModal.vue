@@ -1,179 +1,177 @@
-<template>
-  <div class="tutorial-modal-container">
-    <app-modal :open="open" :dismiss="onDismissClick">
-      <div class="back-button" v-if="isAdd || isUpdate" @click="openHome" data-testid="back-button">
-        <span />
-        <span />
-        <span />
-      </div>
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { ArrowLeft } from '@lucide/vue'
+import AppModal from './AppModal.vue'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from '@/components/ui/carousel'
 
-      <div class="page">
-        <div id="tutorial-home" v-show="isHome">
-          <h2>使用說明</h2>
+const props = defineProps<{
+  open: boolean
+  dismiss?: () => void
+}>()
 
-          <p>
-            如果系統無法讀取你的位置，
-            請至手機系統設定開啟位置權限。
-          </p>
+type Page = 'home' | 'add' | 'update'
+const page = ref<Page>('home')
+const addImages = Array.from({ length: 7 }, (_, i) => `/images/tutorial/create-${i + 1}.jpg`)
+const updateImages = Array.from({ length: 4 }, (_, i) => `/images/tutorial/update-${i + 1}.jpg`)
 
-          <div class="outline-button" @click="openAdd">如何新增一筆<br>違章工廠的資料？</div>
-          <div class="outline-button" @click="openUpdate">如何在一筆資料裡<br>補充更多資訊？</div>
-        </div>
+const isHome = computed(() => page.value === 'home')
+const isAdd = computed(() => page.value === 'add')
+const isUpdate = computed(() => page.value === 'update')
 
-        <div id="tutorial-add-factory" v-show="isAdd">
+const addApi = ref<CarouselApi>()
+const addSelected = ref(0)
+function setAddApi(val: CarouselApi | undefined) {
+  if (!val) return
+  addApi.value = val
+  addSelected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    addSelected.value = val.selectedScrollSnap()
+  })
+}
 
-          <carousel :per-page="1" paginationActiveColor='#6E8501' paginationColor='#e3e3e3' :paginationPadding="5" ref="createCarousel">
-            <slide v-for="(image, index) in addImages" :key="image">
-              <h2>新增違章工廠({{index + 1}}/7)</h2>
-              <img :src="image">
-            </slide>
-          </carousel>
-        </div>
+const updateApi = ref<CarouselApi>()
+const updateSelected = ref(0)
+function setUpdateApi(val: CarouselApi | undefined) {
+  if (!val) return
+  updateApi.value = val
+  updateSelected.value = val.selectedScrollSnap()
+  val.on('select', () => {
+    updateSelected.value = val.selectedScrollSnap()
+  })
+}
 
-        <div id="tutorial-update-factory" v-show="isUpdate">
-          <carousel :per-page="1" paginationActiveColor='#6E8501' paginationColor='#e3e3e3' :paginationPadding="5" ref="updateCarousel">
-            <slide v-for="(image, index) in updateImages" :key="image">
-              <h2>補充工廠資訊({{index + 1}}/4)</h2>
-              <img :src="image">
-            </slide>
-          </carousel>
-        </div>
+const openHome = () => {
+  page.value = 'home'
+}
+const openAdd = () => {
+  addSelected.value = 0
+  addApi.value?.scrollTo(0)
+  page.value = 'add'
+}
+const openUpdate = () => {
+  updateSelected.value = 0
+  updateApi.value?.scrollTo(0)
+  page.value = 'update'
+}
 
-      </div>
-    </app-modal>
-  </div>
-</template>
-
-<script lang="ts">
-import AppModal from '@/components/AppModal.vue'
-import { defineComponent, ref, computed } from 'vue'
-import { Carousel, Slide } from 'vue-carousel'
-
-export default defineComponent({
-  name: 'TutorialModal',
-  components: {
-    AppModal,
-    Carousel,
-    Slide
-  },
-  props: {
-    open: {
-      type: Boolean,
-      default: false
-    },
-    dismiss: {
-      type: Function
-    }
-  },
-  setup (props) {
-    const page = ref('home')
-
-    const isHome = computed(() => page.value === 'home')
-    const isAdd = computed(() => page.value === 'add')
-    const isUpdate = computed(() => page.value === 'update')
-
-    const createCarousel = ref<HTMLElement | null>(null)
-    const updateCarousel = ref<HTMLElement | null>(null)
-
-    const openHome = () => { page.value = 'home' }
-    const openAdd = () => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
-      (createCarousel.value! as any).goToPage(0)
-      page.value = 'add'
-    }
-    const openUpdate = () => {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-explicit-any
-      (updateCarousel.value! as any).goToPage(0)
-      page.value = 'update'
-    }
-
-    const addImages = new Array(7).fill(true).map((_, index) => `/images/tutorial/create-${index + 1}.jpg`)
-    const updateImages = new Array(4).fill(true).map((_, index) => `/images/tutorial/update-${index + 1}.jpg`)
-
-    const onDismissClick = () => {
-      openHome()
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      props.dismiss!()
-    }
-
-    return {
-      isHome,
-      isAdd,
-      isUpdate,
-      openHome,
-      openAdd,
-      openUpdate,
-      addImages,
-      updateImages,
-      onDismissClick,
-      createCarousel,
-      updateCarousel
-    }
-  }
-})
+const onDismiss = () => {
+  openHome()
+  props.dismiss?.()
+}
 </script>
 
-<style lang="scss">
-@import '@/styles/page';
-@import '@/styles/variables';
-@import '@/styles/components/back-button';
+<template>
+  <AppModal :open="open" :dismiss="onDismiss" title="使用說明" top="24px" class="max-w-[640px]">
+    <button
+      v-if="isAdd || isUpdate"
+      type="button"
+      class="absolute top-5 left-5 z-10 rounded p-1 text-brand hover:bg-brand/10"
+      aria-label="返回"
+      @click="openHome"
+    >
+      <ArrowLeft class="size-6" />
+    </button>
 
-.tutorial-modal-container .app-modal {
-  top: 20px;
-  max-height: 100%;
-  max-width: calc(100% - 20px);
-  padding: 70px 45px 35px;
+    <div class="page-prose min-w-0">
+      <div v-show="isHome">
+        <h2>使用說明</h2>
+        <p>如果系統無法讀取你的位置請至手機系統設定開啟位置權限。</p>
+        <button
+          type="button"
+          class="mb-4 w-full border border-brand px-5 py-3 text-left leading-relaxed text-brand transition hover:bg-brand hover:text-white"
+          @click="openAdd"
+        >
+          如何新增一筆<br />違章工廠的資料？
+        </button>
+        <button
+          type="button"
+          class="w-full border border-brand px-5 py-3 text-left leading-relaxed text-brand transition hover:bg-brand hover:text-white"
+          @click="openUpdate"
+        >
+          如何在一筆資料裡<br />補充更多資訊？
+        </button>
+      </div>
 
-  .page {
-    height: auto;
+      <div v-if="isAdd" class="relative select-none">
+        <Carousel :opts="{ loop: true }" @init-api="setAddApi">
+          <CarouselContent class="-ml-0">
+            <CarouselItem v-for="(image, i) in addImages" :key="image" class="pl-0">
+              <div>
+                <h2 class="text-center !text-brand">新增違章工廠 ({{ i + 1 }}/7)</h2>
+                <img
+                  :src="image"
+                  :alt="`新增步驟 ${i + 1}`"
+                  class="mx-auto max-h-[65vh] max-w-full object-contain"
+                  draggable="false"
+                />
+              </div>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious
+            class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="上一張"
+          />
+          <CarouselNext
+            class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="下一張"
+          />
+        </Carousel>
+        <div class="mt-4 flex justify-center gap-1.5">
+          <button
+            v-for="(_, i) in addImages"
+            :key="i"
+            type="button"
+            class="size-2 rounded-full"
+            :class="i === addSelected ? 'bg-brand' : 'bg-[#e3e3e3]'"
+            :aria-label="`第 ${i + 1} 頁`"
+            @click="addApi?.scrollTo(i)"
+          />
+        </div>
+      </div>
 
-    img {
-      display: block;
-      margin: 0 auto;
-      max-height: 65vh;
-    }
-
-    h2 {
-      color: $second-color;
-      border: none;
-    }
-
-    #tutorial-home {
-      p {
-        font-weight: bold;
-        margin-top: 2em;
-        margin-bottom: 2em;
-      }
-    }
-
-    #tutorial-add-factory, #tutorial-update-factory {
-      h2 {
-        margin-right: 0;
-        text-align: center;
-        color: $primary-color;
-      }
-    }
-  }
-
-  .outline-button {
-    border: solid 1px $primary-color;
-    padding: 10px 20px;
-    color: $primary-color;
-    margin-bottom: 15px;
-    line-height: 1.5em;
-    user-select: none;
-    cursor: pointer;
-
-    &:hover, &:active {
-      color: white;
-      background-color: $primary-color;
-    }
-  }
-
-  .back-button {
-    position: absolute;
-    top: 24px;
-    left: 22px;
-  }
-}
-</style>
+      <div v-if="isUpdate" class="relative select-none">
+        <Carousel :opts="{ loop: true }" @init-api="setUpdateApi">
+          <CarouselContent class="-ml-0">
+            <CarouselItem v-for="(image, i) in updateImages" :key="image" class="pl-0">
+              <div>
+                <h2 class="text-center !text-brand">補充工廠資訊 ({{ i + 1 }}/4)</h2>
+                <img
+                  :src="image"
+                  :alt="`補充步驟 ${i + 1}`"
+                  class="mx-auto max-h-[65vh] max-w-full object-contain"
+                  draggable="false"
+                />
+              </div>
+            </CarouselItem>
+          </CarouselContent>
+          <CarouselPrevious
+            class="absolute top-1/2 left-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="上一張"
+          />
+          <CarouselNext
+            class="absolute top-1/2 right-0 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white hover:bg-black/30"
+            aria-label="下一張"
+          />
+        </Carousel>
+        <div class="mt-4 flex justify-center gap-1.5">
+          <button
+            v-for="(_, i) in updateImages"
+            :key="i"
+            type="button"
+            class="size-2 rounded-full"
+            :class="i === updateSelected ? 'bg-brand' : 'bg-[#e3e3e3]'"
+            :aria-label="`第 ${i + 1} 頁`"
+            @click="updateApi?.scrollTo(i)"
+          />
+        </div>
+      </div>
+    </div>
+  </AppModal>
+</template>

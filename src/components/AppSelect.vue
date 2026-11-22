@@ -1,89 +1,29 @@
-<template>
-  <div class="select">
-    <select
-      v-bind="$attrs"
-      v-model="inputValue"
-    >
-      <option
-        v-for="option in items"
-        :key="option.value"
-        :value="option.value"
-      >
-        {{ option.text }}
-      </option>
-    </select>
-  </div>
-</template>
+<script setup lang="ts">
+import { ChevronDown } from '@lucide/vue'
 
-<script lang="ts">
-import { defineComponent, PropType, computed } from 'vue'
+defineProps<{
+  modelValue?: string
+  items: { text: string; value?: string }[]
+  placeholder?: string
+}>()
 
-export default defineComponent({
-  name: 'AppSelect',
-  props: {
-    value: {
-      type: null,
-      required: true
-    },
-    items: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      type: Array as PropType<{ text: string, value: any }[]>,
-      required: true
-    }
-  },
-  setup (props, context) {
-    const inputValue = computed({
-      get: () => props.value,
-      set: (value) => context.emit('input', value)
-    })
-
-    return {
-      inputValue
-    }
-  }
-})
+defineEmits<{ 'update:modelValue': [string] }>()
 </script>
 
-<style lang="scss" scoped>
-@import '@/styles/variables';
-.select {
-  position: relative;
-  width: 100%;
-
-  select {
-    width: 100%;
-    outline: none;
-    padding: 10px 15px;
-    border: 1px solid $second-color;
-    border-radius: 4px;
-    color: $font-color;
-    color: rgba($font-color, 0);
-    background-color: #fff;
-    text-shadow: 0 0 0 $font-color;
-    font-size: $form-font-size;
-    appearance: none;
-
-    > option:not(:checked),
-      option:not(:hover),
-      option:not(:focus) {
-      color: $font-color;
-    }
-
-    &:focus, &:hover {
-      outline: none;
-    }
-  }
-
-  &:before {
-    position: absolute;
-    top: calc(50% + 5px);
-    right: 15px;
-    border: solid transparent;
-    border-width: 10px;
-    border-top-color: $second-color;
-    content: '';
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-}
-</style>
+<template>
+  <div class="relative w-full">
+    <select
+      :value="modelValue ?? ''"
+      class="h-11 w-full appearance-none rounded border border-brand-light bg-white px-3 pr-9 text-base text-black outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
+      @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+    >
+      <option value="" disabled>{{ placeholder || '未選擇' }}</option>
+      <option v-for="item in items" :key="item.value ?? item.text" :value="item.value">
+        {{ item.text }}
+      </option>
+    </select>
+    <ChevronDown
+      class="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-brand-dark"
+    />
+  </div>
+</template>
